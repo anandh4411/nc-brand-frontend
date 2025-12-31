@@ -11,12 +11,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as OutletRouteImport } from './routes/outlet'
 import { Route as InstitutionsRouteImport } from './routes/institutions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShopIndexRouteImport } from './routes/shop/index'
+import { Route as OutletIndexRouteImport } from './routes/outlet/index'
 import { Route as InstitutionsIndexRouteImport } from './routes/institutions/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -28,6 +36,7 @@ import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
 import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboard/institutions/route'
+import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 
@@ -71,9 +80,19 @@ const DashboardSettingsAccountLazyRouteImport = createFileRoute(
   '/dashboard/settings/account',
 )()
 
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutletRoute = OutletRouteImport.update({
+  id: '/outlet',
+  path: '/outlet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstitutionsRoute = InstitutionsRouteImport.update({
@@ -86,10 +105,30 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShopRoute,
+} as any)
+const OutletIndexRoute = OutletIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OutletRoute,
 } as any)
 const InstitutionsIndexRoute = InstitutionsIndexRouteImport.update({
   id: '/',
@@ -100,6 +139,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
 } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -237,6 +286,11 @@ const DashboardFormsIndexLazyRoute = DashboardFormsIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/dashboard/forms/index.lazy').then((d) => d.Route),
 )
+const OutletLoginIndexRoute = OutletLoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => OutletRoute,
+} as any)
 const InstitutionsLoginIndexRoute = InstitutionsLoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
@@ -284,9 +338,13 @@ const DashboardSettingsAccountLazyRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/institutions': typeof InstitutionsRouteWithChildren
+  '/outlet': typeof OutletRouteWithChildren
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/shop': typeof ShopRouteWithChildren
   '/dashboard/institutions': typeof DashboardInstitutionsRouteRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
@@ -298,14 +356,19 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/institutions/': typeof InstitutionsIndexRoute
+  '/outlet/': typeof OutletIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
+  '/outlet/login': typeof OutletLoginIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
@@ -329,14 +392,19 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/account': typeof AccountIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/institutions': typeof InstitutionsIndexRoute
+  '/outlet': typeof OutletIndexRoute
+  '/shop': typeof ShopIndexRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
+  '/outlet/login': typeof OutletLoginIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
@@ -351,9 +419,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/institutions': typeof InstitutionsRouteWithChildren
+  '/outlet': typeof OutletRouteWithChildren
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/shop': typeof ShopRouteWithChildren
   '/dashboard/institutions': typeof DashboardInstitutionsRouteRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -365,14 +437,19 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/institutions/': typeof InstitutionsIndexRoute
+  '/outlet/': typeof OutletIndexRoute
+  '/shop/': typeof ShopIndexRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
+  '/outlet/login/': typeof OutletLoginIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases/': typeof DashboardPhasesIndexLazyRoute
@@ -388,9 +465,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
+    | '/admin'
     | '/dashboard'
     | '/institutions'
+    | '/outlet'
     | '/privacy-policy'
+    | '/shop'
     | '/dashboard/institutions'
     | '/dashboard/settings'
     | '/forgot-password'
@@ -402,14 +483,19 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/account/'
+    | '/admin/'
     | '/dashboard/'
     | '/institutions/'
+    | '/outlet/'
+    | '/shop/'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/'
     | '/institutions/login'
+    | '/outlet/login'
     | '/dashboard/forms'
     | '/dashboard/institutions/'
     | '/dashboard/phases'
@@ -433,14 +519,19 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/account'
+    | '/admin'
     | '/dashboard'
     | '/institutions'
+    | '/outlet'
+    | '/shop'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings'
     | '/institutions/login'
+    | '/outlet/login'
     | '/dashboard/forms'
     | '/dashboard/institutions'
     | '/dashboard/phases'
@@ -454,9 +545,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
+    | '/admin'
     | '/dashboard'
     | '/institutions'
+    | '/outlet'
     | '/privacy-policy'
+    | '/shop'
     | '/dashboard/institutions'
     | '/dashboard/settings'
     | '/(auth)/forgot-password'
@@ -468,14 +563,19 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/account/'
+    | '/admin/'
     | '/dashboard/'
     | '/institutions/'
+    | '/outlet/'
+    | '/shop/'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/'
     | '/institutions/login/'
+    | '/outlet/login/'
     | '/dashboard/forms/'
     | '/dashboard/institutions/'
     | '/dashboard/phases/'
@@ -490,9 +590,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   InstitutionsRoute: typeof InstitutionsRouteWithChildren
+  OutletRoute: typeof OutletRouteWithChildren
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  ShopRoute: typeof ShopRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
@@ -506,11 +610,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy-policy': {
       id: '/privacy-policy'
       path: '/privacy-policy'
       fullPath: '/privacy-policy'
       preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outlet': {
+      id: '/outlet'
+      path: '/outlet'
+      fullPath: '/outlet'
+      preLoaderRoute: typeof OutletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/institutions': {
@@ -527,12 +645,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/shop/': {
+      id: '/shop/'
+      path: '/'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/outlet/': {
+      id: '/outlet/'
+      path: '/'
+      fullPath: '/outlet/'
+      preLoaderRoute: typeof OutletIndexRouteImport
+      parentRoute: typeof OutletRoute
     }
     '/institutions/': {
       id: '/institutions/'
@@ -547,6 +693,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -695,6 +855,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFormsIndexLazyRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/outlet/login/': {
+      id: '/outlet/login/'
+      path: '/login'
+      fullPath: '/outlet/login'
+      preLoaderRoute: typeof OutletLoginIndexRouteImport
+      parentRoute: typeof OutletRoute
+    }
     '/institutions/login/': {
       id: '/institutions/login/'
       path: '/login'
@@ -739,6 +906,27 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AccountRouteChildren {
+  AccountIndexRoute: typeof AccountIndexRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountIndexRoute: AccountIndexRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
+
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardInstitutionsRouteRouteChildren {
   DashboardInstitutionsIndexLazyRoute: typeof DashboardInstitutionsIndexLazyRoute
@@ -826,11 +1014,38 @@ const InstitutionsRouteWithChildren = InstitutionsRoute._addFileChildren(
   InstitutionsRouteChildren,
 )
 
+interface OutletRouteChildren {
+  OutletIndexRoute: typeof OutletIndexRoute
+  OutletLoginIndexRoute: typeof OutletLoginIndexRoute
+}
+
+const OutletRouteChildren: OutletRouteChildren = {
+  OutletIndexRoute: OutletIndexRoute,
+  OutletLoginIndexRoute: OutletLoginIndexRoute,
+}
+
+const OutletRouteWithChildren =
+  OutletRoute._addFileChildren(OutletRouteChildren)
+
+interface ShopRouteChildren {
+  ShopIndexRoute: typeof ShopIndexRoute
+}
+
+const ShopRouteChildren: ShopRouteChildren = {
+  ShopIndexRoute: ShopIndexRoute,
+}
+
+const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   InstitutionsRoute: InstitutionsRouteWithChildren,
+  OutletRoute: OutletRouteWithChildren,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
+  ShopRoute: ShopRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,

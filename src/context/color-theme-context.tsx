@@ -56,7 +56,7 @@ const colorThemes = {
 export function ColorThemeProvider({
   children,
   defaultColorTheme = "blue",
-  storageKey = "impressaa-ui-color-theme",
+  storageKey = "textilehub-ui-color-theme",
   ...props
 }: ColorThemeProviderProps) {
   const [colorTheme, _setColorTheme] = useState<ColorTheme>(() => {

@@ -33,16 +33,28 @@ export const RefreshTokenRequestSchema = z.object({
 export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;
 
 /**
- * Register/Signup Request (if backend supports it)
- * Backend: POST /v1/auth/register
+ * Customer Registration Request
+ * Backend: POST /v1/auth/customer/register
  */
-export const RegisterRequestSchema = z.object({
+export const CustomerRegisterRequestSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email format"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
+export type CustomerRegisterRequest = z.infer<typeof CustomerRegisterRequestSchema>;
+
+/**
+ * Customer Login Request
+ * Backend: POST /v1/auth/customer/login
+ */
+export const CustomerLoginRequestSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type CustomerLoginRequest = z.infer<typeof CustomerLoginRequestSchema>;
 
 // ============================================================================
 // RESPONSE SCHEMAS
@@ -61,6 +73,13 @@ export const AuthTokensSchema = z.object({
 export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 
 /**
+ * User Role
+ * TextileHub has 3 roles: admin (manufacturing unit), outlet, customer
+ */
+export const UserRoleSchema = z.enum(['admin', 'outlet', 'customer']);
+export type UserRole = z.infer<typeof UserRoleSchema>;
+
+/**
  * User Data
  * Basic user information returned on login
  */
@@ -69,10 +88,14 @@ export const UserDataSchema = z.object({
   uuid: z.string().uuid(),
   name: z.string(),
   email: z.string(),
-  role: z.enum(['admin', 'institution']).optional(),
-  institutionId: z.number().optional(),
-  institutionName: z.string().optional(),
-  institutionCode: z.string().optional(),
+  phone: z.string().optional(),
+  role: UserRoleSchema.optional(),
+  // Outlet-specific fields
+  outletId: z.number().optional(),
+  outletName: z.string().optional(),
+  outletCode: z.string().optional(),
+  // Customer-specific fields
+  defaultAddressId: z.number().optional(),
 });
 
 export type UserData = z.infer<typeof UserDataSchema>;

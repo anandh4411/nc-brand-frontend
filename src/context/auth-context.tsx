@@ -6,13 +6,16 @@ import React, {
   ReactNode,
 } from "react";
 import { TokenManager } from "@/api";
-import type { UserData } from "@/types/dto/auth.dto";
+import type { UserData, UserRole } from "@/types/dto/auth.dto";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: UserData | null;
-  userRole: 'admin' | 'institution' | null;
+  userRole: UserRole | null;
+  isAdmin: boolean;
+  isOutlet: boolean;
+  isCustomer: boolean;
   login: (tokens: { accessToken: string; refreshToken: string }, userData?: UserData) => void;
   logout: () => void;
 }
@@ -35,7 +38,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserData | null>(null);
-  const [userRole, setUserRole] = useState<'admin' | 'institution' | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+
+  // Role helper flags
+  const isAdmin = userRole === 'admin';
+  const isOutlet = userRole === 'outlet';
+  const isCustomer = userRole === 'customer';
 
   // Check auth status on mount
   useEffect(() => {
@@ -73,6 +81,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => window.removeEventListener("auth:logout", handleAuthLogout);
   }, []);
 
+  /**
+   * Get redirect path based on user role
+   */
+  const getRedirectPath = (role: UserRole | undefined): string => {
+    switch (role) {
+      case 'admin':
+        return '/admin';
+      case 'outlet':
+        return '/outlet';
+      case 'customer':
+        return '/account';
+      default:
+        return '/shop';
+    }
+  };
+
+  /**
+   * Get login path based on user role
+   */
+  const getLoginPath = (role: UserRole | null): string => {
+    switch (role) {
+      case 'outlet':
+        return '/outlet/login';
+      case 'customer':
+        return '/sign-in?type=customer';
+      default:
+        return '/sign-in';
+    }
+  };
+
   const login = (tokens: { accessToken: string; refreshToken: string }, userData?: UserData) => {
     TokenManager.setTokens(tokens);
     setIsAuthenticated(true);
@@ -84,26 +122,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user_data', JSON.stringify(userData));
 
       // Redirect based on role
-      if (userData.role === 'institution') {
-        window.location.href = '/institutions/dashboard';
-      } else {
-        window.location.href = '/dashboard';
-      }
+      const redirectPath = getRedirectPath(userData.role);
+      window.location.href = redirectPath;
     }
   };
 
   const logout = () => {
+    const currentRole = userRole;
+
     TokenManager.clearTokens();
     localStorage.removeItem('user_data');
     setIsAuthenticated(false);
     setUser(null);
     setUserRole(null);
 
-    // Redirect based on current role
-    if (userRole === 'institution') {
-      window.location.href = "/institutions/login";
-    } else if (window.location.pathname !== "/sign-in") {
-      window.location.href = "/sign-in";
+    // Redirect to appropriate login page
+    const loginPath = getLoginPath(currentRole);
+    if (window.location.pathname !== loginPath) {
+      window.location.href = loginPath;
     }
   };
 
@@ -112,6 +148,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     user,
     userRole,
+    isAdmin,
+    isOutlet,
+    isCustomer,
     login,
     logout,
   };

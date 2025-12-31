@@ -34,10 +34,10 @@ export interface DashboardLayoutProps
   onProfileClick?: () => void;
 }
 
-// Default user profile for Super Admin (fallback when not provided)
-const defaultSuperAdminProfile: UserProfile = {
-  name: "Super Admin",
-  email: "info.impressaa@gmail.com",
+// Default user profile for Admin (fallback when not provided)
+const defaultAdminProfile: UserProfile = {
+  name: "Admin",
+  email: "admin@textilehub.com",
   avatarUrl: undefined,
 };
 
@@ -59,8 +59,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   // Navbar props with defaults
   welcomeMessage = "Welcome back",
-  subText = "It's the best time to manage your ID cards",
-  userProfile = defaultSuperAdminProfile,
+  subText = "Manage your textile business",
+  userProfile = defaultAdminProfile,
   onProfileClick,
   ...props
 }) => {

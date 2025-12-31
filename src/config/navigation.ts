@@ -1,85 +1,112 @@
 import {
   Building2,
-  FileText,
-  FileCheck2,
-  Fingerprint,
-  Layers,
-  Users,
   Home,
-  LayoutTemplate, // Add this for Templates
-  Package, // Add this for Products
-  FolderTree, // Add this for Product Categories
+  Package,
+  FolderTree,
+  Truck,
+  ShoppingCart,
+  BarChart3,
+  Users,
+  Settings,
+  ClipboardList,
+  Store,
+  Heart,
+  MapPin,
+  Star,
+  User,
 } from "lucide-react";
 import { SidebarItem } from "@/components/layout/types";
 import React from "react";
 
-// Helper function to determine which nav items to return based on path
+/**
+ * Admin Navigation (Manufacturing Unit)
+ */
+export const adminNavItems: SidebarItem[] = [
+  { label: "Dashboard", path: "/admin", icon: Home },
+  { label: "Outlets", path: "/admin/outlets", icon: Store },
+  { label: "Categories", path: "/admin/categories", icon: FolderTree },
+  { label: "Products", path: "/admin/products", icon: Package },
+  { label: "Inventory", path: "/admin/inventory", icon: ClipboardList },
+  { label: "Shipments", path: "/admin/shipments", icon: Truck },
+  { label: "Orders", path: "/admin/orders", icon: ShoppingCart },
+  { label: "Users", path: "/admin/users", icon: Users },
+  { label: "Analytics", path: "/admin/analytics", icon: BarChart3 },
+];
+
+export const adminFooterItems: SidebarItem[] = [
+  { label: "Settings", path: "/admin/settings", icon: Settings },
+];
+
+/**
+ * Outlet Navigation
+ */
+export const outletNavItems: SidebarItem[] = [
+  { label: "Dashboard", path: "/outlet", icon: Home },
+  { label: "Inventory", path: "/outlet/inventory", icon: ClipboardList },
+  { label: "Shipments", path: "/outlet/shipments", icon: Truck },
+  { label: "Sales", path: "/outlet/sales", icon: BarChart3 },
+];
+
+export const outletFooterItems: SidebarItem[] = [
+  { label: "Settings", path: "/outlet/settings", icon: Settings },
+];
+
+/**
+ * Customer Account Navigation
+ */
+export const accountNavItems: SidebarItem[] = [
+  { label: "Dashboard", path: "/account", icon: Home },
+  { label: "Orders", path: "/account/orders", icon: ShoppingCart },
+  { label: "Addresses", path: "/account/addresses", icon: MapPin },
+  { label: "Reviews", path: "/account/reviews", icon: Star },
+  { label: "Wishlist", path: "/account/wishlist", icon: Heart },
+];
+
+export const accountFooterItems: SidebarItem[] = [
+  { label: "Profile", path: "/account/settings", icon: User },
+];
+
+/**
+ * Get navigation items based on user role and current path
+ */
 export const getNavItems = (currentPath: string): SidebarItem[] => {
-  const isInstitutionChildRoute = currentPath.startsWith("/institutions/");
-
-  if (isInstitutionChildRoute) {
-    // Institution-specific navigation
-    return [
-      {
-        label: "Dashboard",
-        path: "/institutions/dashboard",
-        icon: Home,
-      },
-      {
-        label: "Submissions",
-        path: "/institutions/submissions",
-        icon: Users,
-      },
-    ];
+  if (currentPath.startsWith("/admin")) {
+    return adminNavItems;
   }
-
-  // Default admin navigation
-  return [
-    {
-      label: "Institutions",
-      path: "/dashboard/institutions",
-      icon: Building2,
-    },
-    {
-      label: "Forms",
-      path: "/dashboard/forms",
-      icon: FileText,
-    },
-    {
-      label: "Phases",
-      path: "/dashboard/phases",
-      icon: Layers,
-    },
-    {
-      label: "Submissions",
-      path: "/dashboard/submissions",
-      icon: FileCheck2,
-    },
-    {
-      label: "Templates",
-      path: "/dashboard/templates",
-      icon: LayoutTemplate, // Changed icon
-    },
-    {
-      label: "Product Categories",
-      path: "/dashboard/product-categories",
-      icon: FolderTree,
-    },
-    {
-      label: "Products",
-      path: "/dashboard/products",
-      icon: Package, // Changed icon
-    },
-  ];
+  if (currentPath.startsWith("/outlet")) {
+    return outletNavItems;
+  }
+  if (currentPath.startsWith("/account")) {
+    return accountNavItems;
+  }
+  // Default to admin nav
+  return adminNavItems;
 };
 
+/**
+ * Get footer items based on user role
+ */
+export const getFooterItems = (currentPath: string): SidebarItem[] => {
+  if (currentPath.startsWith("/admin")) {
+    return adminFooterItems;
+  }
+  if (currentPath.startsWith("/outlet")) {
+    return outletFooterItems;
+  }
+  if (currentPath.startsWith("/account")) {
+    return accountFooterItems;
+  }
+  return adminFooterItems;
+};
+
+// Legacy export for backwards compatibility
 export const footerNavItems: SidebarItem[] = [];
 
 // Custom logo component
 const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return React.createElement("img", {
     src: "/logo.png",
-    alt: "Impressaa Logo",
+    alt: "TextileHub Logo",
     className: "w-full",
     ...props,
   });
@@ -87,5 +114,5 @@ const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
 
 export const brandingConfig = {
   iconComponent: LogoIcon,
-  name: "Impressaa",
+  name: "TextileHub",
 };

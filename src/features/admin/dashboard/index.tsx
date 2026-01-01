@@ -1,4 +1,5 @@
 // src/features/admin/dashboard/index.tsx
+import { useState } from "react";
 import {
   Store,
   Package,
@@ -8,11 +9,28 @@ import {
   Truck,
   IndianRupee,
   Users,
+  ImagePlus,
+  Trash2,
+  GripVertical,
+  Image,
+  X,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 // Mock dashboard data
 const dashboardStats = {
@@ -42,6 +60,33 @@ const lowStockItems = [
   { sku: "LEH-GLD-L", name: "Banarasi Wedding Lehenga", color: "Gold", size: "L", qty: 2 },
 ];
 
+// Banner interface
+interface Banner {
+  id: string;
+  imageUrl: string;
+  title: string;
+  link: string;
+  isActive: boolean;
+}
+
+// Initial mock banners
+const initialBanners: Banner[] = [
+  {
+    id: "1",
+    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&h=400&fit=crop",
+    title: "New Arrivals - Silk Sarees",
+    link: "/shop/categories/sarees",
+    isActive: true,
+  },
+  {
+    id: "2",
+    imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1200&h=400&fit=crop",
+    title: "Wedding Collection",
+    link: "/shop/categories/wedding",
+    isActive: true,
+  },
+];
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -61,6 +106,78 @@ const getStatusColor = (status: string) => {
 };
 
 export default function AdminDashboard() {
+  const [banners, setBanners] = useState<Banner[]>(initialBanners);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [bannerForm, setBannerForm] = useState({
+    imageUrl: "",
+    title: "",
+    link: "",
+  });
+
+  const handleAddBanner = () => {
+    setEditingBanner(null);
+    setBannerForm({ imageUrl: "", title: "", link: "" });
+    setBannerDialogOpen(true);
+  };
+
+  const handleEditBanner = (banner: Banner) => {
+    setEditingBanner(banner);
+    setBannerForm({
+      imageUrl: banner.imageUrl,
+      title: banner.title,
+      link: banner.link,
+    });
+    setBannerDialogOpen(true);
+  };
+
+  const handleSaveBanner = () => {
+    if (!bannerForm.imageUrl || !bannerForm.title) {
+      toast.error("Please fill in image URL and title");
+      return;
+    }
+
+    if (editingBanner) {
+      setBanners(banners.map(b =>
+        b.id === editingBanner.id
+          ? { ...b, ...bannerForm }
+          : b
+      ));
+      toast.success("Banner updated successfully");
+    } else {
+      const newBanner: Banner = {
+        id: String(Date.now()),
+        imageUrl: bannerForm.imageUrl,
+        title: bannerForm.title,
+        link: bannerForm.link,
+        isActive: true,
+      };
+      setBanners([...banners, newBanner]);
+      toast.success("Banner added successfully");
+    }
+    setBannerDialogOpen(false);
+    setBannerForm({ imageUrl: "", title: "", link: "" });
+  };
+
+  const handleDeleteBanner = (bannerId: string) => {
+    setBanners(banners.filter(b => b.id !== bannerId));
+    toast.success("Banner deleted");
+  };
+
+  const handleToggleBanner = (bannerId: string) => {
+    setBanners(banners.map(b =>
+      b.id === bannerId ? { ...b, isActive: !b.isActive } : b
+    ));
+  };
+
+  const moveBanner = (index: number, direction: "up" | "down") => {
+    const newBanners = [...banners];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= banners.length) return;
+    [newBanners[index], newBanners[newIndex]] = [newBanners[newIndex], newBanners[index]];
+    setBanners(newBanners);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -232,6 +349,119 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
+      {/* Banner Management */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Image className="h-5 w-5" />
+                Shop Banners
+              </CardTitle>
+              <CardDescription>
+                Manage homepage banner images for e-commerce storefront
+              </CardDescription>
+            </div>
+            <Button size="sm" onClick={handleAddBanner}>
+              <ImagePlus className="h-4 w-4 mr-2" />
+              Add Banner
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {banners.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Image className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No banners added yet</p>
+              <Button variant="outline" size="sm" className="mt-3" onClick={handleAddBanner}>
+                Add your first banner
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {banners.map((banner, index) => (
+                <div
+                  key={banner.id}
+                  className={`flex items-center gap-4 p-3 border rounded-lg ${
+                    !banner.isActive ? "opacity-50" : ""
+                  }`}
+                >
+                  {/* Reorder buttons */}
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => moveBanner(index, "up")}
+                      disabled={index === 0}
+                    >
+                      <span className="text-xs">▲</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => moveBanner(index, "down")}
+                      disabled={index === banners.length - 1}
+                    >
+                      <span className="text-xs">▼</span>
+                    </Button>
+                  </div>
+
+                  {/* Banner preview */}
+                  <div className="w-40 h-16 rounded overflow-hidden bg-muted shrink-0">
+                    <img
+                      src={banner.imageUrl}
+                      alt={banner.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/160x64?text=No+Image";
+                      }}
+                    />
+                  </div>
+
+                  {/* Banner info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{banner.title}</p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {banner.link || "No link set"}
+                    </p>
+                  </div>
+
+                  {/* Status badge */}
+                  <Badge
+                    variant={banner.isActive ? "default" : "secondary"}
+                    className="cursor-pointer"
+                    onClick={() => handleToggleBanner(banner.id)}
+                  >
+                    {banner.isActive ? "Active" : "Inactive"}
+                  </Badge>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditBanner(banner)}
+                    >
+                      <LinkIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteBanner(banner.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Quick Actions */}
       <Card>
         <CardHeader>
@@ -267,6 +497,78 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Banner Dialog */}
+      <Dialog open={bannerDialogOpen} onOpenChange={setBannerDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {editingBanner ? "Edit Banner" : "Add Banner"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingBanner
+                ? "Update the banner details below."
+                : "Add a new banner to display on the shop homepage."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                placeholder="https://example.com/banner.jpg"
+                value={bannerForm.imageUrl}
+                onChange={(e) => setBannerForm({ ...bannerForm, imageUrl: e.target.value })}
+              />
+              {bannerForm.imageUrl && (
+                <div className="mt-2 rounded-lg overflow-hidden bg-muted h-32">
+                  <img
+                    src={bannerForm.imageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x128?text=Invalid+URL";
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                placeholder="e.g. Summer Collection Sale"
+                value={bannerForm.title}
+                onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="link">Link (optional)</Label>
+              <Input
+                id="link"
+                placeholder="/shop/categories/sarees"
+                value={bannerForm.link}
+                onChange={(e) => setBannerForm({ ...bannerForm, link: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                Where should users go when they click this banner?
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBannerDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveBanner}>
+              {editingBanner ? "Save Changes" : "Add Banner"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

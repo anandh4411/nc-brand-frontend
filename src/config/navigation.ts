@@ -18,6 +18,9 @@ import {
   Tag,
   Percent,
   CreditCard,
+  Globe,
+  Boxes,
+  FileText,
 } from "lucide-react";
 import { SidebarItem } from "@/components/layout/types";
 import React from "react";
@@ -27,19 +30,36 @@ import React from "react";
  */
 export const adminNavItems: SidebarItem[] = [
   { label: "Dashboard", path: "/admin", icon: Home },
-  { label: "Outlets", path: "/admin/outlets", icon: Store },
-  { label: "Categories", path: "/admin/categories", icon: FolderTree },
-  { label: "Products", path: "/admin/products", icon: Package },
-  { label: "Inventory", path: "/admin/inventory", icon: ClipboardList },
-  { label: "Shipments", path: "/admin/shipments", icon: Truck },
-  { label: "Orders", path: "/admin/orders", icon: ShoppingCart },
-  { label: "Users", path: "/admin/users", icon: Users },
+
+  // Outlets Management
+  {
+    label: "Outlets",
+    path: "/admin/outlets",
+    icon: Store,
+    children: [
+      { label: "All Outlets", path: "/admin/outlets", icon: Store },
+      { label: "Inventory", path: "/admin/inventory", icon: Boxes },
+      { label: "Shipments", path: "/admin/shipments", icon: Truck },
+    ],
+  },
+
+  // Shop / E-commerce Management
+  {
+    label: "Shop",
+    path: "/admin/shop",
+    icon: Globe,
+    children: [
+      { label: "Categories", path: "/admin/categories", icon: FolderTree },
+      { label: "Products", path: "/admin/products", icon: Package },
+      { label: "Orders", path: "/admin/orders", icon: ShoppingCart },
+      { label: "Customers", path: "/admin/customers", icon: Users },
+    ],
+  },
+
   { label: "Analytics", path: "/admin/analytics", icon: BarChart3 },
 ];
 
-export const adminFooterItems: SidebarItem[] = [
-  { label: "Settings", path: "/admin/settings", icon: Settings },
-];
+export const adminFooterItems: SidebarItem[] = [];
 
 /**
  * Outlet Navigation

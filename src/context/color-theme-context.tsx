@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-type ColorTheme = "blue";
+type ColorTheme = "red" | "blue";
 
 type ColorThemeProviderProps = {
   children: React.ReactNode;
@@ -14,15 +14,42 @@ type ColorThemeProviderState = {
 };
 
 const initialState: ColorThemeProviderState = {
-  colorTheme: "blue",
+  colorTheme: "red",
   setColorTheme: () => null,
 };
 
 const ColorThemeProviderContext =
   createContext<ColorThemeProviderState>(initialState);
 
-// Keep only blue theme from original implementation
 const colorThemes = {
+  red: {
+    light: {
+      primary: "oklch(0.577 0.245 27.325)",
+      primaryForeground: "oklch(0.985 0.016 17.38)",
+      ring: "oklch(0.577 0.245 27.325)",
+      sidebarPrimary: "oklch(0.577 0.245 27.325)",
+      sidebarPrimaryForeground: "oklch(0.985 0.016 17.38)",
+      sidebarRing: "oklch(0.577 0.245 27.325)",
+      chart1: "oklch(0.577 0.245 27.325)",
+      chart2: "oklch(0.68 0.18 27.325)",
+      chart3: "oklch(0.50 0.28 27.325)",
+      chart4: "oklch(0.78 0.12 27.325)",
+      chart5: "oklch(0.45 0.30 27.325)",
+    },
+    dark: {
+      primary: "oklch(0.577 0.245 27.325)",
+      primaryForeground: "oklch(0.985 0.016 17.38)",
+      ring: "oklch(0.577 0.245 27.325)",
+      sidebarPrimary: "oklch(0.577 0.245 27.325)",
+      sidebarPrimaryForeground: "oklch(0.985 0.016 17.38)",
+      sidebarRing: "oklch(0.577 0.245 27.325)",
+      chart1: "oklch(0.577 0.245 27.325)",
+      chart2: "oklch(0.68 0.18 27.325)",
+      chart3: "oklch(0.50 0.28 27.325)",
+      chart4: "oklch(0.78 0.12 27.325)",
+      chart5: "oklch(0.45 0.30 27.325)",
+    },
+  },
   blue: {
     light: {
       primary: "oklch(0.623 0.214 259.815)",
@@ -55,14 +82,14 @@ const colorThemes = {
 
 export function ColorThemeProvider({
   children,
-  defaultColorTheme = "blue",
+  defaultColorTheme = "red",
   storageKey = "textilehub-ui-color-theme",
   ...props
 }: ColorThemeProviderProps) {
   const [colorTheme, _setColorTheme] = useState<ColorTheme>(() => {
     try {
       const stored = localStorage.getItem(storageKey) as ColorTheme;
-      return stored === "blue" ? stored : defaultColorTheme;
+      return stored === "red" || stored === "blue" ? stored : defaultColorTheme;
     } catch {
       return defaultColorTheme;
     }

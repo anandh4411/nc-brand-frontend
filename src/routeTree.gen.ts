@@ -51,11 +51,14 @@ import { Route as OutletInventoryIndexRouteImport } from './routes/outlet/invent
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as AdminShipmentsIndexRouteImport } from './routes/admin/shipments/index'
+import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
 import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/index'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
+import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
+import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics/index'
 import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$slug'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account/orders.$orderId'
 
@@ -380,6 +383,11 @@ const AdminShipmentsIndexRoute = AdminShipmentsIndexRouteImport.update({
   path: '/shipments/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -400,9 +408,19 @@ const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
   path: '/inventory/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsIndexRoute = AdminAnalyticsIndexRouteImport.update({
+  id: '/analytics/',
+  path: '/analytics/',
   getParentRoute: () => AdminRoute,
 } as any)
 const DashboardSettingsNotificationsLazyRoute =
@@ -489,11 +507,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
+  '/admin/settings': typeof AdminSettingsIndexRoute
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
@@ -544,11 +565,14 @@ export interface FileRoutesByTo {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
+  '/admin/settings': typeof AdminSettingsIndexRoute
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
@@ -608,11 +632,14 @@ export interface FileRoutesById {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/analytics/': typeof AdminAnalyticsIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
   '/admin/outlets/': typeof AdminOutletsIndexRoute
   '/admin/products/': typeof AdminProductsIndexRoute
+  '/admin/settings/': typeof AdminSettingsIndexRoute
   '/admin/shipments/': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
@@ -673,11 +700,14 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/customers'
     | '/admin/inventory'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
+    | '/admin/settings'
     | '/admin/shipments'
     | '/dashboard/settings/'
     | '/institutions/login'
@@ -728,11 +758,14 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/customers'
     | '/admin/inventory'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
+    | '/admin/settings'
     | '/admin/shipments'
     | '/dashboard/settings'
     | '/institutions/login'
@@ -791,11 +824,14 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/analytics/'
     | '/admin/categories/'
+    | '/admin/customers/'
     | '/admin/inventory/'
     | '/admin/orders/'
     | '/admin/outlets/'
     | '/admin/products/'
+    | '/admin/settings/'
     | '/admin/shipments/'
     | '/dashboard/settings/'
     | '/institutions/login/'
@@ -1189,6 +1225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShipmentsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings/': {
+      id: '/admin/settings/'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/products/': {
       id: '/admin/products/'
       path: '/products'
@@ -1217,11 +1260,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInventoryIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/customers/': {
+      id: '/admin/customers/'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/categories/': {
       id: '/admin/categories/'
       path: '/categories'
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AdminCategoriesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics/': {
+      id: '/admin/analytics/'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/dashboard/settings/notifications': {
@@ -1302,21 +1359,27 @@ const AccountRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
+  AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
   AdminOutletsIndexRoute: typeof AdminOutletsIndexRoute
   AdminProductsIndexRoute: typeof AdminProductsIndexRoute
+  AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
   AdminShipmentsIndexRoute: typeof AdminShipmentsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
+  AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
   AdminOutletsIndexRoute: AdminOutletsIndexRoute,
   AdminProductsIndexRoute: AdminProductsIndexRoute,
+  AdminSettingsIndexRoute: AdminSettingsIndexRoute,
   AdminShipmentsIndexRoute: AdminShipmentsIndexRoute,
 }
 

@@ -70,36 +70,50 @@ export const createProductColumns = (
       <div className="font-mono font-medium">{formatPrice(value)}</div>
     )),
 
-    customColumn<ProductGroup>("colorVariants", "Colors", (value: Product[]) => (
-      <div className="flex items-center gap-1">
-        {value.slice(0, 4).map((color: Product, idx: number) => (
-          <div
-            key={idx}
-            className="h-5 w-5 rounded-full border border-gray-300"
-            style={{ backgroundColor: color.colorCode }}
-            title={color.colorName}
-          />
-        ))}
-        {value.length > 4 && (
-          <span className="text-xs text-muted-foreground ml-1">
-            +{value.length - 4}
-          </span>
-        )}
-      </div>
-    )),
+    {
+      id: "colors",
+      accessorKey: "colorVariants",
+      header: "Colors",
+      cell: ({ row }) => {
+        const colors = row.original.colorVariants || [];
+        return (
+          <div className="flex items-center gap-1">
+            {colors.slice(0, 4).map((color: Product, idx: number) => (
+              <div
+                key={idx}
+                className="h-5 w-5 rounded-full border border-gray-300"
+                style={{ backgroundColor: color.colorCode }}
+                title={color.colorName}
+              />
+            ))}
+            {colors.length > 4 && (
+              <span className="text-xs text-muted-foreground ml-1">
+                +{colors.length - 4}
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
 
-    customColumn<ProductGroup>("colorVariants", "Sizes", (value: Product[]) => {
-      const allSizes = new Set<string>();
-      value.forEach((color: Product) => {
-        color.sizeVariants.forEach((sv: ProductVariant) => allSizes.add(sv.size));
-      });
-      return (
-        <div className="text-sm text-muted-foreground">
-          {Array.from(allSizes).slice(0, 3).join(", ")}
-          {allSizes.size > 3 && ` +${allSizes.size - 3}`}
-        </div>
-      );
-    }),
+    {
+      id: "sizes",
+      accessorKey: "colorVariants",
+      header: "Sizes",
+      cell: ({ row }) => {
+        const colors = row.original.colorVariants || [];
+        const allSizes = new Set<string>();
+        colors.forEach((color: Product) => {
+          color.sizeVariants.forEach((sv: ProductVariant) => allSizes.add(sv.size));
+        });
+        return (
+          <div className="text-sm text-muted-foreground">
+            {Array.from(allSizes).slice(0, 3).join(", ")}
+            {allSizes.size > 3 && ` +${allSizes.size - 3}`}
+          </div>
+        );
+      },
+    },
 
     customColumn<ProductGroup>("attributes", "Fabric", (value) => (
       <div className="capitalize">{value?.fabricType || "N/A"}</div>

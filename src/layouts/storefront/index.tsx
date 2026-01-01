@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ShoppingCart,
   Search,
@@ -34,9 +35,25 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const { itemCount: cartItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleNavigate = (path: string) => {
     router.navigate({ to: path });
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.navigate({
+        to: "/shop/products",
+        search: { q: searchQuery.trim() } as any
+      });
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   return (
@@ -125,13 +142,36 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             </Link>
           </nav>
 
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <div className="relative w-full">
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="w-full pr-10"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full"
+                onClick={handleSearch}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
           {/* Right Side Actions */}
           <div className="flex items-center gap-2">
-            {/* Search */}
+            {/* Mobile Search */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleNavigate("/shop/search")}
+              className="md:hidden"
+              onClick={() => handleNavigate("/shop/products")}
             >
               <Search className="h-5 w-5" />
             </Button>

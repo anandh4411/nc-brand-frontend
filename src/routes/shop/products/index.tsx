@@ -30,23 +30,37 @@ interface SearchParams {
   category?: string;
   sale?: boolean;
   new?: boolean;
+  q?: string;
 }
 
 function ProductsPage() {
-  const search = useSearch({ from: "/shop/products/" });
+  const search = useSearch({ from: "/shop/products/" }) as SearchParams;
+  const searchQuery = search?.q || "";
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [columns, setColumns] = useState<2 | 3 | 4>(4);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 50000],
     fabricTypes: [],
-    onSale: (search as SearchParams)?.sale || false,
-    newArrivals: (search as SearchParams)?.new || false,
+    onSale: search?.sale || false,
+    newArrivals: search?.new || false,
   });
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
     let products = [...shopProducts];
+
+    // Search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      products = products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          p.categoryName.toLowerCase().includes(query) ||
+          p.fabricType.toLowerCase().includes(query)
+      );
+    }
 
     // Category filter
     if (filters.categories.length > 0) {
@@ -103,15 +117,19 @@ function ProductsPage() {
     }
 
     return products;
-  }, [filters, sortBy]);
+  }, [filters, sortBy, searchQuery]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">All Products</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {searchQuery ? `Search: "${searchQuery}"` : "All Products"}
+        </h1>
         <p className="text-muted-foreground">
-          Explore our collection of {shopProducts.length}+ premium textiles
+          {searchQuery
+            ? `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? "s" : ""}`
+            : `Explore our collection of ${shopProducts.length}+ premium textiles`}
         </p>
       </div>
 

@@ -16,6 +16,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isOutlet: boolean;
   isCustomer: boolean;
+  isInstitution: boolean;
   login: (tokens: { accessToken: string; refreshToken: string }, userData?: UserData) => void;
   logout: () => void;
 }
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAdmin = userRole === 'admin';
   const isOutlet = userRole === 'outlet';
   const isCustomer = userRole === 'customer';
+  const isInstitution = userRole === 'institution';
 
   // Check auth status on mount
   useEffect(() => {
@@ -92,6 +94,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return '/outlet';
       case 'customer':
         return '/account';
+      case 'institution':
+        return '/institutions';
       default:
         return '/shop';
     }
@@ -151,6 +155,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAdmin,
     isOutlet,
     isCustomer,
+    isInstitution,
     login,
     logout,
   };

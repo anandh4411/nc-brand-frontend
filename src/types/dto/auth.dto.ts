@@ -56,6 +56,18 @@ export const CustomerLoginRequestSchema = z.object({
 
 export type CustomerLoginRequest = z.infer<typeof CustomerLoginRequestSchema>;
 
+/**
+ * Register Request (Generic)
+ * For admin/staff registration
+ */
+export const RegisterRequestSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
+
 // ============================================================================
 // RESPONSE SCHEMAS
 // ============================================================================
@@ -75,8 +87,9 @@ export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 /**
  * User Role
  * TextileHub has 3 roles: admin (manufacturing unit), outlet, customer
+ * Note: "institution" is kept for backward compatibility with old Impressaa code
  */
-export const UserRoleSchema = z.enum(['admin', 'outlet', 'customer']);
+export const UserRoleSchema = z.enum(['admin', 'outlet', 'customer', 'institution']);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
 /**

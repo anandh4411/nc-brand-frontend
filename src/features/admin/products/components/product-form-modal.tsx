@@ -167,8 +167,8 @@ export function ProductFormModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh]">
-        <DialogHeader className="text-left">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogHeader className="text-left shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             {mode === "add" ? "Add Product" : "Edit Product"}
@@ -181,8 +181,8 @@ export function ProductFormModal({
         </DialogHeader>
 
         <Form {...form}>
-          <form id="product-form" onSubmit={form.handleSubmit(onSubmit)}>
-            <ScrollArea className="max-h-[60vh] pr-4">
+          <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full max-h-[60vh] pr-4">
               <div className="space-y-4 px-1">
                 {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4">
@@ -437,7 +437,7 @@ export function ProductFormModal({
           </form>
         </Form>
 
-        <DialogFooter className="gap-y-2">
+        <DialogFooter className="gap-y-2 shrink-0">
           <DialogClose asChild>
             <Button variant="outline" disabled={isSubmitting}>
               Cancel

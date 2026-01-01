@@ -51,9 +51,7 @@ export const outletNavItems: SidebarItem[] = [
   { label: "Sales", path: "/outlet/sales", icon: BarChart3 },
 ];
 
-export const outletFooterItems: SidebarItem[] = [
-  { label: "Settings", path: "/outlet/settings", icon: Settings },
-];
+export const outletFooterItems: SidebarItem[] = [];
 
 /**
  * Customer Account Navigation

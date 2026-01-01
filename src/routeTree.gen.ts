@@ -44,7 +44,10 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
 import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboard/institutions/route'
 import { Route as ShopProductsIndexRouteImport } from './routes/shop/products/index'
+import { Route as OutletShipmentsIndexRouteImport } from './routes/outlet/shipments/index'
+import { Route as OutletSalesIndexRouteImport } from './routes/outlet/sales/index'
 import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
+import { Route as OutletInventoryIndexRouteImport } from './routes/outlet/inventory/index'
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as AdminShipmentsIndexRouteImport } from './routes/admin/shipments/index'
@@ -342,9 +345,24 @@ const ShopProductsIndexRoute = ShopProductsIndexRouteImport.update({
   path: '/products/',
   getParentRoute: () => ShopRoute,
 } as any)
+const OutletShipmentsIndexRoute = OutletShipmentsIndexRouteImport.update({
+  id: '/shipments/',
+  path: '/shipments/',
+  getParentRoute: () => OutletRoute,
+} as any)
+const OutletSalesIndexRoute = OutletSalesIndexRouteImport.update({
+  id: '/sales/',
+  path: '/sales/',
+  getParentRoute: () => OutletRoute,
+} as any)
 const OutletLoginIndexRoute = OutletLoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
+  getParentRoute: () => OutletRoute,
+} as any)
+const OutletInventoryIndexRoute = OutletInventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
   getParentRoute: () => OutletRoute,
 } as any)
 const InstitutionsLoginIndexRoute = InstitutionsLoginIndexRouteImport.update({
@@ -479,7 +497,10 @@ export interface FileRoutesByFullPath {
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
+  '/outlet/inventory': typeof OutletInventoryIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
+  '/outlet/sales': typeof OutletSalesIndexRoute
+  '/outlet/shipments': typeof OutletShipmentsIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
@@ -531,7 +552,10 @@ export interface FileRoutesByTo {
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
+  '/outlet/inventory': typeof OutletInventoryIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
+  '/outlet/sales': typeof OutletSalesIndexRoute
+  '/outlet/shipments': typeof OutletShipmentsIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions': typeof DashboardInstitutionsIndexLazyRoute
@@ -592,7 +616,10 @@ export interface FileRoutesById {
   '/admin/shipments/': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
+  '/outlet/inventory/': typeof OutletInventoryIndexRoute
   '/outlet/login/': typeof OutletLoginIndexRoute
+  '/outlet/sales/': typeof OutletSalesIndexRoute
+  '/outlet/shipments/': typeof OutletShipmentsIndexRoute
   '/shop/products/': typeof ShopProductsIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
@@ -654,7 +681,10 @@ export interface FileRouteTypes {
     | '/admin/shipments'
     | '/dashboard/settings/'
     | '/institutions/login'
+    | '/outlet/inventory'
     | '/outlet/login'
+    | '/outlet/sales'
+    | '/outlet/shipments'
     | '/shop/products'
     | '/dashboard/forms'
     | '/dashboard/institutions/'
@@ -706,7 +736,10 @@ export interface FileRouteTypes {
     | '/admin/shipments'
     | '/dashboard/settings'
     | '/institutions/login'
+    | '/outlet/inventory'
     | '/outlet/login'
+    | '/outlet/sales'
+    | '/outlet/shipments'
     | '/shop/products'
     | '/dashboard/forms'
     | '/dashboard/institutions'
@@ -766,7 +799,10 @@ export interface FileRouteTypes {
     | '/admin/shipments/'
     | '/dashboard/settings/'
     | '/institutions/login/'
+    | '/outlet/inventory/'
     | '/outlet/login/'
+    | '/outlet/sales/'
+    | '/outlet/shipments/'
     | '/shop/products/'
     | '/dashboard/forms/'
     | '/dashboard/institutions/'
@@ -1104,11 +1140,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopProductsIndexRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/outlet/shipments/': {
+      id: '/outlet/shipments/'
+      path: '/shipments'
+      fullPath: '/outlet/shipments'
+      preLoaderRoute: typeof OutletShipmentsIndexRouteImport
+      parentRoute: typeof OutletRoute
+    }
+    '/outlet/sales/': {
+      id: '/outlet/sales/'
+      path: '/sales'
+      fullPath: '/outlet/sales'
+      preLoaderRoute: typeof OutletSalesIndexRouteImport
+      parentRoute: typeof OutletRoute
+    }
     '/outlet/login/': {
       id: '/outlet/login/'
       path: '/login'
       fullPath: '/outlet/login'
       preLoaderRoute: typeof OutletLoginIndexRouteImport
+      parentRoute: typeof OutletRoute
+    }
+    '/outlet/inventory/': {
+      id: '/outlet/inventory/'
+      path: '/inventory'
+      fullPath: '/outlet/inventory'
+      preLoaderRoute: typeof OutletInventoryIndexRouteImport
       parentRoute: typeof OutletRoute
     }
     '/institutions/login/': {
@@ -1353,12 +1410,18 @@ const InstitutionsRouteWithChildren = InstitutionsRoute._addFileChildren(
 
 interface OutletRouteChildren {
   OutletIndexRoute: typeof OutletIndexRoute
+  OutletInventoryIndexRoute: typeof OutletInventoryIndexRoute
   OutletLoginIndexRoute: typeof OutletLoginIndexRoute
+  OutletSalesIndexRoute: typeof OutletSalesIndexRoute
+  OutletShipmentsIndexRoute: typeof OutletShipmentsIndexRoute
 }
 
 const OutletRouteChildren: OutletRouteChildren = {
   OutletIndexRoute: OutletIndexRoute,
+  OutletInventoryIndexRoute: OutletInventoryIndexRoute,
   OutletLoginIndexRoute: OutletLoginIndexRoute,
+  OutletSalesIndexRoute: OutletSalesIndexRoute,
+  OutletShipmentsIndexRoute: OutletShipmentsIndexRoute,
 }
 
 const OutletRouteWithChildren =

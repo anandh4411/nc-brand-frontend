@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AuthLayout from "@/features/auth/auth-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,23 +8,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { Loader2, Store } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const outletLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  loginCode: z.string().min(6, "Login code must be at least 6 characters"),
 });
 
 type OutletLoginForm = z.infer<typeof outletLoginSchema>;
 
 function OutletLoginPage() {
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<OutletLoginForm>({
     resolver: zodResolver(outletLoginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: "chennai@ncbrand.com",
+      loginCode: "NCB001",
     },
   });
 
@@ -34,14 +35,29 @@ function OutletLoginPage() {
     setError(null);
 
     try {
-      // TODO: Implement outlet login API call
-      console.log("Outlet login:", data);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setError("Login functionality will be implemented with backend integration");
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Mock validation - accept any credentials for testing
+      // In real app, this would validate against backend
+
+      // Mock tokens and user data for outlet
+      const mockTokens = {
+        accessToken: "mock_outlet_access_token_" + Date.now(),
+        refreshToken: "mock_outlet_refresh_token_" + Date.now(),
+      };
+
+      const mockUserData = {
+        id: 1,
+        uuid: "outlet-uuid-" + data.loginCode,
+        name: "NC Brand Outlet",
+        email: data.email,
+        role: "outlet" as const,
+      };
+
+      login(mockTokens, mockUserData);
     } catch (err) {
       setError("Failed to login. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -74,7 +90,7 @@ function OutletLoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="outlet@textilehub.com"
+                  placeholder="outlet@ncbrand.com"
                   {...form.register("email")}
                 />
                 {form.formState.errors.email && (
@@ -85,15 +101,16 @@ function OutletLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="loginCode">Login Code</Label>
                 <Input
-                  id="password"
+                  id="loginCode"
                   type="password"
-                  {...form.register("password")}
+                  placeholder="Enter your login code"
+                  {...form.register("loginCode")}
                 />
-                {form.formState.errors.password && (
+                {form.formState.errors.loginCode && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.password.message}
+                    {form.formState.errors.loginCode.message}
                   </p>
                 )}
               </div>

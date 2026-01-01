@@ -22,7 +22,22 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  ThumbsUp,
+  Camera,
+  MessageSquare,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
@@ -30,6 +45,87 @@ import { toast } from "sonner";
 import { getProductBySlug, type ShopProductColor, type ShopProductVariant } from "@/features/shop/data/mock-data";
 import { ProductGrid } from "@/features/shop/components/product-grid";
 import { shopProducts } from "@/features/shop/data/mock-data";
+
+// Mock reviews data
+interface Review {
+  id: string;
+  userName: string;
+  rating: number;
+  date: string;
+  title: string;
+  comment: string;
+  images?: string[];
+  helpful: number;
+  verified: boolean;
+}
+
+const mockReviews: Review[] = [
+  {
+    id: "1",
+    userName: "Priya Sharma",
+    rating: 5,
+    date: "2024-12-15",
+    title: "Absolutely beautiful!",
+    comment: "The fabric quality is amazing and the colors are exactly as shown. Perfect for festive occasions. Received many compliments!",
+    images: [
+      "https://picsum.photos/seed/review1-1/200/200",
+      "https://picsum.photos/seed/review1-2/200/200",
+    ],
+    helpful: 24,
+    verified: true,
+  },
+  {
+    id: "2",
+    userName: "Anjali Reddy",
+    rating: 4,
+    date: "2024-12-10",
+    title: "Great product, minor delay in shipping",
+    comment: "Love the design and quality. The saree drapes beautifully. Only issue was shipping took a bit longer than expected.",
+    helpful: 12,
+    verified: true,
+  },
+  {
+    id: "3",
+    userName: "Meera Patel",
+    rating: 5,
+    date: "2024-12-05",
+    title: "Worth every penny!",
+    comment: "Exceptional craftsmanship. The zari work is intricate and the silk is pure. Will definitely buy more from this brand.",
+    images: [
+      "https://picsum.photos/seed/review3-1/200/200",
+    ],
+    helpful: 18,
+    verified: true,
+  },
+  {
+    id: "4",
+    userName: "Kavitha Nair",
+    rating: 4,
+    date: "2024-11-28",
+    title: "Good quality",
+    comment: "Nice fabric and good finish. Colors are vibrant. Packaging was also very good.",
+    helpful: 8,
+    verified: false,
+  },
+  {
+    id: "5",
+    userName: "Deepa Krishnan",
+    rating: 3,
+    date: "2024-11-20",
+    title: "Decent but expected more",
+    comment: "The product is okay but I expected better quality at this price point. The design is nice though.",
+    helpful: 5,
+    verified: true,
+  },
+];
+
+const ratingBreakdown = {
+  5: 65,
+  4: 20,
+  3: 10,
+  2: 3,
+  1: 2,
+};
 
 function ProductDetailPage() {
   const { slug } = useParams({ from: "/shop/products/$slug" });
@@ -47,7 +143,11 @@ function ProductDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [activeTab, setActiveTab] = useState("description");
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 5, title: "", comment: "" });
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   if (!product) {
     return (
@@ -125,6 +225,29 @@ function ProductDetailPage() {
     setZoomPosition({ x, y });
   };
 
+  const scrollToReviews = () => {
+    setActiveTab("reviews");
+    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSubmitReview = () => {
+    if (!newReview.title || !newReview.comment) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    toast.success("Review submitted successfully!");
+    setReviewModalOpen(false);
+    setNewReview({ rating: 5, title: "", comment: "" });
+  };
+
+  const formatReviewDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   // Related products (same category)
   const relatedProducts = useMemo(() => {
     return shopProducts
@@ -165,7 +288,7 @@ function ProductDetailPage() {
                 <button
                   key={index}
                   className={cn(
-                    "w-16 h-16 rounded-md overflow-hidden border-2 shrink-0 transition-all",
+                    "w-16 h-16 rounded-md overflow-hidden border-2 shrink-0 transition-all cursor-pointer",
                     currentImageIndex === index
                       ? "border-primary ring-1 ring-primary"
                       : "border-gray-200 hover:border-gray-400"
@@ -258,8 +381,11 @@ function ProductDetailPage() {
             <h1 className="text-2xl lg:text-3xl font-bold">{product.name}</h1>
           </div>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2">
+          {/* Rating - Clickable to scroll to reviews */}
+          <button
+            onClick={scrollToReviews}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          >
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -274,10 +400,10 @@ function ProductDetailPage() {
               ))}
             </div>
             <span className="text-sm font-medium">{product.rating}</span>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground underline">
               ({product.reviewCount} reviews)
             </span>
-          </div>
+          </button>
 
           {/* Price */}
           <div className="flex items-center gap-3">
@@ -302,7 +428,7 @@ function ProductDetailPage() {
                 <button
                   key={color.id}
                   className={cn(
-                    "h-10 w-10 rounded-full border-2 transition-all",
+                    "h-10 w-10 rounded-full border-2 transition-all cursor-pointer",
                     selectedColor?.id === color.id
                       ? "border-primary ring-2 ring-primary ring-offset-2"
                       : "border-gray-300"
@@ -324,11 +450,11 @@ function ProductDetailPage() {
                   <button
                     key={variant.id}
                     className={cn(
-                      "px-4 py-2 border rounded-md text-sm transition-all",
+                      "px-4 py-2 border rounded-md text-sm transition-all cursor-pointer",
                       selectedVariant?.id === variant.id
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-gray-300 hover:border-primary",
-                      variant.stock === 0 && "opacity-50 cursor-not-allowed line-through"
+                      variant.stock === 0 && "opacity-50 !cursor-not-allowed line-through"
                     )}
                     disabled={variant.stock === 0}
                     onClick={() => setSelectedVariant(variant)}
@@ -414,12 +540,15 @@ function ProductDetailPage() {
       </div>
 
       {/* Product Details Tabs */}
-      <div className="mt-12">
-        <Tabs defaultValue="description">
+      <div className="mt-12" ref={tabsRef}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="care">Care Instructions</TabsTrigger>
+            <TabsTrigger value="reviews">
+              Reviews ({product.reviewCount})
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-4">
             <p className="text-muted-foreground leading-relaxed">
@@ -449,6 +578,142 @@ function ProductDetailPage() {
           <TabsContent value="care" className="mt-4">
             <p className="text-muted-foreground">{product.careInstructions}</p>
           </TabsContent>
+          <TabsContent value="reviews" className="mt-4">
+            <div className="space-y-8">
+              {/* Rating Summary */}
+              <div className="grid md:grid-cols-[300px_1fr] gap-8">
+                {/* Overall Rating */}
+                <div className="text-center p-6 bg-muted rounded-lg">
+                  <div className="text-5xl font-bold mb-2">{product.rating}</div>
+                  <div className="flex justify-center mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "h-5 w-5",
+                          i < Math.floor(product.rating)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Based on {product.reviewCount} reviews
+                  </p>
+                  <Button onClick={() => setReviewModalOpen(true)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Write a Review
+                  </Button>
+                </div>
+
+                {/* Rating Breakdown */}
+                <div className="space-y-3">
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <div key={star} className="flex items-center gap-3">
+                      <span className="text-sm w-12">{star} star</span>
+                      <Progress
+                        value={ratingBreakdown[star as keyof typeof ratingBreakdown]}
+                        className="flex-1 h-2"
+                      />
+                      <span className="text-sm text-muted-foreground w-12">
+                        {ratingBreakdown[star as keyof typeof ratingBreakdown]}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Images */}
+              {mockReviews.some((r) => r.images?.length) && (
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Customer Photos
+                  </h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {mockReviews
+                      .flatMap((r) => r.images || [])
+                      .slice(0, 6)
+                      .map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Customer photo ${idx + 1}`}
+                          className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 hover:ring-2 hover:ring-primary transition-all"
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Reviews List */}
+              <div className="space-y-6">
+                <h3 className="font-semibold">Customer Reviews</h3>
+                {mockReviews.map((review) => (
+                  <div key={review.id} className="border-b pb-6 last:border-b-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback>
+                            {review.userName.split(" ").map((n) => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{review.userName}</span>
+                            {review.verified && (
+                              <Badge variant="secondary" className="text-xs">
+                                Verified Purchase
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={cn(
+                                    "h-3 w-3",
+                                    i < review.rating
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-gray-300"
+                                  )}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {formatReviewDate(review.date)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <h4 className="font-medium mb-1">{review.title}</h4>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      {review.comment}
+                    </p>
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-2 mb-3">
+                        {review.images.map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`Review image ${idx + 1}`}
+                            className="w-16 h-16 object-cover rounded-lg border cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                      <ThumbsUp className="h-4 w-4" />
+                      Helpful ({review.helpful})
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -459,6 +724,86 @@ function ProductDetailPage() {
           <ProductGrid products={relatedProducts} columns={4} />
         </div>
       )}
+
+      {/* Write Review Modal */}
+      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Write a Review</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Rating Selection */}
+            <div>
+              <Label className="mb-2 block">Your Rating</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setNewReview((prev) => ({ ...prev, rating: star }))}
+                    className="p-1 cursor-pointer"
+                  >
+                    <Star
+                      className={cn(
+                        "h-8 w-8 transition-colors",
+                        star <= newReview.rating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300 hover:text-yellow-300"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Review Title */}
+            <div>
+              <Label htmlFor="review-title">Review Title</Label>
+              <Input
+                id="review-title"
+                placeholder="Summarize your experience"
+                value={newReview.title}
+                onChange={(e) =>
+                  setNewReview((prev) => ({ ...prev, title: e.target.value }))
+                }
+                className="mt-1.5"
+              />
+            </div>
+
+            {/* Review Comment */}
+            <div>
+              <Label htmlFor="review-comment">Your Review</Label>
+              <Textarea
+                id="review-comment"
+                placeholder="Share your experience with this product..."
+                rows={4}
+                value={newReview.comment}
+                onChange={(e) =>
+                  setNewReview((prev) => ({ ...prev, comment: e.target.value }))
+                }
+                className="mt-1.5"
+              />
+            </div>
+
+            {/* Image Upload Placeholder */}
+            <div>
+              <Label>Add Photos (Optional)</Label>
+              <div className="mt-1.5 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-muted/50 transition-colors">
+                <Camera className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Drag photos here or click to upload
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitReview}>Submit Review</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

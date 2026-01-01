@@ -16,6 +16,7 @@ export const OutletSchema = z.object({
   id: z.number(),
   uuid: z.string().uuid(),
   code: z.string(),
+  loginCode: z.string(), // 6-digit alphanumeric for outlet login
   name: z.string(),
   address: z.string(),
   city: z.string(),

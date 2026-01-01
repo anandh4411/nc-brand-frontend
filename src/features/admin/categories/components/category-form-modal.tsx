@@ -60,7 +60,6 @@ export function CategoryFormModal({
       name: category?.name || "",
       description: category?.description || "",
       parentId: category?.parentId || null,
-      sortOrder: category?.sortOrder || 0,
       isActive: category?.isActive ?? true,
     },
   });
@@ -71,7 +70,6 @@ export function CategoryFormModal({
         name: category?.name || "",
         description: category?.description || "",
         parentId: category?.parentId || null,
-        sortOrder: category?.sortOrder || 0,
         isActive: category?.isActive ?? true,
       });
     }
@@ -153,48 +151,30 @@ export function CategoryFormModal({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="parentId"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel>Parent Category</FormLabel>
-                    <SelectDropdown
-                      defaultValue={field.value ? String(field.value) : ""}
-                      onValueChange={(val) =>
-                        field.onChange(val ? Number(val) : null)
-                      }
-                      placeholder="None (Top Level)"
-                      items={[
-                        { label: "None (Top Level)", value: "" },
-                        ...filteredParentOptions,
-                      ]}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="sortOrder"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sort Order</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel>Category Type</FormLabel>
+                  <SelectDropdown
+                    defaultValue={field.value ? String(field.value) : "_none"}
+                    onValueChange={(val) =>
+                      field.onChange(val === "_none" ? null : Number(val))
+                    }
+                    placeholder="Select type"
+                    items={[
+                      { label: "Main Category", value: "_none" },
+                      ...filteredParentOptions.map((p) => ({
+                        label: `Sub of: ${p.label}`,
+                        value: p.value,
+                      })),
+                    ]}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {mode === "edit" && (
               <FormField

@@ -1,5 +1,5 @@
 // src/features/admin/outlets/components/outlet-view-modal.tsx
-import { Store, MapPin, Phone, Mail, Calendar, Building } from "lucide-react";
+import { Store, MapPin, Phone, Mail, Calendar, Copy, KeyRound } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { Outlet } from "@/types/dto/outlet.dto";
 
 interface Props {
@@ -22,6 +24,11 @@ export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     return format(new Date(dateString), "MMM dd, yyyy 'at' hh:mm a");
+  };
+
+  const copyLoginCode = () => {
+    navigator.clipboard.writeText(outlet.loginCode);
+    toast.success("Login code copied to clipboard");
   };
 
   return (
@@ -49,6 +56,23 @@ export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
             <Badge variant={outlet.isActive ? "default" : "secondary"}>
               {outlet.isActive ? "Active" : "Inactive"}
             </Badge>
+          </div>
+
+          {/* Login Code */}
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+            <div className="flex items-center gap-3">
+              <KeyRound className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Login Code</p>
+                <p className="font-mono font-semibold tracking-wider text-lg">
+                  {outlet.loginCode}
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={copyLoginCode}>
+              <Copy className="h-4 w-4 mr-1" />
+              Copy
+            </Button>
           </div>
 
           <Separator />

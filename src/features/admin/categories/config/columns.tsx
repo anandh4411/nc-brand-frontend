@@ -73,10 +73,6 @@ export const createCategoryColumns = (
       );
     }),
 
-    customColumn<Category>("sortOrder", "Order", (value) => (
-      <div className="text-center font-mono text-sm">{value}</div>
-    )),
-
     customColumn<Category>(
       "isActive",
       "Status",

@@ -136,7 +136,7 @@ function ProductsPage() {
       <div className="flex gap-8">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-24">
+          <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
             <h2 className="font-semibold mb-4">Filters</h2>
             <ProductFilters filters={filters} onFiltersChange={setFilters} />
           </div>

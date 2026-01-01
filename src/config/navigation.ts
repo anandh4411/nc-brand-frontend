@@ -14,6 +14,10 @@ import {
   MapPin,
   Star,
   User,
+  Grid3X3,
+  Tag,
+  Percent,
+  CreditCard,
 } from "lucide-react";
 import { SidebarItem } from "@/components/layout/types";
 import React from "react";
@@ -64,6 +68,23 @@ export const accountNavItems: SidebarItem[] = [
 
 export const accountFooterItems: SidebarItem[] = [
   { label: "Profile", path: "/account/settings", icon: User },
+];
+
+/**
+ * Shop Navigation (E-commerce Storefront)
+ */
+export const shopNavItems: SidebarItem[] = [
+  { label: "Home", path: "/shop", icon: Home },
+  { label: "All Products", path: "/shop/products", icon: Package },
+  { label: "Categories", path: "/shop/categories", icon: Grid3X3 },
+  { label: "New Arrivals", path: "/shop/new-arrivals", icon: Tag },
+  { label: "Offers", path: "/shop/offers", icon: Percent },
+];
+
+export const shopFooterItems: SidebarItem[] = [
+  { label: "Cart", path: "/shop/cart", icon: ShoppingCart },
+  { label: "Wishlist", path: "/shop/wishlist", icon: Heart },
+  { label: "My Account", path: "/account", icon: User },
 ];
 
 /**

@@ -16,6 +16,7 @@ import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OutletRouteImport } from './routes/outlet'
 import { Route as InstitutionsRouteImport } from './routes/institutions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -25,6 +26,8 @@ import { Route as InstitutionsIndexRouteImport } from './routes/institutions/ind
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as ShopWishlistRouteImport } from './routes/shop/wishlist'
+import { Route as ShopCartRouteImport } from './routes/shop/cart'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -36,6 +39,7 @@ import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
 import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboard/institutions/route'
+import { Route as ShopProductsIndexRouteImport } from './routes/shop/products/index'
 import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
@@ -45,6 +49,7 @@ import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/in
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
+import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$slug'
 
 const InstitutionsSubmissionsIndexLazyRouteImport = createFileRoute(
   '/institutions/submissions/',
@@ -111,6 +116,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -155,6 +165,16 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
+} as any)
+const ShopWishlistRoute = ShopWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => ShopRoute,
+} as any)
+const ShopCartRoute = ShopCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => ShopRoute,
 } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -292,6 +312,11 @@ const DashboardFormsIndexLazyRoute = DashboardFormsIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/dashboard/forms/index.lazy').then((d) => d.Route),
 )
+const ShopProductsIndexRoute = ShopProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => ShopRoute,
+} as any)
 const OutletLoginIndexRoute = OutletLoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
@@ -371,11 +396,17 @@ const DashboardSettingsAccountLazyRoute =
   } as any).lazy(() =>
     import('./routes/dashboard/settings/account.lazy').then((d) => d.Route),
   )
+const ShopProductsSlugRoute = ShopProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => ShopRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/institutions': typeof InstitutionsRouteWithChildren
   '/outlet': typeof OutletRouteWithChildren
@@ -392,12 +423,15 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/shop/cart': typeof ShopCartRoute
+  '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/institutions/': typeof InstitutionsIndexRoute
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
@@ -411,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
+  '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
@@ -424,6 +459,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checkout': typeof CheckoutRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -434,12 +470,15 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/shop/cart': typeof ShopCartRoute
+  '/shop/wishlist': typeof ShopWishlistRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/institutions': typeof InstitutionsIndexRoute
   '/outlet': typeof OutletIndexRoute
   '/shop': typeof ShopIndexRoute
+  '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
@@ -453,6 +492,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
+  '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
@@ -469,6 +509,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/institutions': typeof InstitutionsRouteWithChildren
   '/outlet': typeof OutletRouteWithChildren
@@ -485,12 +526,15 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/shop/cart': typeof ShopCartRoute
+  '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/institutions/': typeof InstitutionsIndexRoute
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
@@ -504,6 +548,7 @@ export interface FileRoutesById {
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
   '/outlet/login/': typeof OutletLoginIndexRoute
+  '/shop/products/': typeof ShopProductsIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexLazyRoute
   '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
   '/dashboard/phases/': typeof DashboardPhasesIndexLazyRoute
@@ -521,6 +566,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/checkout'
     | '/dashboard'
     | '/institutions'
     | '/outlet'
@@ -537,12 +583,15 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/shop/cart'
+    | '/shop/wishlist'
     | '/account/'
     | '/admin/'
     | '/dashboard/'
     | '/institutions/'
     | '/outlet/'
     | '/shop/'
+    | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
@@ -556,6 +605,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/'
     | '/institutions/login'
     | '/outlet/login'
+    | '/shop/products'
     | '/dashboard/forms'
     | '/dashboard/institutions/'
     | '/dashboard/phases'
@@ -569,6 +619,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/checkout'
     | '/privacy-policy'
     | '/forgot-password'
     | '/otp'
@@ -579,12 +630,15 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/shop/cart'
+    | '/shop/wishlist'
     | '/account'
     | '/admin'
     | '/dashboard'
     | '/institutions'
     | '/outlet'
     | '/shop'
+    | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
@@ -598,6 +652,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/institutions/login'
     | '/outlet/login'
+    | '/shop/products'
     | '/dashboard/forms'
     | '/dashboard/institutions'
     | '/dashboard/phases'
@@ -613,6 +668,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/checkout'
     | '/dashboard'
     | '/institutions'
     | '/outlet'
@@ -629,12 +685,15 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/shop/cart'
+    | '/shop/wishlist'
     | '/account/'
     | '/admin/'
     | '/dashboard/'
     | '/institutions/'
     | '/outlet/'
     | '/shop/'
+    | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
@@ -648,6 +707,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/'
     | '/institutions/login/'
     | '/outlet/login/'
+    | '/shop/products/'
     | '/dashboard/forms/'
     | '/dashboard/institutions/'
     | '/dashboard/phases/'
@@ -664,6 +724,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   InstitutionsRoute: typeof InstitutionsRouteWithChildren
   OutletRoute: typeof OutletRouteWithChildren
@@ -715,6 +776,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -779,6 +847,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/shop/wishlist': {
+      id: '/shop/wishlist'
+      path: '/wishlist'
+      fullPath: '/shop/wishlist'
+      preLoaderRoute: typeof ShopWishlistRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/shop/cart': {
+      id: '/shop/cart'
+      path: '/cart'
+      fullPath: '/shop/cart'
+      preLoaderRoute: typeof ShopCartRouteImport
+      parentRoute: typeof ShopRoute
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -927,6 +1009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFormsIndexLazyRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/shop/products/': {
+      id: '/shop/products/'
+      path: '/products'
+      fullPath: '/shop/products'
+      preLoaderRoute: typeof ShopProductsIndexRouteImport
+      parentRoute: typeof ShopRoute
+    }
     '/outlet/login/': {
       id: '/outlet/login/'
       path: '/login'
@@ -1017,6 +1106,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/settings/account'
       preLoaderRoute: typeof DashboardSettingsAccountLazyRouteImport
       parentRoute: typeof DashboardSettingsRouteRoute
+    }
+    '/shop/products/$slug': {
+      id: '/shop/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/shop/products/$slug'
+      preLoaderRoute: typeof ShopProductsSlugRouteImport
+      parentRoute: typeof ShopRoute
     }
   }
 }
@@ -1154,11 +1250,19 @@ const OutletRouteWithChildren =
   OutletRoute._addFileChildren(OutletRouteChildren)
 
 interface ShopRouteChildren {
+  ShopCartRoute: typeof ShopCartRoute
+  ShopWishlistRoute: typeof ShopWishlistRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ShopProductsSlugRoute: typeof ShopProductsSlugRoute
+  ShopProductsIndexRoute: typeof ShopProductsIndexRoute
 }
 
 const ShopRouteChildren: ShopRouteChildren = {
+  ShopCartRoute: ShopCartRoute,
+  ShopWishlistRoute: ShopWishlistRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ShopProductsSlugRoute: ShopProductsSlugRoute,
+  ShopProductsIndexRoute: ShopProductsIndexRoute,
 }
 
 const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)
@@ -1167,6 +1271,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   DashboardRoute: DashboardRouteWithChildren,
   InstitutionsRoute: InstitutionsRouteWithChildren,
   OutletRoute: OutletRouteWithChildren,

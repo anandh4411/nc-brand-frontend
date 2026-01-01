@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
+import { useCart } from "@/context/cart-context";
+import { useWishlist } from "@/context/wishlist-context";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingCart,
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { shopCategories } from "@/features/shop/data/mock-data";
 
 interface StorefrontLayoutProps {
   children: React.ReactNode;
@@ -28,20 +31,19 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   children,
 }) => {
   const { isAuthenticated, user, isCustomer } = useAuth();
+  const { itemCount: cartItemCount } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
   const router = useRouter();
 
   const handleNavigate = (path: string) => {
     router.navigate({ to: path });
   };
 
-  // Placeholder for cart count - will be replaced with cart context
-  const cartItemCount = 0;
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="shrink-0 sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
@@ -55,11 +57,28 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                   Home
                 </Link>
                 <Link to="/shop/products" className="text-lg font-medium hover:text-primary">
-                  Products
+                  All Products
                 </Link>
-                <Link to="/shop/categories" className="text-lg font-medium hover:text-primary">
-                  Categories
-                </Link>
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Categories</p>
+                  {shopCategories.filter(c => c.parentId === null).map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/shop/products?category=${category.id}` as any}
+                      className="block py-2 text-sm hover:text-primary"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="border-t pt-4">
+                  <Link to="/shop/cart" className="block py-2 text-lg font-medium hover:text-primary">
+                    Cart
+                  </Link>
+                  <Link to="/shop/wishlist" className="block py-2 text-lg font-medium hover:text-primary">
+                    Wishlist
+                  </Link>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
@@ -84,18 +103,17 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                 <ChevronDown className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/categories/men")}>
-                  Men
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/categories/women")}>
-                  Women
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/categories/kids")}>
-                  Kids
-                </DropdownMenuItem>
+                {shopCategories.filter(c => c.parentId === null).map((category) => (
+                  <DropdownMenuItem
+                    key={category.id}
+                    onClick={() => handleNavigate(`/shop/products?category=${category.id}`)}
+                  >
+                    {category.name}
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/categories")}>
-                  All Categories
+                <DropdownMenuItem onClick={() => handleNavigate("/shop/products")}>
+                  All Products
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -119,15 +137,19 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             </Button>
 
             {/* Wishlist */}
-            {isAuthenticated && isCustomer && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleNavigate("/account/wishlist")}
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => handleNavigate("/shop/wishlist")}
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Button>
 
             {/* Cart */}
             <Button
@@ -191,11 +213,12 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        {children}
 
-      {/* Footer */}
-      <footer className="border-t bg-muted/50">
-        <div className="container py-12">
+        {/* Footer */}
+        <footer className="border-t bg-muted/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand */}
             <div>
@@ -218,12 +241,12 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop/categories" className="hover:text-foreground">
+                  <Link to="/shop/products" className="hover:text-foreground">
                     Categories
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop/products?featured=true" className="hover:text-foreground">
+                  <Link to="/shop/products" className="hover:text-foreground">
                     Featured
                   </Link>
                 </li>
@@ -235,17 +258,17 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               <h4 className="font-semibold mb-4">Account</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/account" className="hover:text-foreground">
+                  <Link to="/shop" className="hover:text-foreground">
                     My Account
                   </Link>
                 </li>
                 <li>
-                  <Link to="/account/orders" className="hover:text-foreground">
+                  <Link to="/shop" className="hover:text-foreground">
                     Order History
                   </Link>
                 </li>
                 <li>
-                  <Link to="/account/wishlist" className="hover:text-foreground">
+                  <Link to="/shop/wishlist" className="hover:text-foreground">
                     Wishlist
                   </Link>
                 </li>
@@ -257,19 +280,19 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               <h4 className="font-semibold mb-4">Help</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/help/contact" className="hover:text-foreground">
+                  <span className="hover:text-foreground cursor-pointer">
                     Contact Us
-                  </Link>
+                  </span>
                 </li>
                 <li>
-                  <Link to="/help/shipping" className="hover:text-foreground">
+                  <span className="hover:text-foreground cursor-pointer">
                     Shipping Info
-                  </Link>
+                  </span>
                 </li>
                 <li>
-                  <Link to="/help/returns" className="hover:text-foreground">
+                  <span className="hover:text-foreground cursor-pointer">
                     Returns & Exchanges
-                  </Link>
+                  </span>
                 </li>
               </ul>
             </div>
@@ -279,7 +302,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             © {new Date().getFullYear()} TextileHub. All rights reserved.
           </div>
         </div>
-      </footer>
+        </footer>
+      </main>
     </div>
   );
 };

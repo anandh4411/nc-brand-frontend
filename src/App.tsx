@@ -5,6 +5,8 @@ import { ThemeProvider } from "./context/theme-context";
 import { FontProvider } from "./context/font-context";
 import { ColorThemeProvider } from "./context/color-theme-context";
 import { AuthProvider } from "./context/auth-context";
+import { CartProvider } from "./context/cart-context";
+import { WishlistProvider } from "./context/wishlist-context";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -53,7 +55,11 @@ function App() {
         <ColorThemeProvider>
           <FontProvider>
             <AuthProvider>
-              <RouterProvider router={router} />
+              <CartProvider>
+                <WishlistProvider>
+                  <RouterProvider router={router} />
+                </WishlistProvider>
+              </CartProvider>
             </AuthProvider>
           </FontProvider>
         </ColorThemeProvider>

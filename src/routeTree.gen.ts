@@ -39,6 +39,8 @@ import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboa
 import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
+import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/index'
+import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 
 const InstitutionsSubmissionsIndexLazyRouteImport = createFileRoute(
   '/institutions/submissions/',
@@ -301,6 +303,16 @@ const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardSettingsRouteRoute,
 } as any)
+const AdminOutletsIndexRoute = AdminOutletsIndexRouteImport.update({
+  id: '/outlets/',
+  path: '/outlets/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const DashboardSettingsNotificationsLazyRoute =
   DashboardSettingsNotificationsLazyRouteImport.update({
     id: '/notifications',
@@ -366,6 +378,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/outlets': typeof AdminOutletsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
@@ -402,6 +416,8 @@ export interface FileRoutesByTo {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/outlets': typeof AdminOutletsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
@@ -447,6 +463,8 @@ export interface FileRoutesById {
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
+  '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/outlets/': typeof AdminOutletsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
   '/outlet/login/': typeof OutletLoginIndexRoute
@@ -493,6 +511,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/categories'
+    | '/admin/outlets'
     | '/dashboard/settings/'
     | '/institutions/login'
     | '/outlet/login'
@@ -529,6 +549,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/categories'
+    | '/admin/outlets'
     | '/dashboard/settings'
     | '/institutions/login'
     | '/outlet/login'
@@ -573,6 +595,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings/appearance'
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
+    | '/admin/categories/'
+    | '/admin/outlets/'
     | '/dashboard/settings/'
     | '/institutions/login/'
     | '/outlet/login/'
@@ -876,6 +900,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsIndexRouteImport
       parentRoute: typeof DashboardSettingsRouteRoute
     }
+    '/admin/outlets/': {
+      id: '/admin/outlets/'
+      path: '/outlets'
+      fullPath: '/admin/outlets'
+      preLoaderRoute: typeof AdminOutletsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories/': {
+      id: '/admin/categories/'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/dashboard/settings/notifications': {
       id: '/dashboard/settings/notifications'
       path: '/notifications'
@@ -920,10 +958,14 @@ const AccountRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
+  AdminOutletsIndexRoute: typeof AdminOutletsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
+  AdminOutletsIndexRoute: AdminOutletsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -126,9 +126,9 @@ export const footerNavItems: SidebarItem[] = [];
 // Custom logo component
 const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return React.createElement("img", {
-    src: "/logo.png",
+    src: "/logo.jpg",
     alt: "NC Brand Logo",
-    className: "w-full",
+    className: "w-full rounded-lg",
     ...props,
   });
 };

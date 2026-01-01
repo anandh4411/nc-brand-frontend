@@ -252,12 +252,12 @@ function HeroGeometric() {
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
           >
             <img
-              src="/logo.png"
-              alt="Impressaa Logo"
-              className="h-4 w-4 text-blue-500/80"
+              src="/logo.jpg"
+              alt="NC Brand Logo"
+              className="h-4 w-4 rounded"
             />
             <span className="text-sm text-white/60 tracking-wide">
-              impressaa
+              NC Brand
             </span>
           </motion.div>
 

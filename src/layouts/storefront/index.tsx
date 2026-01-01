@@ -102,7 +102,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
 
           {/* Logo */}
           <Link to="/shop" className="flex items-center gap-2">
-            <img src="/logo.png" alt="NC Brand" className="h-8 w-8" />
+            <img src="/logo.jpg" alt="NC Brand" className="h-8 w-8 rounded-lg" />
             <span className="font-bold text-xl hidden sm:inline">NC Brand</span>
           </Link>
 
@@ -263,7 +263,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo.png" alt="NC Brand" className="h-8 w-8" />
+                <img src="/logo.jpg" alt="NC Brand" className="h-8 w-8 rounded-lg" />
                 <span className="font-bold text-xl">NC Brand</span>
               </div>
               <p className="text-sm text-muted-foreground">

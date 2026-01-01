@@ -29,11 +29,12 @@ const revenueData = [
   { month: "Jul", revenue: 489000, orders: 298 },
 ];
 
+// Red shades for pie chart
 const categoryData = [
-  { name: "Sarees", value: 42, fill: "hsl(var(--chart-1))" },
-  { name: "Kurtis", value: 28, fill: "hsl(var(--chart-2))" },
-  { name: "Lehengas", value: 18, fill: "hsl(var(--chart-3))" },
-  { name: "Dress Materials", value: 12, fill: "hsl(var(--chart-4))" },
+  { name: "Sarees", value: 42, fill: "#dc2626" },
+  { name: "Kurtis", value: 28, fill: "#ef4444" },
+  { name: "Lehengas", value: 18, fill: "#f87171" },
+  { name: "Dress Materials", value: 12, fill: "#fca5a5" },
 ];
 
 const outletPerformance = [
@@ -55,17 +56,17 @@ const dailySales = [
 ];
 
 const revenueChartConfig = {
-  revenue: { label: "Revenue", color: "hsl(var(--chart-1))" },
-  orders: { label: "Orders", color: "hsl(var(--chart-2))" },
+  revenue: { label: "Revenue", color: "#dc2626" },
+  orders: { label: "Orders", color: "#f87171" },
 } satisfies ChartConfig;
 
 const salesChartConfig = {
-  online: { label: "Online", color: "hsl(var(--chart-1))" },
-  offline: { label: "Offline", color: "hsl(var(--chart-2))" },
+  online: { label: "Online", color: "#dc2626" },
+  offline: { label: "Offline", color: "#fca5a5" },
 } satisfies ChartConfig;
 
 const outletChartConfig = {
-  sales: { label: "Sales", color: "hsl(var(--chart-3))" },
+  sales: { label: "Sales", color: "#dc2626" },
 } satisfies ChartConfig;
 
 // Stats
@@ -224,7 +225,7 @@ function AdminAnalytics() {
                 <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
                 <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Revenue"]} />
-                <Area type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.2} strokeWidth={2} />
+                <Area type="monotone" dataKey="revenue" stroke="#dc2626" fill="#dc2626" fillOpacity={0.2} strokeWidth={2} />
               </AreaChart>
             </ChartContainer>
           </CardContent>
@@ -247,7 +248,24 @@ function AdminAnalytics() {
                   outerRadius={100}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
+                  label={({ name, value, cx, cy, midAngle, outerRadius }) => {
+                    const RADIAN = Math.PI / 180;
+                    const radius = outerRadius + 25;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        fill="currentColor"
+                        textAnchor={x > cx ? "start" : "end"}
+                        dominantBaseline="central"
+                        className="text-xs fill-foreground"
+                      >
+                        {`${name}: ${value}%`}
+                      </text>
+                    );
+                  }}
                   labelLine={false}
                 >
                   {categoryData.map((entry, index) => (
@@ -276,8 +294,8 @@ function AdminAnalytics() {
                 <XAxis dataKey="day" tickLine={false} axisLine={false} className="text-xs" />
                 <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="online" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="offline" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="online" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="offline" fill="#fca5a5" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -296,7 +314,7 @@ function AdminAnalytics() {
                 <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} className="text-xs" />
                 <YAxis dataKey="outlet" type="category" tickLine={false} axisLine={false} width={80} className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Sales"]} />
-                <Bar dataKey="sales" fill="hsl(var(--chart-3))" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="sales" fill="#dc2626" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ChartContainer>
           </CardContent>

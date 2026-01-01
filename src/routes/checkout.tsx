@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
+import { StorefrontLayout } from "@/layouts/storefront";
 
 type CheckoutStep = "address" | "payment" | "confirmation";
 
@@ -90,42 +91,47 @@ function CheckoutPage() {
   // Redirect to cart if empty
   if (items.length === 0 && step !== "confirmation") {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-        <p className="text-muted-foreground mb-8">Add items to your cart to checkout.</p>
-        <Button asChild>
-          <Link to="/shop/products">Browse Products</Link>
-        </Button>
-      </div>
+      <StorefrontLayout>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+          <p className="text-muted-foreground mb-8">Add items to your cart to checkout.</p>
+          <Button asChild>
+            <Link to="/shop/products">Browse Products</Link>
+          </Button>
+        </div>
+      </StorefrontLayout>
     );
   }
 
   // Confirmation Step
   if (step === "confirmation") {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="max-w-md mx-auto text-center">
-          <CheckCircle2 className="h-16 w-16 mx-auto mb-6 text-green-500" />
-          <h1 className="text-2xl font-bold mb-4">Order Placed Successfully!</h1>
-          <p className="text-muted-foreground mb-2">
-            Thank you for your order. We've sent a confirmation email to {addressForm.email || "your email"}.
-          </p>
-          <p className="text-sm text-muted-foreground mb-8">
-            Order ID: <span className="font-mono font-medium">TH{Date.now().toString().slice(-8)}</span>
-          </p>
-          <div className="space-y-3">
-            <Button asChild className="w-full">
-              <Link to="/shop">Continue Shopping</Link>
-            </Button>
+      <StorefrontLayout>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <CheckCircle2 className="h-16 w-16 mx-auto mb-6 text-green-500" />
+            <h1 className="text-2xl font-bold mb-4">Order Placed Successfully!</h1>
+            <p className="text-muted-foreground mb-2">
+              Thank you for your order. We've sent a confirmation email to {addressForm.email || "your email"}.
+            </p>
+            <p className="text-sm text-muted-foreground mb-8">
+              Order ID: <span className="font-mono font-medium">TH{Date.now().toString().slice(-8)}</span>
+            </p>
+            <div className="space-y-3">
+              <Button asChild className="w-full">
+                <Link to="/shop">Continue Shopping</Link>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </StorefrontLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
+    <StorefrontLayout>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+        {/* Header */}
       <div className="mb-8">
         <Button
           variant="ghost"
@@ -406,8 +412,9 @@ function CheckoutPage() {
             </CardContent>
           </Card>
         </div>
+        </div>
       </div>
-    </div>
+    </StorefrontLayout>
   );
 }
 

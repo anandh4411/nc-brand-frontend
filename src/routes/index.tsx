@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Landing from "@/features/landing";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: Landing,
+  beforeLoad: () => {
+    throw redirect({ to: "/shop" });
+  },
 });

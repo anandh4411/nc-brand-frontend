@@ -12,6 +12,10 @@ import {
   Menu,
   Heart,
   ChevronDown,
+  Package,
+  KeyRound,
+  Trash2,
+  LogOut,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -31,7 +35,7 @@ interface StorefrontLayoutProps {
 export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   children,
 }) => {
-  const { isAuthenticated, user, isCustomer } = useAuth();
+  const { isAuthenticated, user, isCustomer, logout } = useAuth();
   const { itemCount: cartItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const router = useRouter();
@@ -96,6 +100,26 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                     Wishlist
                   </Link>
                 </div>
+                {isAuthenticated && isCustomer && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Account</p>
+                    <Link to="/account" className="block py-2 text-sm hover:text-primary">
+                      My Account
+                    </Link>
+                    <Link to="/account/orders" className="block py-2 text-sm hover:text-primary">
+                      Order History
+                    </Link>
+                    <Link to="/account/settings" className="block py-2 text-sm hover:text-primary">
+                      Change Password
+                    </Link>
+                    <button
+                      onClick={() => logout()}
+                      className="block py-2 text-sm text-destructive hover:text-destructive/80 w-full text-left"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
@@ -140,6 +164,48 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             >
               All Products
             </Link>
+            {isAuthenticated && isCustomer && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
+                  Account
+                  <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleNavigate("/account")}>
+                    <User className="h-4 w-4 mr-2" />
+                    My Account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
+                    <Heart className="h-4 w-4 mr-2" />
+                    Wishlist
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
+                    <Package className="h-4 w-4 mr-2" />
+                    Order History
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleNavigate("/account/settings")}>
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Change Password
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => handleNavigate("/account/settings?tab=delete")}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => logout()}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
 
           {/* Search Bar */}
@@ -207,47 +273,44 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             </Button>
 
             {/* Account */}
-            {isAuthenticated && isCustomer ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <div className="px-2 py-1.5 text-sm font-medium">
-                    {user?.name}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleNavigate("/account")}>
-                    My Account
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
-                    Orders
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/account/wishlist")}>
-                    Wishlist
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={() => {
-                      // Will be handled by logout
-                    }}
-                  >
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleNavigate("/sign-in?type=customer")}
-              >
-                Sign In
-              </Button>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleNavigate("/account")}>
+                  <User className="h-4 w-4 mr-2" />
+                  My Account
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
+                  <Heart className="h-4 w-4 mr-2" />
+                  Wishlist
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
+                  <Package className="h-4 w-4 mr-2" />
+                  Order History
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleNavigate("/account/settings")}>
+                  <KeyRound className="h-4 w-4 mr-2" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => handleNavigate("/account/settings?tab=delete")}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Account
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleNavigate("/sign-in?type=customer")}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign In
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>

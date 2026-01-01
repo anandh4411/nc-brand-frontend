@@ -62,7 +62,6 @@ export const accountNavItems: SidebarItem[] = [
   { label: "Dashboard", path: "/account", icon: Home },
   { label: "Orders", path: "/account/orders", icon: ShoppingCart },
   { label: "Addresses", path: "/account/addresses", icon: MapPin },
-  { label: "Reviews", path: "/account/reviews", icon: Star },
   { label: "Wishlist", path: "/account/wishlist", icon: Heart },
 ];
 

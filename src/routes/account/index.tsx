@@ -80,7 +80,7 @@ function AccountDashboard() {
             Manage your profile and preferences.
           </p>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard/settings">
+            <Link to="/account/settings">
               <User className="mr-2 h-4 w-4" />
               Edit Profile
             </Link>

@@ -102,7 +102,15 @@ export const shopBanners: Banner[] = [
   },
 ];
 
-// Helper to generate mock images
+// Helper to generate mock images (returns array of 4 images for gallery)
+const getProductImages = (id: number, color: string) => [
+  `https://picsum.photos/seed/${id}-${color}-1/400/500`,
+  `https://picsum.photos/seed/${id}-${color}-2/400/500`,
+  `https://picsum.photos/seed/${id}-${color}-3/400/500`,
+  `https://picsum.photos/seed/${id}-${color}-4/400/500`,
+];
+
+// Legacy single image helper (for backward compatibility)
 const getProductImage = (id: number, color: string) =>
   `https://picsum.photos/seed/${id}-${color}/400/500`;
 
@@ -127,13 +135,13 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.8,
     reviewCount: 124,
     colors: [
-      { id: 101, colorCode: "#8B0000", colorName: "Maroon", images: [getProductImage(1, "maroon")], variants: [
+      { id: 101, colorCode: "#8B0000", colorName: "Maroon", images: getProductImages(1, "maroon"), variants: [
         { id: 1001, sku: "KPS-001-M-S", size: "Standard", priceAdjustment: 0, stock: 15 },
       ]},
-      { id: 102, colorCode: "#006400", colorName: "Bottle Green", images: [getProductImage(1, "green")], variants: [
+      { id: 102, colorCode: "#006400", colorName: "Bottle Green", images: getProductImages(1, "green"), variants: [
         { id: 1002, sku: "KPS-001-G-S", size: "Standard", priceAdjustment: 0, stock: 12 },
       ]},
-      { id: 103, colorCode: "#4B0082", colorName: "Purple", images: [getProductImage(1, "purple")], variants: [
+      { id: 103, colorCode: "#4B0082", colorName: "Purple", images: getProductImages(1, "purple"), variants: [
         { id: 1003, sku: "KPS-001-P-S", size: "Standard", priceAdjustment: 0, stock: 8 },
       ]},
     ],
@@ -157,10 +165,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.9,
     reviewCount: 89,
     colors: [
-      { id: 201, colorCode: "#FFD700", colorName: "Golden", images: [getProductImage(2, "gold")], variants: [
+      { id: 201, colorCode: "#FFD700", colorName: "Golden", images: getProductImages(2, "gold"), variants: [
         { id: 2001, sku: "BSW-002-G-S", size: "Standard", priceAdjustment: 0, stock: 10 },
       ]},
-      { id: 202, colorCode: "#DC143C", colorName: "Crimson", images: [getProductImage(2, "crimson")], variants: [
+      { id: 202, colorCode: "#DC143C", colorName: "Crimson", images: getProductImages(2, "crimson"), variants: [
         { id: 2002, sku: "BSW-002-C-S", size: "Standard", priceAdjustment: 0, stock: 8 },
       ]},
     ],
@@ -183,13 +191,13 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.5,
     reviewCount: 67,
     colors: [
-      { id: 301, colorCode: "#FFC0CB", colorName: "Baby Pink", images: [getProductImage(3, "pink")], variants: [
+      { id: 301, colorCode: "#FFC0CB", colorName: "Baby Pink", images: getProductImages(3, "pink"), variants: [
         { id: 3001, sku: "CCS-003-P-S", size: "Standard", priceAdjustment: 0, stock: 20 },
       ]},
-      { id: 302, colorCode: "#87CEEB", colorName: "Sky Blue", images: [getProductImage(3, "blue")], variants: [
+      { id: 302, colorCode: "#87CEEB", colorName: "Sky Blue", images: getProductImages(3, "blue"), variants: [
         { id: 3002, sku: "CCS-003-B-S", size: "Standard", priceAdjustment: 0, stock: 18 },
       ]},
-      { id: 303, colorCode: "#98FB98", colorName: "Mint Green", images: [getProductImage(3, "mint")], variants: [
+      { id: 303, colorCode: "#98FB98", colorName: "Mint Green", images: getProductImages(3, "mint"), variants: [
         { id: 3003, sku: "CCS-003-M-S", size: "Standard", priceAdjustment: 0, stock: 15 },
       ]},
     ],
@@ -213,10 +221,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.6,
     reviewCount: 45,
     colors: [
-      { id: 401, colorCode: "#E6E6FA", colorName: "Lavender", images: [getProductImage(4, "lavender")], variants: [
+      { id: 401, colorCode: "#E6E6FA", colorName: "Lavender", images: getProductImages(4, "lavender"), variants: [
         { id: 4001, sku: "ODS-004-L-S", size: "Standard", priceAdjustment: 0, stock: 25 },
       ]},
-      { id: 402, colorCode: "#FFDAB9", colorName: "Peach", images: [getProductImage(4, "peach")], variants: [
+      { id: 402, colorCode: "#FFDAB9", colorName: "Peach", images: getProductImages(4, "peach"), variants: [
         { id: 4002, sku: "ODS-004-P-S", size: "Standard", priceAdjustment: 0, stock: 22 },
       ]},
     ],
@@ -239,10 +247,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.4,
     reviewCount: 112,
     colors: [
-      { id: 501, colorCode: "#FFFFFF", colorName: "Off White", images: [getProductImage(5, "white")], variants: [
+      { id: 501, colorCode: "#FFFFFF", colorName: "Off White", images: getProductImages(5, "white"), variants: [
         { id: 5001, sku: "PCH-005-W-S", size: "Standard", priceAdjustment: 0, stock: 30 },
       ]},
-      { id: 502, colorCode: "#F5DEB3", colorName: "Beige", images: [getProductImage(5, "beige")], variants: [
+      { id: 502, colorCode: "#F5DEB3", colorName: "Beige", images: getProductImages(5, "beige"), variants: [
         { id: 5002, sku: "PCH-005-B-S", size: "Standard", priceAdjustment: 0, stock: 28 },
       ]},
     ],
@@ -265,7 +273,7 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.9,
     reviewCount: 34,
     colors: [
-      { id: 601, colorCode: "#FF4500", colorName: "Orange Red", images: [getProductImage(6, "orange")], variants: [
+      { id: 601, colorCode: "#FF4500", colorName: "Orange Red", images: getProductImages(6, "orange"), variants: [
         { id: 6001, sku: "PSS-006-O-S", size: "Standard", priceAdjustment: 0, stock: 5 },
       ]},
     ],
@@ -288,10 +296,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.3,
     reviewCount: 78,
     colors: [
-      { id: 701, colorCode: "#808080", colorName: "Grey", images: [getProductImage(7, "grey")], variants: [
+      { id: 701, colorCode: "#808080", colorName: "Grey", images: getProductImages(7, "grey"), variants: [
         { id: 7001, sku: "LSZ-007-G-S", size: "Standard", priceAdjustment: 0, stock: 20 },
       ]},
-      { id: 702, colorCode: "#000080", colorName: "Navy Blue", images: [getProductImage(7, "navy")], variants: [
+      { id: 702, colorCode: "#000080", colorName: "Navy Blue", images: getProductImages(7, "navy"), variants: [
         { id: 7002, sku: "LSZ-007-N-S", size: "Standard", priceAdjustment: 0, stock: 18 },
       ]},
     ],
@@ -315,10 +323,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.5,
     reviewCount: 56,
     colors: [
-      { id: 801, colorCode: "#D2691E", colorName: "Brown", images: [getProductImage(8, "brown")], variants: [
+      { id: 801, colorCode: "#D2691E", colorName: "Brown", images: getProductImages(8, "brown"), variants: [
         { id: 8001, sku: "TSP-008-B-S", size: "Standard", priceAdjustment: 0, stock: 14 },
       ]},
-      { id: 802, colorCode: "#556B2F", colorName: "Olive", images: [getProductImage(8, "olive")], variants: [
+      { id: 802, colorCode: "#556B2F", colorName: "Olive", images: getProductImages(8, "olive"), variants: [
         { id: 8002, sku: "TSP-008-O-S", size: "Standard", priceAdjustment: 0, stock: 12 },
       ]},
     ],
@@ -341,10 +349,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.6,
     reviewCount: 89,
     colors: [
-      { id: 901, colorCode: "#800020", colorName: "Burgundy", images: [getProductImage(9, "burgundy")], variants: [
+      { id: 901, colorCode: "#800020", colorName: "Burgundy", images: getProductImages(9, "burgundy"), variants: [
         { id: 9001, sku: "MCS-009-B-S", size: "Standard", priceAdjustment: 0, stock: 16 },
       ]},
-      { id: 902, colorCode: "#008B8B", colorName: "Teal", images: [getProductImage(9, "teal")], variants: [
+      { id: 902, colorCode: "#008B8B", colorName: "Teal", images: getProductImages(9, "teal"), variants: [
         { id: 9002, sku: "MCS-009-T-S", size: "Standard", priceAdjustment: 0, stock: 14 },
       ]},
     ],
@@ -367,10 +375,10 @@ export const shopProducts: ShopProduct[] = [
     rating: 4.7,
     reviewCount: 98,
     colors: [
-      { id: 1001, colorCode: "#4169E1", colorName: "Royal Blue", images: [getProductImage(10, "royalblue")], variants: [
+      { id: 1001, colorCode: "#4169E1", colorName: "Royal Blue", images: getProductImages(10, "royalblue"), variants: [
         { id: 10001, sku: "PIS-010-R-S", size: "Standard", priceAdjustment: 0, stock: 22 },
       ]},
-      { id: 1002, colorCode: "#B22222", colorName: "Firebrick", images: [getProductImage(10, "red")], variants: [
+      { id: 1002, colorCode: "#B22222", colorName: "Firebrick", images: getProductImages(10, "red"), variants: [
         { id: 10002, sku: "PIS-010-F-S", size: "Standard", priceAdjustment: 0, stock: 18 },
       ]},
     ],
@@ -382,7 +390,7 @@ export const shopProducts: ShopProduct[] = [
     description: "Traditional Gadwal silk with cotton body and silk border. Perfect blend of comfort and elegance.",
     basePrice: 8999, categoryId: 7, categoryName: "Silk Sarees", fabricType: "Silk Cotton", pattern: "Temple Border",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.5, reviewCount: 45,
-    colors: [{ id: 1101, colorCode: "#DAA520", colorName: "Goldenrod", images: [getProductImage(11, "gold")], variants: [{ id: 11001, sku: "GSS-011-G-S", size: "Standard", priceAdjustment: 0, stock: 10 }]}],
+    colors: [{ id: 1101, colorCode: "#DAA520", colorName: "Goldenrod", images: getProductImages(11, "gold"), variants: [{ id: 11001, sku: "GSS-011-G-S", size: "Standard", priceAdjustment: 0, stock: 10 }]}],
     createdAt: "2024-04-05",
   },
   {
@@ -391,8 +399,8 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1999, categoryId: 8, categoryName: "Cotton Sarees", fabricType: "Cotton", pattern: "Checks",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.2, reviewCount: 156,
     colors: [
-      { id: 1201, colorCode: "#FF69B4", colorName: "Hot Pink", images: [getProductImage(12, "pink")], variants: [{ id: 12001, sku: "MCS-012-P-S", size: "Standard", priceAdjustment: 0, stock: 35 }]},
-      { id: 1202, colorCode: "#20B2AA", colorName: "Light Sea Green", images: [getProductImage(12, "green")], variants: [{ id: 12002, sku: "MCS-012-G-S", size: "Standard", priceAdjustment: 0, stock: 30 }]},
+      { id: 1201, colorCode: "#FF69B4", colorName: "Hot Pink", images: getProductImages(12, "pink"), variants: [{ id: 12001, sku: "MCS-012-P-S", size: "Standard", priceAdjustment: 0, stock: 35 }]},
+      { id: 1202, colorCode: "#20B2AA", colorName: "Light Sea Green", images: getProductImages(12, "green"), variants: [{ id: 12002, sku: "MCS-012-G-S", size: "Standard", priceAdjustment: 0, stock: 30 }]},
     ],
     createdAt: "2024-01-10",
   },
@@ -401,7 +409,7 @@ export const shopProducts: ShopProduct[] = [
     description: "Delicate Uppada silk with jamdani patterns. Light as feather with intricate weaving.",
     basePrice: 11999, originalPrice: 14999, categoryId: 7, categoryName: "Silk Sarees", fabricType: "Uppada Silk", pattern: "Jamdani",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: true, rating: 4.8, reviewCount: 67,
-    colors: [{ id: 1301, colorCode: "#C71585", colorName: "Magenta", images: [getProductImage(13, "magenta")], variants: [{ id: 13001, sku: "USS-013-M-S", size: "Standard", priceAdjustment: 0, stock: 8 }]}],
+    colors: [{ id: 1301, colorCode: "#C71585", colorName: "Magenta", images: getProductImages(13, "magenta"), variants: [{ id: 13001, sku: "USS-013-M-S", size: "Standard", priceAdjustment: 0, stock: 8 }]}],
     createdAt: "2024-03-01",
   },
   {
@@ -409,7 +417,7 @@ export const shopProducts: ShopProduct[] = [
     description: "Hand-painted Kalamkari on cotton. Ancient art form with mythological scenes.",
     basePrice: 3299, categoryId: 8, categoryName: "Cotton Sarees", fabricType: "Cotton", pattern: "Kalamkari",
     careInstructions: "Gentle wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.4, reviewCount: 89,
-    colors: [{ id: 1401, colorCode: "#8B4513", colorName: "Saddle Brown", images: [getProductImage(14, "brown")], variants: [{ id: 14001, sku: "KPS-014-B-S", size: "Standard", priceAdjustment: 0, stock: 25 }]}],
+    colors: [{ id: 1401, colorCode: "#8B4513", colorName: "Saddle Brown", images: getProductImages(14, "brown"), variants: [{ id: 14001, sku: "KPS-014-B-S", size: "Standard", priceAdjustment: 0, stock: 25 }]}],
     createdAt: "2024-02-10",
   },
   {
@@ -418,8 +426,8 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 2799, originalPrice: 3499, categoryId: 9, categoryName: "Designer Sarees", fabricType: "Chiffon", pattern: "Stone Work",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: true, isOnSale: true, rating: 4.3, reviewCount: 112,
     colors: [
-      { id: 1501, colorCode: "#FF0000", colorName: "Red", images: [getProductImage(15, "red")], variants: [{ id: 15001, sku: "CPW-015-R-S", size: "Standard", priceAdjustment: 0, stock: 28 }]},
-      { id: 1502, colorCode: "#000000", colorName: "Black", images: [getProductImage(15, "black")], variants: [{ id: 15002, sku: "CPW-015-B-S", size: "Standard", priceAdjustment: 0, stock: 24 }]},
+      { id: 1501, colorCode: "#FF0000", colorName: "Red", images: getProductImages(15, "red"), variants: [{ id: 15001, sku: "CPW-015-R-S", size: "Standard", priceAdjustment: 0, stock: 28 }]},
+      { id: 1502, colorCode: "#000000", colorName: "Black", images: getProductImages(15, "black"), variants: [{ id: 15002, sku: "CPW-015-B-S", size: "Standard", priceAdjustment: 0, stock: 24 }]},
     ],
     createdAt: "2024-04-10",
   },
@@ -428,7 +436,7 @@ export const shopProducts: ShopProduct[] = [
     description: "Traditional Sambalpuri bandha with natural dyes. Odisha's heritage craft.",
     basePrice: 3799, categoryId: 8, categoryName: "Cotton Sarees", fabricType: "Cotton", pattern: "Bandha",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.6, reviewCount: 78,
-    colors: [{ id: 1601, colorCode: "#FF8C00", colorName: "Dark Orange", images: [getProductImage(16, "orange")], variants: [{ id: 16001, sku: "SCS-016-O-S", size: "Standard", priceAdjustment: 0, stock: 18 }]}],
+    colors: [{ id: 1601, colorCode: "#FF8C00", colorName: "Dark Orange", images: getProductImages(16, "orange"), variants: [{ id: 16001, sku: "SCS-016-O-S", size: "Standard", priceAdjustment: 0, stock: 18 }]}],
     createdAt: "2024-01-25",
   },
   {
@@ -437,8 +445,8 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 4999, originalPrice: 5999, categoryId: 9, categoryName: "Designer Sarees", fabricType: "Georgette", pattern: "Sequin Work",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: true, isOnSale: true, rating: 4.7, reviewCount: 56,
     colors: [
-      { id: 1701, colorCode: "#00CED1", colorName: "Dark Turquoise", images: [getProductImage(17, "turquoise")], variants: [{ id: 17001, sku: "GSS-017-T-S", size: "Standard", priceAdjustment: 0, stock: 15 }]},
-      { id: 1702, colorCode: "#FF1493", colorName: "Deep Pink", images: [getProductImage(17, "pink")], variants: [{ id: 17002, sku: "GSS-017-P-S", size: "Standard", priceAdjustment: 0, stock: 12 }]},
+      { id: 1701, colorCode: "#00CED1", colorName: "Dark Turquoise", images: getProductImages(17, "turquoise"), variants: [{ id: 17001, sku: "GSS-017-T-S", size: "Standard", priceAdjustment: 0, stock: 15 }]},
+      { id: 1702, colorCode: "#FF1493", colorName: "Deep Pink", images: getProductImages(17, "pink"), variants: [{ id: 17002, sku: "GSS-017-P-S", size: "Standard", priceAdjustment: 0, stock: 12 }]},
     ],
     createdAt: "2024-04-15",
   },
@@ -447,7 +455,7 @@ export const shopProducts: ShopProduct[] = [
     description: "Maharashtra's pride - Paithani silk with peacock motifs. Handwoven masterpiece.",
     basePrice: 35999, categoryId: 7, categoryName: "Silk Sarees", fabricType: "Paithani Silk", pattern: "Peacock Motif",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 5.0, reviewCount: 23,
-    colors: [{ id: 1801, colorCode: "#9400D3", colorName: "Dark Violet", images: [getProductImage(18, "violet")], variants: [{ id: 18001, sku: "PSS-018-V-S", size: "Standard", priceAdjustment: 0, stock: 3 }]}],
+    colors: [{ id: 1801, colorCode: "#9400D3", colorName: "Dark Violet", images: getProductImages(18, "violet"), variants: [{ id: 18001, sku: "PSS-018-V-S", size: "Standard", priceAdjustment: 0, stock: 3 }]}],
     createdAt: "2024-02-05",
   },
 
@@ -458,13 +466,13 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1499, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton", pattern: "Embroidered",
     careInstructions: "Machine wash", isFeatured: true, isNewArrival: true, isOnSale: false, rating: 4.5, reviewCount: 234,
     colors: [
-      { id: 1901, colorCode: "#FFD700", colorName: "Yellow", images: [getProductImage(19, "yellow")], variants: [
+      { id: 1901, colorCode: "#FFD700", colorName: "Yellow", images: getProductImages(19, "yellow"), variants: [
         { id: 19001, sku: "ACK-019-Y-S", size: "S", priceAdjustment: 0, stock: 25 },
         { id: 19002, sku: "ACK-019-Y-M", size: "M", priceAdjustment: 0, stock: 30 },
         { id: 19003, sku: "ACK-019-Y-L", size: "L", priceAdjustment: 0, stock: 28 },
         { id: 19004, sku: "ACK-019-Y-XL", size: "XL", priceAdjustment: 50, stock: 20 },
       ]},
-      { id: 1902, colorCode: "#008000", colorName: "Green", images: [getProductImage(19, "green")], variants: [
+      { id: 1902, colorCode: "#008000", colorName: "Green", images: getProductImages(19, "green"), variants: [
         { id: 19005, sku: "ACK-019-G-S", size: "S", priceAdjustment: 0, stock: 22 },
         { id: 19006, sku: "ACK-019-G-M", size: "M", priceAdjustment: 0, stock: 28 },
         { id: 19007, sku: "ACK-019-G-L", size: "L", priceAdjustment: 0, stock: 25 },
@@ -479,20 +487,20 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 899, categoryId: 2, categoryName: "Kurtis", fabricType: "Rayon", pattern: "Plain",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.3, reviewCount: 345,
     colors: [
-      { id: 2001, colorCode: "#000080", colorName: "Navy", images: [getProductImage(20, "navy")], variants: [
+      { id: 2001, colorCode: "#000080", colorName: "Navy", images: getProductImages(20, "navy"), variants: [
         { id: 20001, sku: "SRK-020-N-S", size: "S", priceAdjustment: 0, stock: 40 },
         { id: 20002, sku: "SRK-020-N-M", size: "M", priceAdjustment: 0, stock: 45 },
         { id: 20003, sku: "SRK-020-N-L", size: "L", priceAdjustment: 0, stock: 42 },
         { id: 20004, sku: "SRK-020-N-XL", size: "XL", priceAdjustment: 0, stock: 35 },
         { id: 20005, sku: "SRK-020-N-XXL", size: "XXL", priceAdjustment: 100, stock: 20 },
       ]},
-      { id: 2002, colorCode: "#800000", colorName: "Maroon", images: [getProductImage(20, "maroon")], variants: [
+      { id: 2002, colorCode: "#800000", colorName: "Maroon", images: getProductImages(20, "maroon"), variants: [
         { id: 20006, sku: "SRK-020-M-S", size: "S", priceAdjustment: 0, stock: 38 },
         { id: 20007, sku: "SRK-020-M-M", size: "M", priceAdjustment: 0, stock: 42 },
         { id: 20008, sku: "SRK-020-M-L", size: "L", priceAdjustment: 0, stock: 40 },
         { id: 20009, sku: "SRK-020-M-XL", size: "XL", priceAdjustment: 0, stock: 32 },
       ]},
-      { id: 2003, colorCode: "#FFFFFF", colorName: "White", images: [getProductImage(20, "white")], variants: [
+      { id: 2003, colorCode: "#FFFFFF", colorName: "White", images: getProductImages(20, "white"), variants: [
         { id: 20010, sku: "SRK-020-W-S", size: "S", priceAdjustment: 0, stock: 35 },
         { id: 20011, sku: "SRK-020-W-M", size: "M", priceAdjustment: 0, stock: 40 },
         { id: 20012, sku: "SRK-020-W-L", size: "L", priceAdjustment: 0, stock: 38 },
@@ -506,7 +514,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1199, originalPrice: 1499, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton Blend", pattern: "Printed",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: true, isOnSale: true, rating: 4.4, reviewCount: 189,
     colors: [
-      { id: 2101, colorCode: "#FF6347", colorName: "Tomato", images: [getProductImage(21, "tomato")], variants: [
+      { id: 2101, colorCode: "#FF6347", colorName: "Tomato", images: getProductImages(21, "tomato"), variants: [
         { id: 21001, sku: "ALK-021-T-S", size: "S", priceAdjustment: 0, stock: 28 },
         { id: 21002, sku: "ALK-021-T-M", size: "M", priceAdjustment: 0, stock: 32 },
         { id: 21003, sku: "ALK-021-T-L", size: "L", priceAdjustment: 0, stock: 30 },
@@ -521,13 +529,13 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 2499, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton", pattern: "Chikankari",
     careInstructions: "Hand wash", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.8, reviewCount: 156,
     colors: [
-      { id: 2201, colorCode: "#FFFAFA", colorName: "Snow White", images: [getProductImage(22, "white")], variants: [
+      { id: 2201, colorCode: "#FFFAFA", colorName: "Snow White", images: getProductImages(22, "white"), variants: [
         { id: 22001, sku: "CLK-022-W-S", size: "S", priceAdjustment: 0, stock: 18 },
         { id: 22002, sku: "CLK-022-W-M", size: "M", priceAdjustment: 0, stock: 22 },
         { id: 22003, sku: "CLK-022-W-L", size: "L", priceAdjustment: 0, stock: 20 },
         { id: 22004, sku: "CLK-022-W-XL", size: "XL", priceAdjustment: 100, stock: 15 },
       ]},
-      { id: 2202, colorCode: "#ADD8E6", colorName: "Light Blue", images: [getProductImage(22, "lightblue")], variants: [
+      { id: 2202, colorCode: "#ADD8E6", colorName: "Light Blue", images: getProductImages(22, "lightblue"), variants: [
         { id: 22005, sku: "CLK-022-B-S", size: "S", priceAdjustment: 0, stock: 16 },
         { id: 22006, sku: "CLK-022-B-M", size: "M", priceAdjustment: 0, stock: 20 },
         { id: 22007, sku: "CLK-022-B-L", size: "L", priceAdjustment: 0, stock: 18 },
@@ -541,13 +549,13 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1999, originalPrice: 2499, categoryId: 2, categoryName: "Kurtis", fabricType: "Rayon", pattern: "Solid",
     careInstructions: "Machine wash", isFeatured: true, isNewArrival: true, isOnSale: true, rating: 4.6, reviewCount: 267,
     colors: [
-      { id: 2301, colorCode: "#008B8B", colorName: "Dark Cyan", images: [getProductImage(23, "cyan")], variants: [
+      { id: 2301, colorCode: "#008B8B", colorName: "Dark Cyan", images: getProductImages(23, "cyan"), variants: [
         { id: 23001, sku: "PKS-023-C-S", size: "S", priceAdjustment: 0, stock: 22 },
         { id: 23002, sku: "PKS-023-C-M", size: "M", priceAdjustment: 0, stock: 28 },
         { id: 23003, sku: "PKS-023-C-L", size: "L", priceAdjustment: 0, stock: 25 },
         { id: 23004, sku: "PKS-023-C-XL", size: "XL", priceAdjustment: 100, stock: 18 },
       ]},
-      { id: 2302, colorCode: "#9932CC", colorName: "Dark Orchid", images: [getProductImage(23, "orchid")], variants: [
+      { id: 2302, colorCode: "#9932CC", colorName: "Dark Orchid", images: getProductImages(23, "orchid"), variants: [
         { id: 23005, sku: "PKS-023-O-S", size: "S", priceAdjustment: 0, stock: 20 },
         { id: 23006, sku: "PKS-023-O-M", size: "M", priceAdjustment: 0, stock: 25 },
         { id: 23007, sku: "PKS-023-O-L", size: "L", priceAdjustment: 0, stock: 22 },
@@ -561,7 +569,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1299, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton", pattern: "Bandhani",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.4, reviewCount: 134,
     colors: [
-      { id: 2401, colorCode: "#FF4500", colorName: "Orange Red", images: [getProductImage(24, "orange")], variants: [
+      { id: 2401, colorCode: "#FF4500", colorName: "Orange Red", images: getProductImages(24, "orange"), variants: [
         { id: 24001, sku: "BPK-024-O-S", size: "S", priceAdjustment: 0, stock: 30 },
         { id: 24002, sku: "BPK-024-O-M", size: "M", priceAdjustment: 0, stock: 35 },
         { id: 24003, sku: "BPK-024-O-L", size: "L", priceAdjustment: 0, stock: 32 },
@@ -575,7 +583,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1599, categoryId: 2, categoryName: "Kurtis", fabricType: "Denim", pattern: "Solid",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.2, reviewCount: 89,
     colors: [
-      { id: 2501, colorCode: "#4169E1", colorName: "Royal Blue", images: [getProductImage(25, "denim")], variants: [
+      { id: 2501, colorCode: "#4169E1", colorName: "Royal Blue", images: getProductImages(25, "denim"), variants: [
         { id: 25001, sku: "DKT-025-B-S", size: "S", priceAdjustment: 0, stock: 25 },
         { id: 25002, sku: "DKT-025-B-M", size: "M", priceAdjustment: 0, stock: 30 },
         { id: 25003, sku: "DKT-025-B-L", size: "L", priceAdjustment: 0, stock: 28 },
@@ -590,7 +598,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1799, originalPrice: 2199, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton", pattern: "Mirror Work",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: true, rating: 4.5, reviewCount: 112,
     colors: [
-      { id: 2601, colorCode: "#DC143C", colorName: "Crimson", images: [getProductImage(26, "crimson")], variants: [
+      { id: 2601, colorCode: "#DC143C", colorName: "Crimson", images: getProductImages(26, "crimson"), variants: [
         { id: 26001, sku: "MWK-026-C-S", size: "S", priceAdjustment: 0, stock: 18 },
         { id: 26002, sku: "MWK-026-C-M", size: "M", priceAdjustment: 0, stock: 22 },
         { id: 26003, sku: "MWK-026-C-L", size: "L", priceAdjustment: 0, stock: 20 },
@@ -604,10 +612,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 999, categoryId: 2, categoryName: "Kurtis", fabricType: "Viscose", pattern: "Printed",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.1, reviewCount: 178,
     colors: [
-      { id: 2701, colorCode: "#2E8B57", colorName: "Sea Green", images: [getProductImage(27, "seagreen")], variants: [
+      { id: 2701, colorCode: "#2E8B57", colorName: "Sea Green", images: getProductImages(27, "seagreen"), variants: [
         { id: 27001, sku: "KSK-027-S-FREE", size: "Free Size", priceAdjustment: 0, stock: 45 },
       ]},
-      { id: 2702, colorCode: "#BA55D3", colorName: "Medium Orchid", images: [getProductImage(27, "orchid")], variants: [
+      { id: 2702, colorCode: "#BA55D3", colorName: "Medium Orchid", images: getProductImages(27, "orchid"), variants: [
         { id: 27002, sku: "KSK-027-O-FREE", size: "Free Size", priceAdjustment: 0, stock: 40 },
       ]},
     ],
@@ -619,7 +627,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1899, categoryId: 2, categoryName: "Kurtis", fabricType: "Crepe", pattern: "Solid",
     careInstructions: "Dry clean", isFeatured: true, isNewArrival: true, isOnSale: false, rating: 4.6, reviewCount: 67,
     colors: [
-      { id: 2801, colorCode: "#2F4F4F", colorName: "Dark Slate Grey", images: [getProductImage(28, "grey")], variants: [
+      { id: 2801, colorCode: "#2F4F4F", colorName: "Dark Slate Grey", images: getProductImages(28, "grey"), variants: [
         { id: 28001, sku: "ADK-028-G-S", size: "S", priceAdjustment: 0, stock: 15 },
         { id: 28002, sku: "ADK-028-G-M", size: "M", priceAdjustment: 0, stock: 20 },
         { id: 28003, sku: "ADK-028-G-L", size: "L", priceAdjustment: 0, stock: 18 },
@@ -633,7 +641,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1699, categoryId: 2, categoryName: "Kurtis", fabricType: "Silk Blend", pattern: "Brocade",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.5, reviewCount: 98,
     colors: [
-      { id: 2901, colorCode: "#DAA520", colorName: "Goldenrod", images: [getProductImage(29, "gold")], variants: [
+      { id: 2901, colorCode: "#DAA520", colorName: "Goldenrod", images: getProductImages(29, "gold"), variants: [
         { id: 29001, sku: "ASK-029-G-S", size: "S", priceAdjustment: 0, stock: 20 },
         { id: 29002, sku: "ASK-029-G-M", size: "M", priceAdjustment: 0, stock: 25 },
         { id: 29003, sku: "ASK-029-G-L", size: "L", priceAdjustment: 0, stock: 22 },
@@ -648,13 +656,13 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 699, originalPrice: 899, categoryId: 2, categoryName: "Kurtis", fabricType: "Cotton", pattern: "Solid",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: true, rating: 4.2, reviewCount: 289,
     colors: [
-      { id: 3001, colorCode: "#FF69B4", colorName: "Hot Pink", images: [getProductImage(30, "pink")], variants: [
+      { id: 3001, colorCode: "#FF69B4", colorName: "Hot Pink", images: getProductImages(30, "pink"), variants: [
         { id: 30001, sku: "SKT-030-P-S", size: "S", priceAdjustment: 0, stock: 50 },
         { id: 30002, sku: "SKT-030-P-M", size: "M", priceAdjustment: 0, stock: 55 },
         { id: 30003, sku: "SKT-030-P-L", size: "L", priceAdjustment: 0, stock: 52 },
         { id: 30004, sku: "SKT-030-P-XL", size: "XL", priceAdjustment: 0, stock: 45 },
       ]},
-      { id: 3002, colorCode: "#4682B4", colorName: "Steel Blue", images: [getProductImage(30, "blue")], variants: [
+      { id: 3002, colorCode: "#4682B4", colorName: "Steel Blue", images: getProductImages(30, "blue"), variants: [
         { id: 30005, sku: "SKT-030-B-S", size: "S", priceAdjustment: 0, stock: 48 },
         { id: 30006, sku: "SKT-030-B-M", size: "M", priceAdjustment: 0, stock: 52 },
         { id: 30007, sku: "SKT-030-B-L", size: "L", priceAdjustment: 0, stock: 50 },
@@ -670,7 +678,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 45999, originalPrice: 55999, categoryId: 3, categoryName: "Lehengas", fabricType: "Velvet Silk", pattern: "Zardozi",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: true, rating: 4.9, reviewCount: 45,
     colors: [
-      { id: 3101, colorCode: "#B22222", colorName: "Bridal Red", images: [getProductImage(31, "red")], variants: [
+      { id: 3101, colorCode: "#B22222", colorName: "Bridal Red", images: getProductImages(31, "red"), variants: [
         { id: 31001, sku: "BRL-031-R-S", size: "S", priceAdjustment: 0, stock: 3 },
         { id: 31002, sku: "BRL-031-R-M", size: "M", priceAdjustment: 0, stock: 5 },
         { id: 31003, sku: "BRL-031-R-L", size: "L", priceAdjustment: 0, stock: 4 },
@@ -684,12 +692,12 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 18999, categoryId: 3, categoryName: "Lehengas", fabricType: "Net", pattern: "Sequin Work",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: true, isOnSale: false, rating: 4.7, reviewCount: 78,
     colors: [
-      { id: 3201, colorCode: "#FF1493", colorName: "Deep Pink", images: [getProductImage(32, "pink")], variants: [
+      { id: 3201, colorCode: "#FF1493", colorName: "Deep Pink", images: getProductImages(32, "pink"), variants: [
         { id: 32001, sku: "DPL-032-P-S", size: "S", priceAdjustment: 0, stock: 8 },
         { id: 32002, sku: "DPL-032-P-M", size: "M", priceAdjustment: 0, stock: 10 },
         { id: 32003, sku: "DPL-032-P-L", size: "L", priceAdjustment: 0, stock: 8 },
       ]},
-      { id: 3202, colorCode: "#7B68EE", colorName: "Medium Slate Blue", images: [getProductImage(32, "blue")], variants: [
+      { id: 3202, colorCode: "#7B68EE", colorName: "Medium Slate Blue", images: getProductImages(32, "blue"), variants: [
         { id: 32004, sku: "DPL-032-B-S", size: "S", priceAdjustment: 0, stock: 6 },
         { id: 32005, sku: "DPL-032-B-M", size: "M", priceAdjustment: 0, stock: 8 },
         { id: 32006, sku: "DPL-032-B-L", size: "L", priceAdjustment: 0, stock: 7 },
@@ -703,12 +711,12 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 12999, categoryId: 3, categoryName: "Lehengas", fabricType: "Organza", pattern: "Thread Work",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.6, reviewCount: 56,
     colors: [
-      { id: 3301, colorCode: "#E6E6FA", colorName: "Lavender", images: [getProductImage(33, "lavender")], variants: [
+      { id: 3301, colorCode: "#E6E6FA", colorName: "Lavender", images: getProductImages(33, "lavender"), variants: [
         { id: 33001, sku: "PLS-033-L-S", size: "S", priceAdjustment: 0, stock: 10 },
         { id: 33002, sku: "PLS-033-L-M", size: "M", priceAdjustment: 0, stock: 12 },
         { id: 33003, sku: "PLS-033-L-L", size: "L", priceAdjustment: 0, stock: 10 },
       ]},
-      { id: 3302, colorCode: "#FFDAB9", colorName: "Peach Puff", images: [getProductImage(33, "peach")], variants: [
+      { id: 3302, colorCode: "#FFDAB9", colorName: "Peach Puff", images: getProductImages(33, "peach"), variants: [
         { id: 33004, sku: "PLS-033-P-S", size: "S", priceAdjustment: 0, stock: 8 },
         { id: 33005, sku: "PLS-033-P-M", size: "M", priceAdjustment: 0, stock: 10 },
         { id: 33006, sku: "PLS-033-P-L", size: "L", priceAdjustment: 0, stock: 9 },
@@ -722,7 +730,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 28999, categoryId: 3, categoryName: "Lehengas", fabricType: "Banarasi Silk", pattern: "Brocade",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.8, reviewCount: 34,
     colors: [
-      { id: 3401, colorCode: "#DC143C", colorName: "Crimson", images: [getProductImage(34, "crimson")], variants: [
+      { id: 3401, colorCode: "#DC143C", colorName: "Crimson", images: getProductImages(34, "crimson"), variants: [
         { id: 34001, sku: "BLN-034-C-S", size: "S", priceAdjustment: 0, stock: 5 },
         { id: 34002, sku: "BLN-034-C-M", size: "M", priceAdjustment: 0, stock: 7 },
         { id: 34003, sku: "BLN-034-C-L", size: "L", priceAdjustment: 0, stock: 6 },
@@ -736,7 +744,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 8999, originalPrice: 10999, categoryId: 3, categoryName: "Lehengas", fabricType: "Georgette", pattern: "Floral Print",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: true, rating: 4.4, reviewCount: 89,
     colors: [
-      { id: 3501, colorCode: "#FFB6C1", colorName: "Light Pink", images: [getProductImage(35, "pink")], variants: [
+      { id: 3501, colorCode: "#FFB6C1", colorName: "Light Pink", images: getProductImages(35, "pink"), variants: [
         { id: 35001, sku: "FPL-035-P-S", size: "S", priceAdjustment: 0, stock: 12 },
         { id: 35002, sku: "FPL-035-P-M", size: "M", priceAdjustment: 0, stock: 15 },
         { id: 35003, sku: "FPL-035-P-L", size: "L", priceAdjustment: 0, stock: 13 },
@@ -750,7 +758,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 22999, categoryId: 3, categoryName: "Lehengas", fabricType: "Velvet", pattern: "Gota Patti",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.7, reviewCount: 45,
     colors: [
-      { id: 3601, colorCode: "#191970", colorName: "Midnight Blue", images: [getProductImage(36, "blue")], variants: [
+      { id: 3601, colorCode: "#191970", colorName: "Midnight Blue", images: getProductImages(36, "blue"), variants: [
         { id: 36001, sku: "VWL-036-B-S", size: "S", priceAdjustment: 0, stock: 6 },
         { id: 36002, sku: "VWL-036-B-M", size: "M", priceAdjustment: 0, stock: 8 },
         { id: 36003, sku: "VWL-036-B-L", size: "L", priceAdjustment: 0, stock: 7 },
@@ -764,7 +772,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 15999, categoryId: 3, categoryName: "Lehengas", fabricType: "Tissue", pattern: "Embroidered",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.5, reviewCount: 67,
     colors: [
-      { id: 3701, colorCode: "#FF6347", colorName: "Tomato", images: [getProductImage(37, "tomato")], variants: [
+      { id: 3701, colorCode: "#FF6347", colorName: "Tomato", images: getProductImages(37, "tomato"), variants: [
         { id: 37001, sku: "CCL-037-T-S", size: "S", priceAdjustment: 0, stock: 8 },
         { id: 37002, sku: "CCL-037-T-M", size: "M", priceAdjustment: 0, stock: 10 },
         { id: 37003, sku: "CCL-037-T-L", size: "L", priceAdjustment: 0, stock: 9 },
@@ -778,7 +786,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 6999, categoryId: 3, categoryName: "Lehengas", fabricType: "Art Silk", pattern: "Temple Border",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.3, reviewCount: 78,
     colors: [
-      { id: 3801, colorCode: "#32CD32", colorName: "Lime Green", images: [getProductImage(38, "green")], variants: [
+      { id: 3801, colorCode: "#32CD32", colorName: "Lime Green", images: getProductImages(38, "green"), variants: [
         { id: 38001, sku: "HSL-038-G-S", size: "S", priceAdjustment: 0, stock: 15 },
         { id: 38002, sku: "HSL-038-G-M", size: "M", priceAdjustment: 0, stock: 18 },
         { id: 38003, sku: "HSL-038-G-L", size: "L", priceAdjustment: 0, stock: 16 },
@@ -794,10 +802,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1299, categoryId: 4, categoryName: "Dress Materials", fabricType: "Cotton", pattern: "Printed",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.3, reviewCount: 156,
     colors: [
-      { id: 3901, colorCode: "#FF7F50", colorName: "Coral", images: [getProductImage(39, "coral")], variants: [
+      { id: 3901, colorCode: "#FF7F50", colorName: "Coral", images: getProductImages(39, "coral"), variants: [
         { id: 39001, sku: "CSM-039-C-S", size: "Unstitched", priceAdjustment: 0, stock: 30 },
       ]},
-      { id: 3902, colorCode: "#6B8E23", colorName: "Olive Drab", images: [getProductImage(39, "olive")], variants: [
+      { id: 3902, colorCode: "#6B8E23", colorName: "Olive Drab", images: getProductImages(39, "olive"), variants: [
         { id: 39002, sku: "CSM-039-O-S", size: "Unstitched", priceAdjustment: 0, stock: 28 },
       ]},
     ],
@@ -809,7 +817,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 2499, categoryId: 4, categoryName: "Dress Materials", fabricType: "Chanderi Silk", pattern: "Zari Work",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.5, reviewCount: 89,
     colors: [
-      { id: 4001, colorCode: "#DEB887", colorName: "Burlywood", images: [getProductImage(40, "burlywood")], variants: [
+      { id: 4001, colorCode: "#DEB887", colorName: "Burlywood", images: getProductImages(40, "burlywood"), variants: [
         { id: 40001, sku: "CSP-040-B-S", size: "Unstitched", priceAdjustment: 0, stock: 22 },
       ]},
     ],
@@ -821,10 +829,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 3299, originalPrice: 3999, categoryId: 4, categoryName: "Dress Materials", fabricType: "Lawn Cotton", pattern: "Embroidered",
     careInstructions: "Hand wash", isFeatured: true, isNewArrival: false, isOnSale: true, rating: 4.6, reviewCount: 112,
     colors: [
-      { id: 4101, colorCode: "#F0E68C", colorName: "Khaki", images: [getProductImage(41, "khaki")], variants: [
+      { id: 4101, colorCode: "#F0E68C", colorName: "Khaki", images: getProductImages(41, "khaki"), variants: [
         { id: 41001, sku: "ELS-041-K-S", size: "Unstitched", priceAdjustment: 0, stock: 18 },
       ]},
-      { id: 4102, colorCode: "#E0FFFF", colorName: "Light Cyan", images: [getProductImage(41, "cyan")], variants: [
+      { id: 4102, colorCode: "#E0FFFF", colorName: "Light Cyan", images: getProductImages(41, "cyan"), variants: [
         { id: 41002, sku: "ELS-041-C-S", size: "Unstitched", priceAdjustment: 0, stock: 15 },
       ]},
     ],
@@ -836,7 +844,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 4999, categoryId: 4, categoryName: "Dress Materials", fabricType: "Jamavar", pattern: "Paisley",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.7, reviewCount: 56,
     colors: [
-      { id: 4201, colorCode: "#8B0000", colorName: "Dark Red", images: [getProductImage(42, "darkred")], variants: [
+      { id: 4201, colorCode: "#8B0000", colorName: "Dark Red", images: getProductImages(42, "darkred"), variants: [
         { id: 42001, sku: "JSM-042-R-S", size: "Unstitched", priceAdjustment: 0, stock: 12 },
       ]},
     ],
@@ -848,7 +856,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1899, categoryId: 4, categoryName: "Dress Materials", fabricType: "Georgette", pattern: "Printed",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.4, reviewCount: 78,
     colors: [
-      { id: 4301, colorCode: "#9370DB", colorName: "Medium Purple", images: [getProductImage(43, "purple")], variants: [
+      { id: 4301, colorCode: "#9370DB", colorName: "Medium Purple", images: getProductImages(43, "purple"), variants: [
         { id: 43001, sku: "GPS-043-P-S", size: "Unstitched", priceAdjustment: 0, stock: 25 },
       ]},
     ],
@@ -860,7 +868,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 2199, originalPrice: 2699, categoryId: 4, categoryName: "Dress Materials", fabricType: "Jacquard", pattern: "Self Design",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: true, rating: 4.3, reviewCount: 92,
     colors: [
-      { id: 4401, colorCode: "#2E8B57", colorName: "Sea Green", images: [getProductImage(44, "seagreen")], variants: [
+      { id: 4401, colorCode: "#2E8B57", colorName: "Sea Green", images: getProductImages(44, "seagreen"), variants: [
         { id: 44001, sku: "JSS-044-G-S", size: "Unstitched", priceAdjustment: 0, stock: 20 },
       ]},
     ],
@@ -872,7 +880,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 5499, categoryId: 4, categoryName: "Dress Materials", fabricType: "Banarasi", pattern: "Brocade",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.8, reviewCount: 67,
     colors: [
-      { id: 4501, colorCode: "#FFD700", colorName: "Gold", images: [getProductImage(45, "gold")], variants: [
+      { id: 4501, colorCode: "#FFD700", colorName: "Gold", images: getProductImages(45, "gold"), variants: [
         { id: 45001, sku: "BSM-045-G-S", size: "Unstitched", priceAdjustment: 0, stock: 10 },
       ]},
     ],
@@ -884,7 +892,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1799, categoryId: 4, categoryName: "Dress Materials", fabricType: "Kota Doria", pattern: "Checks",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.2, reviewCount: 104,
     colors: [
-      { id: 4601, colorCode: "#FFA07A", colorName: "Light Salmon", images: [getProductImage(46, "salmon")], variants: [
+      { id: 4601, colorCode: "#FFA07A", colorName: "Light Salmon", images: getProductImages(46, "salmon"), variants: [
         { id: 46001, sku: "KDS-046-S-S", size: "Unstitched", priceAdjustment: 0, stock: 28 },
       ]},
     ],
@@ -896,10 +904,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1499, categoryId: 4, categoryName: "Dress Materials", fabricType: "Crepe", pattern: "Digital Print",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.1, reviewCount: 134,
     colors: [
-      { id: 4701, colorCode: "#FF4500", colorName: "Orange Red", images: [getProductImage(47, "orange")], variants: [
+      { id: 4701, colorCode: "#FF4500", colorName: "Orange Red", images: getProductImages(47, "orange"), variants: [
         { id: 47001, sku: "PCS-047-O-S", size: "Unstitched", priceAdjustment: 0, stock: 32 },
       ]},
-      { id: 4702, colorCode: "#4682B4", colorName: "Steel Blue", images: [getProductImage(47, "blue")], variants: [
+      { id: 4702, colorCode: "#4682B4", colorName: "Steel Blue", images: getProductImages(47, "blue"), variants: [
         { id: 47002, sku: "PCS-047-B-S", size: "Unstitched", priceAdjustment: 0, stock: 30 },
       ]},
     ],
@@ -911,7 +919,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1999, categoryId: 4, categoryName: "Dress Materials", fabricType: "Muslin", pattern: "Embroidered",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.4, reviewCount: 87,
     colors: [
-      { id: 4801, colorCode: "#FFFAF0", colorName: "Floral White", images: [getProductImage(48, "white")], variants: [
+      { id: 4801, colorCode: "#FFFAF0", colorName: "Floral White", images: getProductImages(48, "white"), variants: [
         { id: 48001, sku: "MSM-048-W-S", size: "Unstitched", priceAdjustment: 0, stock: 24 },
       ]},
     ],
@@ -925,10 +933,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1999, categoryId: 5, categoryName: "Dupattas", fabricType: "Cotton", pattern: "Phulkari",
     careInstructions: "Dry clean", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.7, reviewCount: 89,
     colors: [
-      { id: 4901, colorCode: "#FF0000", colorName: "Red", images: [getProductImage(49, "red")], variants: [
+      { id: 4901, colorCode: "#FF0000", colorName: "Red", images: getProductImages(49, "red"), variants: [
         { id: 49001, sku: "PHD-049-R-S", size: "Standard", priceAdjustment: 0, stock: 20 },
       ]},
-      { id: 4902, colorCode: "#FFFF00", colorName: "Yellow", images: [getProductImage(49, "yellow")], variants: [
+      { id: 4902, colorCode: "#FFFF00", colorName: "Yellow", images: getProductImages(49, "yellow"), variants: [
         { id: 49002, sku: "PHD-049-Y-S", size: "Standard", priceAdjustment: 0, stock: 18 },
       ]},
     ],
@@ -940,7 +948,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 2499, categoryId: 5, categoryName: "Dupattas", fabricType: "Banarasi Silk", pattern: "Zari",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.6, reviewCount: 67,
     colors: [
-      { id: 5001, colorCode: "#800080", colorName: "Purple", images: [getProductImage(50, "purple")], variants: [
+      { id: 5001, colorCode: "#800080", colorName: "Purple", images: getProductImages(50, "purple"), variants: [
         { id: 50001, sku: "BSD-050-P-S", size: "Standard", priceAdjustment: 0, stock: 15 },
       ]},
     ],
@@ -952,10 +960,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 699, originalPrice: 899, categoryId: 5, categoryName: "Dupattas", fabricType: "Chiffon", pattern: "Printed",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: false, isOnSale: true, rating: 4.2, reviewCount: 145,
     colors: [
-      { id: 5101, colorCode: "#FF69B4", colorName: "Hot Pink", images: [getProductImage(51, "pink")], variants: [
+      { id: 5101, colorCode: "#FF69B4", colorName: "Hot Pink", images: getProductImages(51, "pink"), variants: [
         { id: 51001, sku: "CPD-051-P-S", size: "Standard", priceAdjustment: 0, stock: 40 },
       ]},
-      { id: 5102, colorCode: "#87CEEB", colorName: "Sky Blue", images: [getProductImage(51, "blue")], variants: [
+      { id: 5102, colorCode: "#87CEEB", colorName: "Sky Blue", images: getProductImages(51, "blue"), variants: [
         { id: 51002, sku: "CPD-051-B-S", size: "Standard", priceAdjustment: 0, stock: 38 },
       ]},
     ],
@@ -967,7 +975,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1299, categoryId: 5, categoryName: "Dupattas", fabricType: "Net", pattern: "Gotta Patti",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.5, reviewCount: 78,
     colors: [
-      { id: 5201, colorCode: "#FF4500", colorName: "Orange", images: [getProductImage(52, "orange")], variants: [
+      { id: 5201, colorCode: "#FF4500", colorName: "Orange", images: getProductImages(52, "orange"), variants: [
         { id: 52001, sku: "GPD-052-O-S", size: "Standard", priceAdjustment: 0, stock: 22 },
       ]},
     ],
@@ -979,10 +987,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 899, categoryId: 5, categoryName: "Dupattas", fabricType: "Cotton", pattern: "Bandhani",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.4, reviewCount: 112,
     colors: [
-      { id: 5301, colorCode: "#DC143C", colorName: "Crimson", images: [getProductImage(53, "crimson")], variants: [
+      { id: 5301, colorCode: "#DC143C", colorName: "Crimson", images: getProductImages(53, "crimson"), variants: [
         { id: 53001, sku: "BND-053-C-S", size: "Standard", priceAdjustment: 0, stock: 30 },
       ]},
-      { id: 5302, colorCode: "#228B22", colorName: "Forest Green", images: [getProductImage(53, "green")], variants: [
+      { id: 5302, colorCode: "#228B22", colorName: "Forest Green", images: getProductImages(53, "green"), variants: [
         { id: 53002, sku: "BND-053-G-S", size: "Standard", priceAdjustment: 0, stock: 28 },
       ]},
     ],
@@ -994,7 +1002,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 1599, categoryId: 5, categoryName: "Dupattas", fabricType: "Organza", pattern: "Embroidered",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.3, reviewCount: 56,
     colors: [
-      { id: 5401, colorCode: "#DDA0DD", colorName: "Plum", images: [getProductImage(54, "plum")], variants: [
+      { id: 5401, colorCode: "#DDA0DD", colorName: "Plum", images: getProductImages(54, "plum"), variants: [
         { id: 54001, sku: "OED-054-P-S", size: "Standard", priceAdjustment: 0, stock: 18 },
       ]},
     ],
@@ -1008,12 +1016,12 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 899, categoryId: 6, categoryName: "Fabrics", fabricType: "Pure Silk", pattern: "Plain",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.8, reviewCount: 234,
     colors: [
-      { id: 5501, colorCode: "#C71585", colorName: "Medium Violet Red", images: [getProductImage(55, "violet")], variants: [
+      { id: 5501, colorCode: "#C71585", colorName: "Medium Violet Red", images: getProductImages(55, "violet"), variants: [
         { id: 55001, sku: "PSF-055-V-1M", size: "1 Meter", priceAdjustment: 0, stock: 50 },
         { id: 55002, sku: "PSF-055-V-2M", size: "2 Meters", priceAdjustment: 899, stock: 40 },
         { id: 55003, sku: "PSF-055-V-3M", size: "3 Meters", priceAdjustment: 1798, stock: 30 },
       ]},
-      { id: 5502, colorCode: "#008080", colorName: "Teal", images: [getProductImage(55, "teal")], variants: [
+      { id: 5502, colorCode: "#008080", colorName: "Teal", images: getProductImages(55, "teal"), variants: [
         { id: 55004, sku: "PSF-055-T-1M", size: "1 Meter", priceAdjustment: 0, stock: 45 },
         { id: 55005, sku: "PSF-055-T-2M", size: "2 Meters", priceAdjustment: 899, stock: 38 },
       ]},
@@ -1026,11 +1034,11 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 299, categoryId: 6, categoryName: "Fabrics", fabricType: "Cotton Cambric", pattern: "Plain",
     careInstructions: "Machine wash", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.4, reviewCount: 345,
     colors: [
-      { id: 5601, colorCode: "#FFFFFF", colorName: "White", images: [getProductImage(56, "white")], variants: [
+      { id: 5601, colorCode: "#FFFFFF", colorName: "White", images: getProductImages(56, "white"), variants: [
         { id: 56001, sku: "CCF-056-W-1M", size: "1 Meter", priceAdjustment: 0, stock: 100 },
         { id: 56002, sku: "CCF-056-W-5M", size: "5 Meters", priceAdjustment: 1196, stock: 50 },
       ]},
-      { id: 5602, colorCode: "#F5F5DC", colorName: "Beige", images: [getProductImage(56, "beige")], variants: [
+      { id: 5602, colorCode: "#F5F5DC", colorName: "Beige", images: getProductImages(56, "beige"), variants: [
         { id: 56003, sku: "CCF-056-B-1M", size: "1 Meter", priceAdjustment: 0, stock: 90 },
       ]},
     ],
@@ -1042,7 +1050,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 699, originalPrice: 849, categoryId: 6, categoryName: "Fabrics", fabricType: "Brocade", pattern: "Jacquard",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: true, isOnSale: true, rating: 4.6, reviewCount: 156,
     colors: [
-      { id: 5701, colorCode: "#B8860B", colorName: "Dark Goldenrod", images: [getProductImage(57, "gold")], variants: [
+      { id: 5701, colorCode: "#B8860B", colorName: "Dark Goldenrod", images: getProductImages(57, "gold"), variants: [
         { id: 57001, sku: "BRF-057-G-1M", size: "1 Meter", priceAdjustment: 0, stock: 35 },
         { id: 57002, sku: "BRF-057-G-2M", size: "2 Meters", priceAdjustment: 699, stock: 25 },
       ]},
@@ -1055,10 +1063,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 599, categoryId: 6, categoryName: "Fabrics", fabricType: "Velvet", pattern: "Plain",
     careInstructions: "Dry clean only", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.5, reviewCount: 112,
     colors: [
-      { id: 5801, colorCode: "#000080", colorName: "Navy Blue", images: [getProductImage(58, "navy")], variants: [
+      { id: 5801, colorCode: "#000080", colorName: "Navy Blue", images: getProductImages(58, "navy"), variants: [
         { id: 58001, sku: "VLF-058-N-1M", size: "1 Meter", priceAdjustment: 0, stock: 40 },
       ]},
-      { id: 5802, colorCode: "#800000", colorName: "Maroon", images: [getProductImage(58, "maroon")], variants: [
+      { id: 5802, colorCode: "#800000", colorName: "Maroon", images: getProductImages(58, "maroon"), variants: [
         { id: 58002, sku: "VLF-058-M-1M", size: "1 Meter", priceAdjustment: 0, stock: 38 },
       ]},
     ],
@@ -1070,7 +1078,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 549, categoryId: 6, categoryName: "Fabrics", fabricType: "Linen", pattern: "Plain",
     careInstructions: "Hand wash", isFeatured: false, isNewArrival: true, isOnSale: false, rating: 4.7, reviewCount: 189,
     colors: [
-      { id: 5901, colorCode: "#F5F5F5", colorName: "White Smoke", images: [getProductImage(59, "whitesmoke")], variants: [
+      { id: 5901, colorCode: "#F5F5F5", colorName: "White Smoke", images: getProductImages(59, "whitesmoke"), variants: [
         { id: 59001, sku: "LNF-059-W-1M", size: "1 Meter", priceAdjustment: 0, stock: 55 },
         { id: 59002, sku: "LNF-059-W-3M", size: "3 Meters", priceAdjustment: 1098, stock: 30 },
       ]},
@@ -1083,7 +1091,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 449, categoryId: 6, categoryName: "Fabrics", fabricType: "Chanderi", pattern: "Buti",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.4, reviewCount: 98,
     colors: [
-      { id: 6001, colorCode: "#FFB6C1", colorName: "Light Pink", images: [getProductImage(60, "pink")], variants: [
+      { id: 6001, colorCode: "#FFB6C1", colorName: "Light Pink", images: getProductImages(60, "pink"), variants: [
         { id: 60001, sku: "CHF-060-P-1M", size: "1 Meter", priceAdjustment: 0, stock: 42 },
       ]},
     ],
@@ -1095,10 +1103,10 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 349, categoryId: 6, categoryName: "Fabrics", fabricType: "Georgette", pattern: "Plain",
     careInstructions: "Dry clean", isFeatured: false, isNewArrival: false, isOnSale: false, rating: 4.3, reviewCount: 167,
     colors: [
-      { id: 6101, colorCode: "#FF6347", colorName: "Tomato", images: [getProductImage(61, "tomato")], variants: [
+      { id: 6101, colorCode: "#FF6347", colorName: "Tomato", images: getProductImages(61, "tomato"), variants: [
         { id: 61001, sku: "GGF-061-T-1M", size: "1 Meter", priceAdjustment: 0, stock: 60 },
       ]},
-      { id: 6102, colorCode: "#4169E1", colorName: "Royal Blue", images: [getProductImage(61, "royal")], variants: [
+      { id: 6102, colorCode: "#4169E1", colorName: "Royal Blue", images: getProductImages(61, "royal"), variants: [
         { id: 61002, sku: "GGF-061-R-1M", size: "1 Meter", priceAdjustment: 0, stock: 55 },
       ]},
     ],
@@ -1110,7 +1118,7 @@ export const shopProducts: ShopProduct[] = [
     basePrice: 749, categoryId: 6, categoryName: "Fabrics", fabricType: "Tussar Silk", pattern: "Natural",
     careInstructions: "Dry clean only", isFeatured: true, isNewArrival: false, isOnSale: false, rating: 4.6, reviewCount: 78,
     colors: [
-      { id: 6201, colorCode: "#D2B48C", colorName: "Tan", images: [getProductImage(62, "tan")], variants: [
+      { id: 6201, colorCode: "#D2B48C", colorName: "Tan", images: getProductImages(62, "tan"), variants: [
         { id: 62001, sku: "TSF-062-T-1M", size: "1 Meter", priceAdjustment: 0, stock: 30 },
         { id: 62002, sku: "TSF-062-T-2M", size: "2 Meters", priceAdjustment: 749, stock: 20 },
       ]},

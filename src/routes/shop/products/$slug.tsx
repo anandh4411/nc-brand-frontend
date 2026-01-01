@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -45,6 +45,9 @@ function ProductDetailPage() {
   );
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   if (!product) {
     return (
@@ -114,6 +117,14 @@ function ProductDetailPage() {
     });
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current) return;
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({ x, y });
+  };
+
   // Related products (same category)
   const relatedProducts = useMemo(() => {
     return shopProducts
@@ -145,15 +156,57 @@ function ProductDetailPage() {
       </Breadcrumb>
 
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Image Gallery */}
-        <div className="space-y-4">
+        {/* Image Gallery - Amazon Style */}
+        <div className="flex gap-4">
+          {/* Vertical Thumbnails */}
+          {images.length > 1 && (
+            <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto">
+              {images.map((img, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    "w-16 h-16 rounded-md overflow-hidden border-2 shrink-0 transition-all",
+                    currentImageIndex === index
+                      ? "border-primary ring-1 ring-primary"
+                      : "border-gray-200 hover:border-gray-400"
+                  )}
+                  onMouseEnter={() => setCurrentImageIndex(index)}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <img
+                    src={img}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Main Image */}
-          <div className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden">
+          <div
+            ref={imageContainerRef}
+            className="flex-1 relative aspect-[3/4] bg-muted rounded-lg overflow-hidden cursor-crosshair"
+            onMouseEnter={() => setIsZooming(true)}
+            onMouseLeave={() => setIsZooming(false)}
+            onMouseMove={handleMouseMove}
+          >
             <img
               src={currentImage}
               alt={product.name}
               className="w-full h-full object-cover"
             />
+            {/* Zoom Lens */}
+            {isZooming && (
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: `url(${currentImage})`,
+                  backgroundSize: "200%",
+                  backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                }}
+              />
+            )}
 
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -171,7 +224,7 @@ function ProductDetailPage() {
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 transition-opacity"
                   onClick={() =>
                     setCurrentImageIndex(
                       (prev) => (prev - 1 + images.length) % images.length
@@ -183,7 +236,7 @@ function ProductDetailPage() {
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 transition-opacity"
                   onClick={() =>
                     setCurrentImageIndex((prev) => (prev + 1) % images.length)
                   }
@@ -193,30 +246,6 @@ function ProductDetailPage() {
               </>
             )}
           </div>
-
-          {/* Thumbnails */}
-          {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {images.map((img, index) => (
-                <button
-                  key={index}
-                  className={cn(
-                    "w-20 h-20 rounded-md overflow-hidden border-2 shrink-0",
-                    currentImageIndex === index
-                      ? "border-primary"
-                      : "border-transparent"
-                  )}
-                  onClick={() => setCurrentImageIndex(index)}
-                >
-                  <img
-                    src={img}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Product Info */}

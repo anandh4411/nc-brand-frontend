@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
 import { useWishlist } from "@/context/wishlist-context";
 import { useCart } from "@/context/cart-context";
@@ -68,72 +67,72 @@ function WishlistPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">My Wishlist</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold">My Wishlist</h1>
+          <p className="text-sm text-muted-foreground">
             {items.length} item{items.length > 1 ? "s" : ""} saved
           </p>
         </div>
-        <Button variant="ghost" onClick={clearWishlist} className="text-destructive">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear All
+        <Button variant="ghost" size="sm" onClick={clearWishlist} className="text-destructive">
+          <Trash2 className="h-4 w-4 mr-1" />
+          Clear
         </Button>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {items.map((item) => (
-          <Card
+          <div
             key={item.productGroupId}
-            className="group overflow-hidden border hover:shadow-lg transition-shadow"
+            className="group bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow"
           >
-            <Link to={`/shop/products/${getProductById(item.productGroupId)?.slug || ""}` as any} >
-              <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+            <Link to={`/shop/products/${getProductById(item.productGroupId)?.slug || ""}` as any}>
+              {/* Image - Compact 1:1 */}
+              <div className="relative aspect-square overflow-hidden bg-muted">
                 <img
                   src={item.imageUrl || "/placeholder-product.jpg"}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
 
-                {/* Remove Button */}
+                {/* Remove from Wishlist */}
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                  className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white shadow-sm"
                   onClick={(e) => {
                     e.preventDefault();
                     removeItem(item.productGroupId);
                   }}
                 >
-                  <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                  <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500" />
                 </Button>
               </div>
 
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">
+              {/* Content */}
+              <div className="p-2.5">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
                   {item.categoryName}
-                </p>
-                <h3 className="font-medium text-sm line-clamp-2 mb-2 min-h-[2.5rem]">
+                </span>
+                <h3 className="font-medium text-sm leading-tight line-clamp-2 mt-0.5 mb-1.5 min-h-[2.25rem]">
                   {item.name}
                 </h3>
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{formatPrice(item.basePrice)}</span>
-                </div>
-              </CardContent>
+                <span className="font-semibold text-sm">{formatPrice(item.basePrice)}</span>
+              </div>
             </Link>
 
-            {/* Add to Cart Button */}
-            <div className="px-4 pb-4">
+            {/* Add to Cart */}
+            <div className="px-2.5 pb-2.5">
               <Button
-                className="w-full"
+                className="w-full h-8 text-xs"
                 size="sm"
                 onClick={() => handleAddToCart(item.productGroupId)}
               >
-                <ShoppingCart className="h-4 w-4 mr-2" />
+                <ShoppingCart className="h-3.5 w-3.5 mr-1" />
                 Add to Cart
               </Button>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     </div>

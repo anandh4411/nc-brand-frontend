@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, ShoppingCart, Star } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ interface ProductCardProps {
 export function ProductCard({ product, className }: ProductCardProps) {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -28,8 +29,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
     ? Math.round(((product.originalPrice - product.basePrice) / product.originalPrice) * 100)
     : 0;
 
-  const firstColor = product.colors[0];
-  const imageUrl = firstColor?.images[0] || "/placeholder-product.jpg";
+  const selectedColor = product.colors[selectedColorIndex] || product.colors[0];
+  const imageUrl = selectedColor?.images[0] || "/placeholder-product.jpg";
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,83 +44,101 @@ export function ProductCard({ product, className }: ProductCardProps) {
     });
   };
 
+  const handleColorClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedColorIndex(index);
+  };
+
   return (
-    <Card className={cn("group overflow-hidden border hover:shadow-lg transition-shadow", className)}>
+    <div className={cn("group bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow", className)}>
       <Link to={`/shop/products/${product.slug}` as any}>
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+        {/* Image - Compact 1:1 aspect ratio */}
+        <div className="relative aspect-square overflow-hidden bg-muted">
           <img
             src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
 
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {/* Badges - Top Left */}
+          <div className="absolute top-1.5 left-1.5 flex gap-1">
             {product.isNewArrival && (
-              <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>
+              <Badge className="bg-blue-500 hover:bg-blue-600 text-[10px] px-1.5 py-0">New</Badge>
             )}
             {discount > 0 && (
-              <Badge variant="destructive">{discount}% OFF</Badge>
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{discount}%</Badge>
             )}
           </div>
 
-          {/* Wishlist Button */}
+          {/* Wishlist - Top Right */}
           <Button
-            variant="secondary"
+            variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white shadow-sm"
             onClick={handleWishlistClick}
           >
             <Heart
               className={cn(
-                "h-4 w-4",
-                inWishlist && "fill-red-500 text-red-500"
+                "h-3.5 w-3.5",
+                inWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
               )}
             />
           </Button>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex gap-1">
-              {product.colors.slice(0, 5).map((color) => (
-                <div
+        {/* Content */}
+        <div className="p-2.5">
+          {/* Category & Rating Row */}
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              {product.categoryName}
+            </span>
+            <div className="flex items-center gap-0.5">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span className="text-[11px] font-medium">{product.rating}</span>
+            </div>
+          </div>
+
+          {/* Product Name */}
+          <h3 className="font-medium text-sm leading-tight line-clamp-2 mb-1 min-h-[2.25rem]">
+            {product.name}
+          </h3>
+
+          {/* Color Swatches */}
+          {product.colors.length > 1 && (
+            <div className="flex items-center gap-1 mb-2">
+              {product.colors.slice(0, 5).map((color, index) => (
+                <button
                   key={color.id}
-                  className="h-4 w-4 rounded-full border border-white/50"
+                  onClick={(e) => handleColorClick(e, index)}
+                  className={cn(
+                    "h-5 w-5 rounded-full border-2 transition-all cursor-pointer",
+                    selectedColorIndex === index
+                      ? "border-primary scale-110"
+                      : "border-transparent hover:scale-105"
+                  )}
                   style={{ backgroundColor: color.colorCode }}
                   title={color.colorName}
                 />
               ))}
               {product.colors.length > 5 && (
-                <span className="text-xs text-white">+{product.colors.length - 5}</span>
+                <span className="text-[10px] text-muted-foreground">+{product.colors.length - 5}</span>
               )}
             </div>
-          </div>
-        </div>
+          )}
 
-        <CardContent className="p-3">
-          <p className="text-xs text-muted-foreground mb-1">{product.categoryName}</p>
-          <h3 className="font-medium text-sm line-clamp-2 mb-2 min-h-[2.5rem]">
-            {product.name}
-          </h3>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-medium">{product.rating}</span>
-            <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{formatPrice(product.basePrice)}</span>
+          {/* Price Row */}
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-semibold text-sm">{formatPrice(product.basePrice)}</span>
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-xs text-muted-foreground line-through">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
           </div>
-        </CardContent>
+        </div>
       </Link>
-    </Card>
+    </div>
   );
 }

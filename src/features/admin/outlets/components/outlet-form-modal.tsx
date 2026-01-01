@@ -40,15 +40,8 @@ interface Props {
   mode: "add" | "edit";
 }
 
-const formSchema = CreateOutletRequestSchema.extend({
-  isActive: CreateOutletRequestSchema.shape.code.optional().transform(() => true),
-}).transform((data) => ({
-  ...data,
-  isActive: true,
-}));
-
 export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
-  const form = useForm<CreateOutletRequest & { isActive: boolean }>({
+  const form = useForm<CreateOutletRequest>({
     resolver: zodResolver(CreateOutletRequestSchema),
     defaultValues: {
       code: outlet?.code || "",

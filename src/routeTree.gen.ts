@@ -39,7 +39,11 @@ import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboa
 import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
+import { Route as AdminShipmentsIndexRouteImport } from './routes/admin/shipments/index'
+import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
 import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/index'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
+import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 
 const InstitutionsSubmissionsIndexLazyRouteImport = createFileRoute(
@@ -303,9 +307,29 @@ const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardSettingsRouteRoute,
 } as any)
+const AdminShipmentsIndexRoute = AdminShipmentsIndexRouteImport.update({
+  id: '/shipments/',
+  path: '/shipments/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOutletsIndexRoute = AdminOutletsIndexRouteImport.update({
   id: '/outlets/',
   path: '/outlets/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
@@ -379,7 +403,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
+  '/admin/products': typeof AdminProductsIndexRoute
+  '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
@@ -417,7 +445,11 @@ export interface FileRoutesByTo {
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
+  '/admin/products': typeof AdminProductsIndexRoute
+  '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
@@ -464,7 +496,11 @@ export interface FileRoutesById {
   '/dashboard/settings/display': typeof DashboardSettingsDisplayLazyRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/inventory/': typeof AdminInventoryIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
   '/admin/outlets/': typeof AdminOutletsIndexRoute
+  '/admin/products/': typeof AdminProductsIndexRoute
+  '/admin/shipments/': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/institutions/login/': typeof InstitutionsLoginIndexRoute
   '/outlet/login/': typeof OutletLoginIndexRoute
@@ -512,7 +548,11 @@ export interface FileRouteTypes {
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/admin/categories'
+    | '/admin/inventory'
+    | '/admin/orders'
     | '/admin/outlets'
+    | '/admin/products'
+    | '/admin/shipments'
     | '/dashboard/settings/'
     | '/institutions/login'
     | '/outlet/login'
@@ -550,7 +590,11 @@ export interface FileRouteTypes {
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/admin/categories'
+    | '/admin/inventory'
+    | '/admin/orders'
     | '/admin/outlets'
+    | '/admin/products'
+    | '/admin/shipments'
     | '/dashboard/settings'
     | '/institutions/login'
     | '/outlet/login'
@@ -596,7 +640,11 @@ export interface FileRouteTypes {
     | '/dashboard/settings/display'
     | '/dashboard/settings/notifications'
     | '/admin/categories/'
+    | '/admin/inventory/'
+    | '/admin/orders/'
     | '/admin/outlets/'
+    | '/admin/products/'
+    | '/admin/shipments/'
     | '/dashboard/settings/'
     | '/institutions/login/'
     | '/outlet/login/'
@@ -900,11 +948,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsIndexRouteImport
       parentRoute: typeof DashboardSettingsRouteRoute
     }
+    '/admin/shipments/': {
+      id: '/admin/shipments/'
+      path: '/shipments'
+      fullPath: '/admin/shipments'
+      preLoaderRoute: typeof AdminShipmentsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products/': {
+      id: '/admin/products/'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/outlets/': {
       id: '/admin/outlets/'
       path: '/outlets'
       fullPath: '/admin/outlets'
       preLoaderRoute: typeof AdminOutletsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders/': {
+      id: '/admin/orders/'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inventory/': {
+      id: '/admin/inventory/'
+      path: '/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories/': {
@@ -959,13 +1035,21 @@ const AccountRouteWithChildren =
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
+  AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
   AdminOutletsIndexRoute: typeof AdminOutletsIndexRoute
+  AdminProductsIndexRoute: typeof AdminProductsIndexRoute
+  AdminShipmentsIndexRoute: typeof AdminShipmentsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
+  AdminInventoryIndexRoute: AdminInventoryIndexRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
   AdminOutletsIndexRoute: AdminOutletsIndexRoute,
+  AdminProductsIndexRoute: AdminProductsIndexRoute,
+  AdminShipmentsIndexRoute: AdminShipmentsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -69,7 +69,7 @@ export default function AdminDashboard() {
           Dashboard
         </h1>
         <p className="text-muted-foreground">
-          Welcome to TextileHub Admin. Here's an overview of your business.
+          Welcome to NC Brand Admin. Here's an overview of your business.
         </p>
       </div>
 

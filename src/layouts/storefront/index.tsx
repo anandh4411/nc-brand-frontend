@@ -102,8 +102,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
 
           {/* Logo */}
           <Link to="/shop" className="flex items-center gap-2">
-            <img src="/logo.png" alt="TextileHub" className="h-8 w-8" />
-            <span className="font-bold text-xl hidden sm:inline">TextileHub</span>
+            <img src="/logo.png" alt="NC Brand" className="h-8 w-8" />
+            <span className="font-bold text-xl hidden sm:inline">NC Brand</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -263,8 +263,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo.png" alt="TextileHub" className="h-8 w-8" />
-                <span className="font-bold text-xl">TextileHub</span>
+                <img src="/logo.png" alt="NC Brand" className="h-8 w-8" />
+                <span className="font-bold text-xl">NC Brand</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Quality textiles from manufacturing to your doorstep.
@@ -339,7 +339,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
           </div>
 
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TextileHub. All rights reserved.
+            © {new Date().getFullYear()} NC Brand. All rights reserved.
           </div>
         </div>
         </footer>

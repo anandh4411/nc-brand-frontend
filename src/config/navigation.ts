@@ -127,7 +127,7 @@ export const footerNavItems: SidebarItem[] = [];
 const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return React.createElement("img", {
     src: "/logo.png",
-    alt: "TextileHub Logo",
+    alt: "NC Brand Logo",
     className: "w-full",
     ...props,
   });
@@ -135,5 +135,5 @@ const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
 
 export const brandingConfig = {
   iconComponent: LogoIcon,
-  name: "TextileHub",
+  name: "NC Brand",
 };

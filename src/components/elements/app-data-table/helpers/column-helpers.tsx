@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, type LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -152,6 +152,8 @@ export function actionsColumn<TData>(
     label: string;
     onClick: (row: TData) => void;
     className?: string;
+    icon?: LucideIcon;
+    disabled?: (row: TData) => boolean;
   }>
 ): ColumnDef<TData> {
   return {
@@ -168,15 +170,21 @@ export function actionsColumn<TData>(
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {actions.map((action, index) => (
-            <DropdownMenuItem
-              key={index}
-              onClick={() => action.onClick(row.original)}
-              className={action.className}
-            >
-              {action.label}
-            </DropdownMenuItem>
-          ))}
+          {actions.map((action, index) => {
+            const Icon = action.icon;
+            const isDisabled = action.disabled?.(row.original) ?? false;
+            return (
+              <DropdownMenuItem
+                key={index}
+                onClick={() => action.onClick(row.original)}
+                className={action.className}
+                disabled={isDisabled}
+              >
+                {Icon && <Icon className="mr-2 h-4 w-4" />}
+                {action.label}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     ),

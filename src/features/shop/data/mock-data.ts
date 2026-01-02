@@ -69,6 +69,7 @@ export const shopCategories: ShopCategory[] = [
   { id: 7, name: "Silk Sarees", slug: "silk-sarees", description: "Pure silk sarees", imageUrl: "/categories/silk-sarees.jpg", productCount: 8, parentId: 1 },
   { id: 8, name: "Cotton Sarees", slug: "cotton-sarees", description: "Comfortable cotton sarees", imageUrl: "/categories/cotton-sarees.jpg", productCount: 6, parentId: 1 },
   { id: 9, name: "Designer Sarees", slug: "designer-sarees", description: "Party wear designer sarees", imageUrl: "/categories/designer-sarees.jpg", productCount: 4, parentId: 1 },
+  { id: 10, name: "Frocks", slug: "frocks", description: "Designer frocks and dresses", imageUrl: "/categories/frocks.jpg", productCount: 1, parentId: null },
 ];
 
 // Banners
@@ -1124,6 +1125,52 @@ export const shopProducts: ShopProduct[] = [
       ]},
     ],
     createdAt: "2024-01-25",
+  },
+
+  // FROCKS
+  {
+    id: 63,
+    name: "Designer Cotton Frock",
+    slug: "designer-cotton-frock",
+    description: "Beautiful designer cotton frock with floral embroidery. Perfect for casual outings and festive occasions. Lightweight and comfortable fabric suitable for all seasons.",
+    basePrice: 1299,
+    categoryId: 10,
+    categoryName: "Frocks",
+    fabricType: "Cotton",
+    pattern: "Floral",
+    careInstructions: "Machine wash cold with similar colors. Do not bleach. Tumble dry low.",
+    isFeatured: true,
+    isNewArrival: true,
+    isOnSale: false,
+    rating: 4.7,
+    reviewCount: 86,
+    colors: [
+      {
+        id: 6301,
+        colorCode: "#FFB6C1",
+        colorName: "Light Pink",
+        images: ["/frok.jpg", "/frok.jpg", "/frok.jpg", "/frok.jpg"],
+        variants: [
+          { id: 63001, sku: "FRK-063-P-XS", size: "XS", priceAdjustment: 0, stock: 15 },
+          { id: 63002, sku: "FRK-063-P-S", size: "S", priceAdjustment: 0, stock: 20 },
+          { id: 63003, sku: "FRK-063-P-M", size: "M", priceAdjustment: 0, stock: 25 },
+          { id: 63004, sku: "FRK-063-P-L", size: "L", priceAdjustment: 100, stock: 18 },
+          { id: 63005, sku: "FRK-063-P-XL", size: "XL", priceAdjustment: 150, stock: 12 },
+        ],
+      },
+      {
+        id: 6302,
+        colorCode: "#87CEEB",
+        colorName: "Sky Blue",
+        images: ["/frok.jpg", "/frok.jpg", "/frok.jpg", "/frok.jpg"],
+        variants: [
+          { id: 63006, sku: "FRK-063-B-S", size: "S", priceAdjustment: 0, stock: 18 },
+          { id: 63007, sku: "FRK-063-B-M", size: "M", priceAdjustment: 0, stock: 22 },
+          { id: 63008, sku: "FRK-063-B-L", size: "L", priceAdjustment: 100, stock: 15 },
+        ],
+      },
+    ],
+    createdAt: "2024-12-28",
   },
 ];
 

@@ -1,5 +1,4 @@
 import {
-  Building2,
   Home,
   Package,
   FolderTree,
@@ -7,20 +6,16 @@ import {
   ShoppingCart,
   BarChart3,
   Users,
-  Settings,
   ClipboardList,
   Store,
   Heart,
   MapPin,
-  Star,
   User,
   Grid3X3,
   Tag,
   Percent,
-  CreditCard,
   Globe,
   Boxes,
-  FileText,
 } from "lucide-react";
 import { SidebarItem } from "@/components/layout/types";
 import React from "react";

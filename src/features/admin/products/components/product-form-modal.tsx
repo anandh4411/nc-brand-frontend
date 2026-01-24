@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { fabricTypeOptions, patternOptions, sizeOptions } from "../data/mock-data";
 import type { ProductGroup, Category } from "@/types/dto/product-catalog.dto";
 import { toast } from "sonner";
+import { ProductPreviewCard } from "./product-preview-card";
 
 interface Props {
   open: boolean;
@@ -165,26 +166,32 @@ export function ProductFormModal({
     .filter((c) => c.isActive)
     .map((c) => ({ label: c.name, value: String(c.id) }));
 
+  // Watch form values for live preview
+  const watchedValues = form.watch();
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        <DialogHeader className="text-left shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            {mode === "add" ? "Add Product" : "Edit Product"}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === "add"
-              ? "Create a new product with color and size variants."
-              : "Update product details and variants."}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[950px] h-[90vh] p-0 gap-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row h-full">
+          {/* Left Section - Form */}
+          <div className="flex-1 flex flex-col min-w-0 h-full">
+            <DialogHeader className="text-left px-6 pt-6 pb-4 shrink-0">
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                {mode === "add" ? "Add Product" : "Edit Product"}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === "add"
+                  ? "Create a new product with color and size variants."
+                  : "Update product details and variants."}
+              </DialogDescription>
+            </DialogHeader>
 
-        <Form {...form}>
-          <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full max-h-[60vh] pr-4">
-              <div className="space-y-4 px-1">
-                {/* Basic Info */}
+            <div className="h-0 flex-1 flex flex-col overflow-y-scroll">
+              <div className="h-0 flex-1 overflow-y-auto px-6">
+                <Form {...form}>
+                  <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
+                    {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -431,32 +438,49 @@ export function ProductFormModal({
                       </div>
                     ))}
                   </div>
-                </div>
+                  </div>
+                  </form>
+                </Form>
               </div>
-            </ScrollArea>
-          </form>
-        </Form>
 
-        <DialogFooter className="gap-y-2 shrink-0">
-          <DialogClose asChild>
-            <Button variant="outline" disabled={isSubmitting}>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button type="submit" form="product-form" disabled={isSubmitting}>
-            {mode === "add" ? (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                {isSubmitting ? "Adding..." : "Add Product"}
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+              <DialogFooter className="px-6 py-4 border-t shrink-0">
+                <DialogClose asChild>
+                  <Button variant="outline" disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit" form="product-form" disabled={isSubmitting}>
+                  {mode === "add" ? (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      {isSubmitting ? "Adding..." : "Add Product"}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      {isSubmitting ? "Saving..." : "Save Changes"}
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          </div>
+
+          {/* Right Section - Preview */}
+          <div className="hidden sm:flex w-[320px] border-l bg-muted/30 flex-col">
+            <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+              <ProductPreviewCard
+                name={watchedValues.name || ""}
+                description={watchedValues.description || ""}
+                basePrice={watchedValues.basePrice || 0}
+                fabricType={watchedValues.fabricType}
+                pattern={watchedValues.pattern}
+                isFeatured={watchedValues.isFeatured}
+                colorVariants={watchedValues.colorVariants || []}
+              />
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

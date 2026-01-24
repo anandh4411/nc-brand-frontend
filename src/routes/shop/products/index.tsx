@@ -121,18 +121,6 @@ function ProductsPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          {searchQuery ? `Search: "${searchQuery}"` : "All Products"}
-        </h1>
-        <p className="text-muted-foreground">
-          {searchQuery
-            ? `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? "s" : ""}`
-            : `Explore our collection of ${shopProducts.length}+ premium textiles`}
-        </p>
-      </div>
-
       <div className="flex gap-8">
         {/* Desktop Sidebar Filters */}
         <aside className="hidden lg:block w-64 shrink-0">
@@ -144,6 +132,18 @@ function ProductsPage() {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">
+              {searchQuery ? `Search: "${searchQuery}"` : "All Products"}
+            </h1>
+            <p className="text-muted-foreground">
+              {searchQuery
+                ? `Found ${filteredProducts.length} result${filteredProducts.length !== 1 ? "s" : ""}`
+                : `Explore our collection of ${shopProducts.length}+ premium textiles`}
+            </p>
+          </div>
+
           {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">

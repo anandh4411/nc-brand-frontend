@@ -8,7 +8,7 @@ import {
 import type { Outlet } from "@/types/dto/outlet.dto";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Edit, ExternalLink, Eye, Trash2 } from "lucide-react";
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -18,9 +18,15 @@ const formatDate = (dateString?: string) => {
 export const createOutletColumns = (
   onView: (outlet: Outlet) => void,
   onEdit: (outlet: Outlet) => void,
-  onDelete: (outlet: Outlet) => void
+  onDelete: (outlet: Outlet) => void,
+  onViewProfile: (outlet: Outlet) => void
 ): ColumnDef<Outlet>[] => {
   const outletActions = [
+    {
+      label: "View Profile",
+      icon: ExternalLink,
+      onClick: onViewProfile,
+    },
     {
       label: "View Details",
       icon: Eye,

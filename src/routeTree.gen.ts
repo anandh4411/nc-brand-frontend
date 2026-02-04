@@ -60,6 +60,7 @@ import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customer
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics/index'
 import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$slug'
+import { Route as AdminOutletsOutletIdRouteImport } from './routes/admin/outlets/$outletId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account/orders.$orderId'
 
 const InstitutionsSubmissionsIndexLazyRouteImport = createFileRoute(
@@ -462,6 +463,11 @@ const ShopProductsSlugRoute = ShopProductsSlugRouteImport.update({
   path: '/products/$slug',
   getParentRoute: () => ShopRoute,
 } as any)
+const AdminOutletsOutletIdRoute = AdminOutletsOutletIdRouteImport.update({
+  id: '/outlets/$outletId',
+  path: '/outlets/$outletId',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
   id: '/$orderId',
   path: '/$orderId',
@@ -502,6 +508,7 @@ export interface FileRoutesByFullPath {
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/admin/outlets/$outletId': typeof AdminOutletsOutletIdRoute
   '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
@@ -560,6 +567,7 @@ export interface FileRoutesByTo {
   '/outlet': typeof OutletIndexRoute
   '/shop': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/admin/outlets/$outletId': typeof AdminOutletsOutletIdRoute
   '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
@@ -627,6 +635,7 @@ export interface FileRoutesById {
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
+  '/admin/outlets/$outletId': typeof AdminOutletsOutletIdRoute
   '/shop/products/$slug': typeof ShopProductsSlugRoute
   '/dashboard/settings/account': typeof DashboardSettingsAccountLazyRoute
   '/dashboard/settings/appearance': typeof DashboardSettingsAppearanceLazyRoute
@@ -695,6 +704,7 @@ export interface FileRouteTypes {
     | '/outlet/'
     | '/shop/'
     | '/account/orders/$orderId'
+    | '/admin/outlets/$outletId'
     | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
@@ -753,6 +763,7 @@ export interface FileRouteTypes {
     | '/outlet'
     | '/shop'
     | '/account/orders/$orderId'
+    | '/admin/outlets/$outletId'
     | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
@@ -819,6 +830,7 @@ export interface FileRouteTypes {
     | '/outlet/'
     | '/shop/'
     | '/account/orders/$orderId'
+    | '/admin/outlets/$outletId'
     | '/shop/products/$slug'
     | '/dashboard/settings/account'
     | '/dashboard/settings/appearance'
@@ -1316,6 +1328,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopProductsSlugRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/admin/outlets/$outletId': {
+      id: '/admin/outlets/$outletId'
+      path: '/outlets/$outletId'
+      fullPath: '/admin/outlets/$outletId'
+      preLoaderRoute: typeof AdminOutletsOutletIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/orders/$orderId': {
       id: '/account/orders/$orderId'
       path: '/$orderId'
@@ -1359,6 +1378,7 @@ const AccountRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminOutletsOutletIdRoute: typeof AdminOutletsOutletIdRoute
   AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
@@ -1372,6 +1392,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminOutletsOutletIdRoute: AdminOutletsOutletIdRoute,
   AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,

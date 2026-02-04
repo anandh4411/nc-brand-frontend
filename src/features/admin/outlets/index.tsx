@@ -1,5 +1,6 @@
 // src/features/admin/outlets/index.tsx
 import { useState, useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
@@ -11,6 +12,8 @@ import { mockOutlets } from "./data/mock-data";
 import type { Outlet } from "@/types/dto/outlet.dto";
 
 export default function Outlets() {
+  const navigate = useNavigate();
+
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -40,9 +43,13 @@ export default function Outlets() {
     setDeleteDialogOpen(true);
   };
 
+  const handleViewProfile = (outlet: Outlet) => {
+    navigate({ to: "/admin/outlets/$outletId", params: { outletId: outlet.uuid } });
+  };
+
   // Columns
   const columns = useMemo(
-    () => createOutletColumns(handleView, handleEdit, handleDelete),
+    () => createOutletColumns(handleView, handleEdit, handleDelete, handleViewProfile),
     []
   );
 

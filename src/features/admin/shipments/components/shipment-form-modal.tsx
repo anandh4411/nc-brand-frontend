@@ -38,7 +38,7 @@ interface Props {
 }
 
 const shipmentItemSchema = z.object({
-  productVariantUuid: z.string(),
+  variantUuid: z.string(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
@@ -112,11 +112,11 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
 
   // Available inventory items not yet added
   const availableItems = inventoryItems.filter(
-    (inv: any) => !fields.some((f) => f.productVariantUuid === (inv.productVariant?.uuid || inv.uuid))
+    (inv: any) => !fields.some((f) => f.variantUuid === (inv.variant?.uuid || inv.productVariant?.uuid || inv.uuid))
   );
 
-  const getItemInfo = (productVariantUuid: string) => {
-    return inventoryItems.find((i: any) => (i.productVariant?.uuid || i.uuid) === productVariantUuid);
+  const getItemInfo = (variantUuid: string) => {
+    return inventoryItems.find((i: any) => (i.variant?.uuid || i.productVariant?.uuid || i.uuid) === variantUuid);
   };
 
   const isSubmitting = createShipment.isPending;
@@ -164,19 +164,19 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
                         defaultValue=""
                         onValueChange={(val) => {
                           const inv = inventoryItems.find(
-                            (i: any) => (i.productVariant?.uuid || i.uuid) === val
+                            (i: any) => (i.variant?.uuid || i.productVariant?.uuid || i.uuid) === val
                           );
                           if (inv) {
                             append({
-                              productVariantUuid: (inv as any).productVariant?.uuid || (inv as any).uuid,
+                              variantUuid: (inv as any).variant?.uuid || (inv as any).productVariant?.uuid || (inv as any).uuid,
                               quantity: 1,
                             });
                           }
                         }}
                         placeholder="+ Add Item"
                         items={availableItems.map((inv: any) => ({
-                          label: `${inv.productVariant?.sku || inv.productVariantSku || inv.sku} - ${inv.productVariant?.product?.productGroup?.name || inv.productName || 'Product'}`,
-                          value: inv.productVariant?.uuid || inv.uuid,
+                          label: `${inv.variant?.sku || inv.productVariant?.sku || inv.sku} - ${inv.variant?.productName || inv.productName || 'Product'}`,
+                          value: inv.variant?.uuid || inv.productVariant?.uuid || inv.uuid,
                         }))}
                         className="w-[150px]"
                       />
@@ -191,7 +191,7 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
 
                   <div className="space-y-2">
                     {fields.map((field, index) => {
-                      const itemInfo = getItemInfo(field.productVariantUuid);
+                      const itemInfo = getItemInfo(field.variantUuid);
                       return (
                         <div
                           key={field.id}
@@ -199,17 +199,17 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
                         >
                           <div className="flex-1">
                             <p className="font-medium text-sm">
-                              {(itemInfo as any)?.productVariant?.product?.productGroup?.name || (itemInfo as any)?.productName || 'Product'}
+                              {(itemInfo as any)?.variant?.productName || (itemInfo as any)?.productName || 'Product'}
                             </p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span className="font-mono">
-                                {(itemInfo as any)?.productVariant?.sku || (itemInfo as any)?.productVariantSku}
+                                {(itemInfo as any)?.variant?.sku || (itemInfo as any)?.sku}
                               </span>
                               <span>•</span>
-                              <span>{(itemInfo as any)?.productVariant?.product?.colorName || (itemInfo as any)?.colorName}</span>
+                              <span>{(itemInfo as any)?.variant?.colorName || (itemInfo as any)?.colorName}</span>
                               <span>•</span>
                               <Badge variant="outline" className="text-xs">
-                                {(itemInfo as any)?.productVariant?.size || (itemInfo as any)?.size}
+                                {(itemInfo as any)?.variant?.size || (itemInfo as any)?.size}
                               </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">

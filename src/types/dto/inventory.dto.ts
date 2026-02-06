@@ -9,17 +9,24 @@ import { z } from "zod";
 // MANUFACTURING INVENTORY
 // ============================================================================
 
+export const InventoryVariantSchema = z.object({
+  id: z.number(),
+  uuid: z.string(),
+  sku: z.string(),
+  size: z.string(),
+  productName: z.string(),
+  productGroupName: z.string(),
+  colorName: z.string(),
+});
+
 export const InventoryItemSchema = z.object({
   id: z.number(),
-  productVariantId: z.number(),
-  productVariantSku: z.string(),
-  productName: z.string(),
-  colorName: z.string(),
-  size: z.string(),
+  uuid: z.string(),
   quantity: z.number(),
   lowStockThreshold: z.number(),
-  batchNumber: z.string().optional(),
-  updatedAt: z.string(),
+  batchNumber: z.string().nullable(),
+  isLowStock: z.boolean(),
+  variant: InventoryVariantSchema,
 });
 
 export type InventoryItem = z.infer<typeof InventoryItemSchema>;
@@ -107,16 +114,15 @@ export const ShipmentSchema = z.object({
 export type Shipment = z.infer<typeof ShipmentSchema>;
 
 export const CreateShipmentItemRequestSchema = z.object({
-  productVariantId: z.number(),
+  variantUuid: z.string().uuid(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
 export type CreateShipmentItemRequest = z.infer<typeof CreateShipmentItemRequestSchema>;
 
 export const CreateShipmentRequestSchema = z.object({
-  outletId: z.number(),
+  outletUuid: z.string().uuid(),
   items: z.array(CreateShipmentItemRequestSchema).min(1, "At least one item is required"),
-  notes: z.string().optional(),
 });
 
 export type CreateShipmentRequest = z.infer<typeof CreateShipmentRequestSchema>;

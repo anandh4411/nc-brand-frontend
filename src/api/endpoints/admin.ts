@@ -283,7 +283,7 @@ export interface ShipmentItem {
 export interface CreateShipmentRequest {
   outletUuid: string;
   items: {
-    productVariantUuid: string;
+    variantUuid: string;
     quantity: number;
   }[];
 }

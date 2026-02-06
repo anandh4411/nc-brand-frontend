@@ -26,7 +26,7 @@ export default function Inventory() {
   const { data: lowStockResponse } = useLowStockItems(100);
 
   // Get data from API
-  const inventoryList = ((inventoryResponse?.data as any)?.items || inventoryResponse?.data || []) as InventoryItem[];
+  const inventoryList = ((inventoryResponse?.data as any)?.inventories || inventoryResponse?.data || []) as InventoryItem[];
   const lowStockAlerts = (lowStockResponse?.data || []) as any[];
 
   // Action handlers
@@ -101,7 +101,7 @@ export default function Inventory() {
               {lowStockAlerts.length} item(s) below low stock threshold
             </p>
             <p className="text-sm text-muted-foreground">
-              {lowStockAlerts.slice(0, 5).map((a: any) => a.sku || a.productVariantSku).join(", ")}
+              {lowStockAlerts.slice(0, 5).map((a: any) => a.variant?.sku || a.sku || a.productVariantSku).join(", ")}
               {lowStockAlerts.length > 5 && ` and ${lowStockAlerts.length - 5} more...`}
             </p>
           </div>

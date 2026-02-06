@@ -78,7 +78,7 @@ export function StockAdjustmentModal({ open, onOpenChange, item }: Props) {
 
     adjustStock.mutate(
       {
-        variantUuid: (item as any).uuid || (item as any).productVariantUuid || (item as any).productVariant?.uuid,
+        variantUuid: item.variant.uuid,
         data: {
           adjustmentQty: finalAdjustment,
           reason: values.reason + (values.notes ? ` - ${values.notes}` : '') + (values.batchNumber ? ` (Batch: ${values.batchNumber})` : ''),
@@ -127,11 +127,11 @@ export function StockAdjustmentModal({ open, onOpenChange, item }: Props) {
         {/* Product Info */}
         <div className="p-3 bg-muted rounded-lg space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{item.productName}</span>
-            <Badge variant="outline">{item.productVariantSku}</Badge>
+            <span className="font-medium">{item.variant.productName}</span>
+            <Badge variant="outline">{item.variant.sku}</Badge>
           </div>
           <div className="text-sm text-muted-foreground">
-            {item.colorName} / {item.size}
+            {item.variant.colorName} / {item.variant.size}
           </div>
           <div className="flex items-center gap-4 mt-2">
             <div>

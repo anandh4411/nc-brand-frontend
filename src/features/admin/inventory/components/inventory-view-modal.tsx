@@ -1,6 +1,5 @@
 // src/features/admin/inventory/components/inventory-view-modal.tsx
-import { Package, Calendar, AlertTriangle, Hash } from "lucide-react";
-import { format } from "date-fns";
+import { Package, AlertTriangle, Hash } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +18,6 @@ interface Props {
 }
 
 export function InventoryViewModal({ open, onOpenChange, item }: Props) {
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    return format(new Date(dateString), "MMM dd, yyyy 'at' hh:mm a");
-  };
-
-  const isLowStock = item.quantity <= item.lowStockThreshold;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -43,12 +35,12 @@ export function InventoryViewModal({ open, onOpenChange, item }: Props) {
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-semibold text-lg">{item.productName}</h3>
+              <h3 className="font-semibold text-lg">{item.variant.productName}</h3>
               <p className="text-sm text-muted-foreground font-mono">
-                {item.productVariantSku}
+                {item.variant.sku}
               </p>
             </div>
-            {isLowStock && (
+            {item.isLowStock && (
               <Badge variant="destructive" className="flex items-center gap-1">
                 <AlertTriangle className="h-3 w-3" /> Low Stock
               </Badge>
@@ -61,11 +53,11 @@ export function InventoryViewModal({ open, onOpenChange, item }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium">Color</p>
-              <p className="text-sm text-muted-foreground">{item.colorName}</p>
+              <p className="text-sm text-muted-foreground">{item.variant.colorName}</p>
             </div>
             <div>
               <p className="text-sm font-medium">Size</p>
-              <Badge variant="outline">{item.size}</Badge>
+              <Badge variant="outline">{item.variant.size}</Badge>
             </div>
           </div>
 
@@ -75,7 +67,7 @@ export function InventoryViewModal({ open, onOpenChange, item }: Props) {
               <p className="text-sm text-muted-foreground">Current Stock</p>
               <p
                 className={`text-2xl font-bold font-mono ${
-                  isLowStock ? "text-destructive" : ""
+                  item.isLowStock ? "text-destructive" : ""
                 }`}
               >
                 {item.quantity}
@@ -101,19 +93,6 @@ export function InventoryViewModal({ open, onOpenChange, item }: Props) {
               </div>
             </div>
           )}
-
-          <Separator />
-
-          {/* Timestamp */}
-          <div className="flex items-start gap-2">
-            <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Last Updated</p>
-              <p className="text-muted-foreground text-xs">
-                {formatDate(item.updatedAt)}
-              </p>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

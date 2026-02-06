@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -11,81 +12,79 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { MapPin, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  useAddresses,
+  useCreateAddress,
+  useUpdateAddress,
+  useDeleteAddress,
+  useSetDefaultAddress,
+} from "@/api/hooks/shop";
+import { useAuth } from "@/context/auth-context";
 
-interface Address {
-  id: string;
+interface AddressFormData {
   name: string;
   phone: string;
-  address: string;
+  addressLine1: string;
+  addressLine2: string;
   city: string;
   state: string;
   pincode: string;
-  isDefault: boolean;
 }
 
-// Mock addresses
-const initialAddresses: Address[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    phone: "+91 98765 43210",
-    address: "123, MG Road, Koramangala",
-    city: "Bangalore",
-    state: "Karnataka",
-    pincode: "560034",
-    isDefault: true,
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    phone: "+91 98765 43210",
-    address: "456, Brigade Road, Indiranagar",
-    city: "Bangalore",
-    state: "Karnataka",
-    pincode: "560038",
-    isDefault: false,
-  },
-];
+const initialFormData: AddressFormData = {
+  name: "",
+  phone: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  pincode: "",
+};
 
 function AddressesPage() {
-  const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const { isAuthenticated, isCustomer } = useAuth();
+  const { data: addressesData, isLoading } = useAddresses();
+  const createAddress = useCreateAddress();
+  const updateAddress = useUpdateAddress();
+  const deleteAddress = useDeleteAddress();
+  const setDefaultAddress = useSetDefaultAddress();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<any | null>(null);
+  const [deletingAddressUuid, setDeletingAddressUuid] = useState<string | null>(null);
+  const [formData, setFormData] = useState<AddressFormData>(initialFormData);
+
+  const addresses = addressesData?.data || [];
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-    });
+    setFormData(initialFormData);
     setEditingAddress(null);
   };
 
-  const handleOpenDialog = (address?: Address) => {
+  const handleOpenDialog = (address?: any) => {
     if (address) {
       setEditingAddress(address);
       setFormData({
-        name: address.name,
-        phone: address.phone,
-        address: address.address,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
+        name: address.name || "",
+        phone: address.phone || "",
+        addressLine1: address.addressLine1 || "",
+        addressLine2: address.addressLine2 || "",
+        city: address.city || "",
+        state: address.state || "",
+        pincode: address.pincode || "",
       });
     } else {
       resetForm();
@@ -94,44 +93,89 @@ function AddressesPage() {
   };
 
   const handleSave = () => {
-    if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.state || !formData.pincode) {
-      toast.error("Please fill all fields");
+    if (!formData.name || !formData.phone || !formData.addressLine1 || !formData.city || !formData.state || !formData.pincode) {
+      toast.error("Please fill all required fields");
       return;
     }
 
     if (editingAddress) {
-      setAddresses(addresses.map(a =>
-        a.id === editingAddress.id
-          ? { ...a, ...formData }
-          : a
-      ));
-      toast.success("Address updated");
+      updateAddress.mutate(
+        { uuid: editingAddress.uuid, data: formData },
+        {
+          onSuccess: () => {
+            setIsDialogOpen(false);
+            resetForm();
+          },
+        }
+      );
     } else {
-      const newAddress: Address = {
-        id: Date.now().toString(),
-        ...formData,
-        isDefault: addresses.length === 0,
-      };
-      setAddresses([...addresses, newAddress]);
-      toast.success("Address added");
+      createAddress.mutate(formData, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+          resetForm();
+        },
+      });
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
-  const handleDelete = (id: string) => {
-    setAddresses(addresses.filter(a => a.id !== id));
-    toast.success("Address deleted");
+  const handleDelete = () => {
+    if (!deletingAddressUuid) return;
+    deleteAddress.mutate(deletingAddressUuid, {
+      onSuccess: () => {
+        setDeletingAddressUuid(null);
+      },
+    });
   };
 
-  const handleSetDefault = (id: string) => {
-    setAddresses(addresses.map(a => ({
-      ...a,
-      isDefault: a.id === id,
-    })));
-    toast.success("Default address updated");
+  const handleSetDefault = (uuid: string) => {
+    setDefaultAddress.mutate(uuid);
   };
+
+  const isSaving = createAddress.isPending || updateAddress.isPending;
+
+  // Not logged in as customer
+  if (!isAuthenticated || !isCustomer) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-md mx-auto text-center">
+          <MapPin className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
+          <p className="text-muted-foreground mb-8">
+            Sign in to manage your addresses.
+          </p>
+          <Button asChild>
+            <Link to="/sign-in" search={{ type: "customer" }}>
+              Sign In
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <Skeleton className="h-8 w-40 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -142,7 +186,10 @@ function AddressesPage() {
             Manage your delivery addresses
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="h-4 w-4 mr-2" />
@@ -158,7 +205,7 @@ function AddressesPage() {
             <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Full Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -167,27 +214,36 @@ function AddressesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Phone *</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+91 98765 43210"
+                    placeholder="9876543210"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="addressLine1">Address Line 1 *</Label>
                 <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  id="addressLine1"
+                  value={formData.addressLine1}
+                  onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
                   placeholder="Street address, apartment, etc."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="addressLine2">Address Line 2</Label>
+                <Input
+                  id="addressLine2"
+                  value={formData.addressLine2}
+                  onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+                  placeholder="Area, landmark (optional)"
                 />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -196,7 +252,7 @@ function AddressesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="state">State *</Label>
                   <Input
                     id="state"
                     value={formData.state}
@@ -205,7 +261,7 @@ function AddressesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="pincode">Pincode</Label>
+                  <Label htmlFor="pincode">Pincode *</Label>
                   <Input
                     id="pincode"
                     value={formData.pincode}
@@ -215,11 +271,18 @@ function AddressesPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button onClick={handleSave}>
-                  {editingAddress ? "Update" : "Add"} Address
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>{editingAddress ? "Update" : "Add"} Address</>
+                  )}
                 </Button>
               </div>
             </div>
@@ -241,8 +304,8 @@ function AddressesPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
-          {addresses.map((address) => (
-            <Card key={address.id}>
+          {addresses.map((address: any) => (
+            <Card key={address.uuid}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -253,7 +316,10 @@ function AddressesPage() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">{address.phone}</p>
-                    <p className="text-sm text-muted-foreground">{address.address}</p>
+                    <p className="text-sm text-muted-foreground">{address.addressLine1}</p>
+                    {address.addressLine2 && (
+                      <p className="text-sm text-muted-foreground">{address.addressLine2}</p>
+                    )}
                     <p className="text-sm text-muted-foreground">
                       {address.city}, {address.state} - {address.pincode}
                     </p>
@@ -273,15 +339,20 @@ function AddressesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleSetDefault(address.id)}
+                        onClick={() => handleSetDefault(address.uuid)}
+                        disabled={setDefaultAddress.isPending}
                       >
-                        Set as Default
+                        {setDefaultAddress.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Set as Default"
+                        )}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(address.id)}
+                        onClick={() => setDeletingAddressUuid(address.uuid)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -293,6 +364,35 @@ function AddressesPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingAddressUuid} onOpenChange={() => setDeletingAddressUuid(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Address?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this address? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAddress.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteAddress.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteAddress.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

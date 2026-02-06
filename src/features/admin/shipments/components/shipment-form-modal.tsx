@@ -27,8 +27,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { mockOutlets } from "../../outlets/data/mock-data";
-import { mockInventoryItems } from "../../inventory/data/mock-data";
+import { useAdminOutlets, useAdminInventory, useCreateShipment } from "@/api/hooks/admin";
+import type { Outlet } from "@/types/dto/outlet.dto";
+import type { InventoryItem } from "@/types/dto/inventory.dto";
 import { toast } from "sonner";
 
 interface Props {
@@ -37,12 +38,12 @@ interface Props {
 }
 
 const shipmentItemSchema = z.object({
-  productVariantId: z.number(),
+  productVariantUuid: z.string(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
 const formSchema = z.object({
-  outletId: z.number({ required_error: "Outlet is required" }),
+  outletUuid: z.string({ required_error: "Outlet is required" }),
   items: z.array(shipmentItemSchema).min(1, "At least one item is required"),
   notes: z.string().optional(),
 });
@@ -50,10 +51,17 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function ShipmentFormModal({ open, onOpenChange }: Props) {
+  const { data: outletsResponse } = useAdminOutlets();
+  const { data: inventoryResponse } = useAdminInventory();
+  const createShipment = useCreateShipment();
+
+  const outlets = ((outletsResponse?.data as any)?.outlets || outletsResponse?.data || []) as Outlet[];
+  const inventoryItems = ((inventoryResponse?.data as any)?.items || inventoryResponse?.data || []) as InventoryItem[];
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      outletId: undefined,
+      outletUuid: "",
       items: [],
       notes: "",
     },
@@ -67,7 +75,7 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
   useEffect(() => {
     if (open) {
       form.reset({
-        outletId: undefined,
+        outletUuid: "",
         items: [],
         notes: "",
       });
@@ -75,10 +83,22 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
   }, [open, form]);
 
   const onSubmit = async (values: FormData) => {
-    console.log("Create shipment:", values);
-    toast.success("Shipment created successfully");
-    form.reset();
-    onOpenChange(false);
+    createShipment.mutate(
+      {
+        outletUuid: values.outletUuid,
+        items: values.items,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Shipment created successfully");
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: () => {
+          toast.error("Failed to create shipment");
+        },
+      }
+    );
   };
 
   const handleClose = () => {
@@ -86,20 +106,20 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
     onOpenChange(false);
   };
 
-  const outletOptions = mockOutlets
-    .filter((o) => o.isActive)
-    .map((o) => ({ label: o.name, value: String(o.id) }));
+  const outletOptions = outlets
+    .filter((o: any) => o.isActive)
+    .map((o: any) => ({ label: o.name, value: o.uuid }));
 
   // Available inventory items not yet added
-  const availableItems = mockInventoryItems.filter(
-    (inv) => !fields.some((f) => f.productVariantId === inv.productVariantId)
+  const availableItems = inventoryItems.filter(
+    (inv: any) => !fields.some((f) => f.productVariantUuid === (inv.productVariant?.uuid || inv.uuid))
   );
 
-  const getItemInfo = (productVariantId: number) => {
-    return mockInventoryItems.find((i) => i.productVariantId === productVariantId);
+  const getItemInfo = (productVariantUuid: string) => {
+    return inventoryItems.find((i: any) => (i.productVariant?.uuid || i.uuid) === productVariantUuid);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = createShipment.isPending;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -120,13 +140,13 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
               <div className="space-y-4 px-1">
                 <FormField
                   control={form.control}
-                  name="outletId"
+                  name="outletUuid"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
                       <FormLabel>Destination Outlet</FormLabel>
                       <SelectDropdown
-                        defaultValue={field.value ? String(field.value) : ""}
-                        onValueChange={(val) => field.onChange(Number(val))}
+                        defaultValue={field.value || ""}
+                        onValueChange={field.onChange}
                         placeholder="Select outlet"
                         items={outletOptions}
                       />
@@ -143,20 +163,20 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
                       <SelectDropdown
                         defaultValue=""
                         onValueChange={(val) => {
-                          const inv = mockInventoryItems.find(
-                            (i) => i.productVariantId === Number(val)
+                          const inv = inventoryItems.find(
+                            (i: any) => (i.productVariant?.uuid || i.uuid) === val
                           );
                           if (inv) {
                             append({
-                              productVariantId: inv.productVariantId,
+                              productVariantUuid: (inv as any).productVariant?.uuid || (inv as any).uuid,
                               quantity: 1,
                             });
                           }
                         }}
                         placeholder="+ Add Item"
-                        items={availableItems.map((inv) => ({
-                          label: `${inv.productVariantSku} - ${inv.productName}`,
-                          value: String(inv.productVariantId),
+                        items={availableItems.map((inv: any) => ({
+                          label: `${inv.productVariant?.sku || inv.productVariantSku || inv.sku} - ${inv.productVariant?.product?.productGroup?.name || inv.productName || 'Product'}`,
+                          value: inv.productVariant?.uuid || inv.uuid,
                         }))}
                         className="w-[150px]"
                       />
@@ -171,7 +191,7 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
 
                   <div className="space-y-2">
                     {fields.map((field, index) => {
-                      const itemInfo = getItemInfo(field.productVariantId);
+                      const itemInfo = getItemInfo(field.productVariantUuid);
                       return (
                         <div
                           key={field.id}
@@ -179,17 +199,17 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
                         >
                           <div className="flex-1">
                             <p className="font-medium text-sm">
-                              {itemInfo?.productName}
+                              {(itemInfo as any)?.productVariant?.product?.productGroup?.name || (itemInfo as any)?.productName || 'Product'}
                             </p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span className="font-mono">
-                                {itemInfo?.productVariantSku}
+                                {(itemInfo as any)?.productVariant?.sku || (itemInfo as any)?.productVariantSku}
                               </span>
                               <span>•</span>
-                              <span>{itemInfo?.colorName}</span>
+                              <span>{(itemInfo as any)?.productVariant?.product?.colorName || (itemInfo as any)?.colorName}</span>
                               <span>•</span>
                               <Badge variant="outline" className="text-xs">
-                                {itemInfo?.size}
+                                {(itemInfo as any)?.productVariant?.size || (itemInfo as any)?.size}
                               </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">

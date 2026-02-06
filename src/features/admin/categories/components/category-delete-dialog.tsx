@@ -13,6 +13,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   category: Category;
   hasChildren: boolean;
+  onConfirm?: () => void;
+  isDeleting?: boolean;
 }
 
 export function CategoryDeleteDialog({
@@ -20,16 +22,24 @@ export function CategoryDeleteDialog({
   onOpenChange,
   category,
   hasChildren,
+  onConfirm,
+  isDeleting: externalIsDeleting,
 }: Props) {
   const [value, setValue] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [internalIsDeleting, setInternalIsDeleting] = useState(false);
+  const isDeleting = externalIsDeleting ?? internalIsDeleting;
 
   const handleDelete = async () => {
     if (value.trim() !== category.name) return;
 
-    setIsDeleting(true);
+    if (onConfirm) {
+      onConfirm();
+      setValue("");
+      return;
+    }
+
+    setInternalIsDeleting(true);
     try {
-      // TODO: Replace with actual API call
       console.log("Delete category:", category.uuid);
       await new Promise((r) => setTimeout(r, 500)); // Simulate API
       toast.success("Category deleted successfully");
@@ -39,7 +49,7 @@ export function CategoryDeleteDialog({
       toast.error("Failed to delete category");
       console.error("Failed to delete category:", error);
     } finally {
-      setIsDeleting(false);
+      setInternalIsDeleting(false);
     }
   };
 

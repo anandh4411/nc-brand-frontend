@@ -5,22 +5,21 @@ import {
   Package,
   ShoppingCart,
   AlertTriangle,
-  TrendingUp,
   Truck,
   IndianRupee,
-  Users,
   ImagePlus,
   Trash2,
-  GripVertical,
   Image,
-  X,
   Link as LinkIcon,
+  Loader2,
+  Users,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 import {
   Dialog,
@@ -31,61 +30,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-// Mock dashboard data
-const dashboardStats = {
-  totalOutlets: 6,
-  activeOutlets: 5,
-  totalProducts: 4,
-  activeProducts: 3,
-  totalOrders: 5,
-  pendingOrders: 1,
-  processingOrders: 2,
-  lowStockItems: 3,
-  pendingShipments: 2,
-  totalRevenue: 99377,
-  monthlyRevenue: 73727,
-};
-
-const recentOrders = [
-  { id: "TXH-2024-0004", customer: "Meera Krishnan", status: "pending", total: 17700 },
-  { id: "TXH-2024-0003", customer: "Arjun Sharma", status: "processing", total: 53100 },
-  { id: "TXH-2024-0002", customer: "Lakshmi Devi", status: "shipped", total: 2927 },
-  { id: "TXH-2024-0001", customer: "Priya Kumar", status: "delivered", total: 17700 },
-];
-
-const lowStockItems = [
-  { sku: "KUR-BLU-M", name: "Cotton Casual Kurti", color: "Royal Blue", size: "M", qty: 8 },
-  { sku: "KUR-BLU-XL", name: "Cotton Casual Kurti", color: "Royal Blue", size: "XL", qty: 3 },
-  { sku: "LEH-GLD-L", name: "Banarasi Wedding Lehenga", color: "Gold", size: "L", qty: 2 },
-];
-
-// Banner interface
-interface Banner {
-  id: string;
-  imageUrl: string;
-  title: string;
-  link: string;
-  isActive: boolean;
-}
-
-// Initial mock banners
-const initialBanners: Banner[] = [
-  {
-    id: "1",
-    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200&h=400&fit=crop",
-    title: "New Arrivals - Silk Sarees",
-    link: "/shop/categories/sarees",
-    isActive: true,
-  },
-  {
-    id: "2",
-    imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1200&h=400&fit=crop",
-    title: "Wedding Collection",
-    link: "/shop/categories/wedding",
-    isActive: true,
-  },
-];
+import {
+  useDashboardStats,
+  useLowStockItems,
+  useRecentOrders,
+  usePendingShipments,
+  useAdminBanners,
+  useCreateBanner,
+  useUpdateBanner,
+  useDeleteBanner,
+} from "@/api/hooks/admin";
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("en-IN", {
@@ -96,7 +50,7 @@ const formatPrice = (price: number) => {
 };
 
 const getStatusColor = (status: string) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case "delivered": return "default";
     case "shipped":
     case "processing": return "secondary";
@@ -106,76 +60,99 @@ const getStatusColor = (status: string) => {
 };
 
 export default function AdminDashboard() {
-  const [banners, setBanners] = useState<Banner[]>(initialBanners);
+  // API Hooks
+  const { data: statsResponse, isLoading: statsLoading } = useDashboardStats();
+  const { data: lowStockResponse, isLoading: lowStockLoading } = useLowStockItems(5);
+  const { data: recentOrdersResponse, isLoading: ordersLoading } = useRecentOrders(5);
+  const { data: pendingShipmentsResponse, isLoading: shipmentsLoading } = usePendingShipments(5);
+  const { data: bannersResponse, isLoading: bannersLoading } = useAdminBanners();
+
+  const createBanner = useCreateBanner();
+  const updateBanner = useUpdateBanner();
+  const deleteBanner = useDeleteBanner();
+
+  // Extract data with fallbacks
+  const stats = (statsResponse?.data || {}) as any;
+  const lowStockItems = (lowStockResponse?.data || []) as any[];
+  const recentOrders = (recentOrdersResponse?.data || []) as any[];
+  const pendingShipments = (pendingShipmentsResponse?.data || []) as any[];
+  const banners = (bannersResponse?.data || []) as any[];
+
+  // Banner state
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [editingBanner, setEditingBanner] = useState<any>(null);
   const [bannerForm, setBannerForm] = useState({
     imageUrl: "",
     title: "",
     link: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleAddBanner = () => {
     setEditingBanner(null);
     setBannerForm({ imageUrl: "", title: "", link: "" });
+    setImageFile(null);
     setBannerDialogOpen(true);
   };
 
-  const handleEditBanner = (banner: Banner) => {
+  const handleEditBanner = (banner: any) => {
     setEditingBanner(banner);
     setBannerForm({
       imageUrl: banner.imageUrl,
       title: banner.title,
-      link: banner.link,
+      link: banner.link || "",
     });
+    setImageFile(null);
     setBannerDialogOpen(true);
   };
 
   const handleSaveBanner = () => {
-    if (!bannerForm.imageUrl || !bannerForm.title) {
-      toast.error("Please fill in image URL and title");
+    if (!bannerForm.title) {
+      toast.error("Please fill in the title");
       return;
     }
 
     if (editingBanner) {
-      setBanners(banners.map(b =>
-        b.id === editingBanner.id
-          ? { ...b, ...bannerForm }
-          : b
-      ));
-      toast.success("Banner updated successfully");
+      updateBanner.mutate(
+        {
+          uuid: editingBanner.uuid,
+          data: { title: bannerForm.title, link: bannerForm.link },
+          image: imageFile || undefined,
+        },
+        {
+          onSuccess: () => {
+            setBannerDialogOpen(false);
+            toast.success("Banner updated");
+          },
+          onError: () => toast.error("Failed to update banner"),
+        }
+      );
     } else {
-      const newBanner: Banner = {
-        id: String(Date.now()),
-        imageUrl: bannerForm.imageUrl,
-        title: bannerForm.title,
-        link: bannerForm.link,
-        isActive: true,
-      };
-      setBanners([...banners, newBanner]);
-      toast.success("Banner added successfully");
+      if (!imageFile) {
+        toast.error("Please select an image");
+        return;
+      }
+      createBanner.mutate(
+        {
+          data: { title: bannerForm.title, link: bannerForm.link },
+          image: imageFile,
+        },
+        {
+          onSuccess: () => {
+            setBannerDialogOpen(false);
+            toast.success("Banner added");
+          },
+          onError: () => toast.error("Failed to add banner"),
+        }
+      );
     }
-    setBannerDialogOpen(false);
-    setBannerForm({ imageUrl: "", title: "", link: "" });
   };
 
-  const handleDeleteBanner = (bannerId: string) => {
-    setBanners(banners.filter(b => b.id !== bannerId));
-    toast.success("Banner deleted");
-  };
-
-  const handleToggleBanner = (bannerId: string) => {
-    setBanners(banners.map(b =>
-      b.id === bannerId ? { ...b, isActive: !b.isActive } : b
-    ));
-  };
-
-  const moveBanner = (index: number, direction: "up" | "down") => {
-    const newBanners = [...banners];
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= banners.length) return;
-    [newBanners[index], newBanners[newIndex]] = [newBanners[newIndex], newBanners[index]];
-    setBanners(newBanners);
+  const handleDeleteBanner = (uuid: string) => {
+    deleteBanner.mutate(uuid, {
+      onSuccess: () => toast.success("Banner deleted"),
+      onError: () => toast.error("Failed to delete banner"),
+    });
   };
 
   return (
@@ -198,10 +175,16 @@ export default function AdminDashboard() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats.activeOutlets}</div>
-            <p className="text-xs text-muted-foreground">
-              of {dashboardStats.totalOutlets} total outlets
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.activeOutlets || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  of {stats.totalOutlets || 0} total outlets
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -211,10 +194,16 @@ export default function AdminDashboard() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats.activeProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardStats.totalProducts} in catalog
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.totalProducts || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.totalProductGroups || 0} product groups
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -224,10 +213,16 @@ export default function AdminDashboard() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardStats.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">
-              {dashboardStats.pendingOrders} pending, {dashboardStats.processingOrders} processing
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.totalOrders || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.pendingOrders || 0} pending
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -237,10 +232,14 @@ export default function AdminDashboard() {
             <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPrice(dashboardStats.monthlyRevenue)}</div>
-            <p className="text-xs text-muted-foreground">
-              This month
-            </p>
+            {statsLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{formatPrice(stats.monthlyRevenue || 0)}</div>
+                <p className="text-xs text-muted-foreground">This month</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -248,43 +247,56 @@ export default function AdminDashboard() {
       {/* Alerts Row */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Low Stock Alert */}
-        {dashboardStats.lowStockItems > 0 && (
-          <Card className="border-destructive/50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
-                  <CardTitle className="text-sm font-medium text-destructive">
-                    Low Stock Alert
-                  </CardTitle>
-                </div>
-                <Badge variant="destructive">{dashboardStats.lowStockItems}</Badge>
+        <Card className="border-destructive/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+                <CardTitle className="text-sm font-medium text-destructive">
+                  Low Stock Alert
+                </CardTitle>
               </div>
-              <CardDescription>
-                Items below threshold requiring attention
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {lowStockItems.map((item) => (
-                <div
-                  key={item.sku}
-                  className="flex items-center justify-between text-sm py-2 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.color} / {item.size}
-                    </p>
+              {lowStockLoading ? (
+                <Skeleton className="h-5 w-8" />
+              ) : (
+                <Badge variant="destructive">{stats.lowStockItems || lowStockItems.length}</Badge>
+              )}
+            </div>
+            <CardDescription>
+              Items below threshold requiring attention
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {lowStockLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : lowStockItems.length > 0 ? (
+              <>
+                {lowStockItems.slice(0, 3).map((item: any) => (
+                  <div
+                    key={item.uuid || item.sku}
+                    className="flex items-center justify-between text-sm py-2 border-b last:border-0"
+                  >
+                    <div>
+                      <p className="font-medium">{item.productName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.colorName} / {item.size}
+                      </p>
+                    </div>
+                    <Badge variant="destructive">{item.quantity} left</Badge>
                   </div>
-                  <Badge variant="destructive">{item.qty} left</Badge>
-                </div>
-              ))}
-              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
-                <Link to="/admin/inventory">View Inventory</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                ))}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4">All items well stocked</p>
+            )}
+            <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+              <Link to="/admin/inventory">View Inventory</Link>
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Pending Shipments */}
         <Card>
@@ -294,19 +306,40 @@ export default function AdminDashboard() {
                 <Truck className="h-4 w-4 text-muted-foreground" />
                 <CardTitle className="text-sm font-medium">Pending Shipments</CardTitle>
               </div>
-              <Badge variant="secondary">{dashboardStats.pendingShipments}</Badge>
+              {shipmentsLoading ? (
+                <Skeleton className="h-5 w-8" />
+              ) : (
+                <Badge variant="secondary">{pendingShipments.length}</Badge>
+              )}
             </div>
             <CardDescription>
               Shipments awaiting dispatch to outlets
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between py-4">
-              <p className="text-3xl font-bold">{dashboardStats.pendingShipments}</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/admin/shipments">View All</Link>
-              </Button>
-            </div>
+            {shipmentsLoading ? (
+              <Skeleton className="h-16 w-full" />
+            ) : pendingShipments.length > 0 ? (
+              <div className="space-y-2">
+                {pendingShipments.slice(0, 3).map((shipment: any) => (
+                  <div
+                    key={shipment.uuid}
+                    className="flex items-center justify-between text-sm py-2 border-b last:border-0"
+                  >
+                    <div>
+                      <p className="font-medium">{shipment.outletName}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.itemCount} items</p>
+                    </div>
+                    <Badge variant="outline">{shipment.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4">No pending shipments</p>
+            )}
+            <Button variant="outline" size="sm" className="w-full mt-4" asChild>
+              <Link to="/admin/shipments">View All</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -325,27 +358,37 @@ export default function AdminDashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between py-2 border-b last:border-0"
-              >
-                <div className="flex items-center gap-4">
-                  <div>
-                    <p className="font-medium font-mono">{order.id}</p>
-                    <p className="text-sm text-muted-foreground">{order.customer}</p>
+          {ordersLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-14 w-full" />
+              ))}
+            </div>
+          ) : recentOrders.length > 0 ? (
+            <div className="space-y-4">
+              {recentOrders.map((order: any) => (
+                <div
+                  key={order.uuid || order.orderNumber}
+                  className="flex items-center justify-between py-2 border-b last:border-0"
+                >
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="font-medium font-mono">{order.orderNumber}</p>
+                      <p className="text-sm text-muted-foreground">{order.customerName}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Badge variant={getStatusColor(order.status) as any} className="capitalize">
+                      {order.status}
+                    </Badge>
+                    <span className="font-mono font-medium">{formatPrice(order.total)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Badge variant={getStatusColor(order.status) as any} className="capitalize">
-                    {order.status}
-                  </Badge>
-                  <span className="font-mono font-medium">{formatPrice(order.total)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No orders yet</p>
+          )}
         </CardContent>
       </Card>
 
@@ -369,7 +412,13 @@ export default function AdminDashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          {banners.length === 0 ? (
+          {bannersLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : banners.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Image className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No banners added yet</p>
@@ -379,35 +428,13 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {banners.map((banner, index) => (
+              {banners.map((banner: any) => (
                 <div
-                  key={banner.id}
+                  key={banner.uuid}
                   className={`flex items-center gap-4 p-3 border rounded-lg ${
                     !banner.isActive ? "opacity-50" : ""
                   }`}
                 >
-                  {/* Reorder buttons */}
-                  <div className="flex flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => moveBanner(index, "up")}
-                      disabled={index === 0}
-                    >
-                      <span className="text-xs">▲</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => moveBanner(index, "down")}
-                      disabled={index === banners.length - 1}
-                    >
-                      <span className="text-xs">▼</span>
-                    </Button>
-                  </div>
-
                   {/* Banner preview */}
                   <div className="w-40 h-16 rounded overflow-hidden bg-muted shrink-0">
                     <img
@@ -429,11 +456,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Status badge */}
-                  <Badge
-                    variant={banner.isActive ? "default" : "secondary"}
-                    className="cursor-pointer"
-                    onClick={() => handleToggleBanner(banner.id)}
-                  >
+                  <Badge variant={banner.isActive ? "default" : "secondary"}>
                     {banner.isActive ? "Active" : "Inactive"}
                   </Badge>
 
@@ -450,9 +473,14 @@ export default function AdminDashboard() {
                       variant="ghost"
                       size="icon"
                       className="text-destructive hover:text-destructive"
-                      onClick={() => handleDeleteBanner(banner.id)}
+                      onClick={() => handleDeleteBanner(banner.uuid)}
+                      disabled={deleteBanner.isPending}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {deleteBanner.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -514,21 +542,27 @@ export default function AdminDashboard() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
+              <Label htmlFor="imageFile">Banner Image</Label>
               <Input
-                id="imageUrl"
-                placeholder="https://example.com/banner.jpg"
-                value={bannerForm.imageUrl}
-                onChange={(e) => setBannerForm({ ...bannerForm, imageUrl: e.target.value })}
+                id="imageFile"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setImageFile(file);
+                    setBannerForm({ ...bannerForm, imageUrl: URL.createObjectURL(file) });
+                  }
+                }}
               />
-              {bannerForm.imageUrl && (
+              {(bannerForm.imageUrl || editingBanner?.imageUrl) && (
                 <div className="mt-2 rounded-lg overflow-hidden bg-muted h-32">
                   <img
-                    src={bannerForm.imageUrl}
+                    src={bannerForm.imageUrl || editingBanner?.imageUrl}
                     alt="Preview"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x128?text=Invalid+URL";
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x128?text=Invalid+Image";
                     }}
                   />
                 </div>
@@ -563,7 +597,13 @@ export default function AdminDashboard() {
             <Button variant="outline" onClick={() => setBannerDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveBanner}>
+            <Button
+              onClick={handleSaveBanner}
+              disabled={createBanner.isPending || updateBanner.isPending}
+            >
+              {(createBanner.isPending || updateBanner.isPending) && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
               {editingBanner ? "Save Changes" : "Add Banner"}
             </Button>
           </DialogFooter>

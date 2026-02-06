@@ -26,8 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { adjustmentReasons } from "../data/mock-data";
+import { useAdjustStock } from "@/api/hooks/admin";
 import type { InventoryItem } from "@/types/dto/inventory.dto";
 import { toast } from "sonner";
 
@@ -48,6 +48,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function StockAdjustmentModal({ open, onOpenChange, item }: Props) {
   const [adjustmentType, setAdjustmentType] = useState<"add" | "remove">("add");
+  const adjustStock = useAdjustStock();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -75,17 +76,27 @@ export function StockAdjustmentModal({ open, onOpenChange, item }: Props) {
     const finalAdjustment =
       adjustmentType === "add" ? values.adjustment : -values.adjustment;
 
-    console.log("Adjust stock:", {
-      ...values,
-      adjustment: finalAdjustment,
-      productVariantId: item.productVariantId,
-    });
-
-    toast.success(
-      `Stock ${adjustmentType === "add" ? "added" : "removed"} successfully`
+    adjustStock.mutate(
+      {
+        variantUuid: (item as any).uuid || (item as any).productVariantUuid || (item as any).productVariant?.uuid,
+        data: {
+          adjustmentQty: finalAdjustment,
+          reason: values.reason + (values.notes ? ` - ${values.notes}` : '') + (values.batchNumber ? ` (Batch: ${values.batchNumber})` : ''),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            `Stock ${adjustmentType === "add" ? "added" : "removed"} successfully`
+          );
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: () => {
+          toast.error("Failed to adjust stock");
+        },
+      }
     );
-    form.reset();
-    onOpenChange(false);
   };
 
   const handleClose = () => {
@@ -93,7 +104,7 @@ export function StockAdjustmentModal({ open, onOpenChange, item }: Props) {
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = adjustStock.isPending;
   const adjustmentValue = form.watch("adjustment") || 0;
   const newQuantity =
     adjustmentType === "add"

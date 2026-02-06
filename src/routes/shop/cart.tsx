@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Trash2,
   Minus,
@@ -14,27 +15,30 @@ import {
   Truck,
   ArrowRight,
   X,
+  Loader2,
 } from "lucide-react";
-import { useCart, AVAILABLE_COUPONS } from "@/context/cart-context";
+import {
+  useCart,
+  useUpdateCartItem,
+  useRemoveFromCart,
+  useApplyCoupon,
+  useRemoveCoupon,
+} from "@/api/hooks/shop";
+import { useAuth } from "@/context/auth-context";
 
 function CartPage() {
-  const {
-    items,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    appliedCoupon,
-    applyCoupon,
-    removeCoupon,
-    subtotal,
-    discount,
-    shippingFee,
-    tax,
-    total,
-  } = useCart();
+  const { isAuthenticated, isCustomer } = useAuth();
+  const { data: cartData, isLoading: cartLoading } = useCart();
+  const updateCartItem = useUpdateCartItem();
+  const removeFromCart = useRemoveFromCart();
+  const applyCouponMutation = useApplyCoupon();
+  const removeCouponMutation = useRemoveCoupon();
 
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
+
+  const cart = cartData?.data as any;
+  const items = cart?.items || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -44,16 +48,78 @@ function CartPage() {
     }).format(price);
   };
 
-  const handleApplyCoupon = () => {
-    setCouponError("");
-    const success = applyCoupon(couponCode.toUpperCase().trim());
-    if (!success) {
-      setCouponError("Invalid or expired coupon code");
-    } else {
-      setCouponCode("");
-    }
+  const handleUpdateQuantity = (variantUuid: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    updateCartItem.mutate({ variantUuid, data: { quantity: newQuantity } });
   };
 
+  const handleRemoveItem = (variantUuid: string) => {
+    removeFromCart.mutate(variantUuid);
+  };
+
+  const handleApplyCoupon = () => {
+    setCouponError("");
+    applyCouponMutation.mutate(couponCode.toUpperCase().trim(), {
+      onSuccess: () => setCouponCode(""),
+      onError: () => setCouponError("Invalid or expired coupon code"),
+    });
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCouponMutation.mutate();
+  };
+
+  // Not logged in as customer
+  if (!isAuthenticated || !isCustomer) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-md mx-auto text-center">
+          <ShoppingBag className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
+          <p className="text-muted-foreground mb-8">
+            Sign in to view your shopping cart.
+          </p>
+          <Button asChild>
+            <Link to="/sign-in" search={{ type: "customer" }}>
+              Sign In
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (cartLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Skeleton className="h-10 w-48 mb-8" />
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {[1, 2].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <Skeleton className="w-24 h-32" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-8 w-24 mt-4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="lg:col-span-1">
+            <Skeleton className="h-96" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty cart
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -71,28 +137,32 @@ function CartPage() {
     );
   }
 
+  const subtotal = cart?.subtotal || 0;
+  const discount = cart?.discount || 0;
+  const shipping = cart?.shipping || 0;
+  const tax = cart?.tax || 0;
+  const total = cart?.total || 0;
+  const appliedCoupon = cart?.couponCode;
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Shopping Cart</h1>
-        <Button variant="ghost" onClick={clearCart} className="text-destructive">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear Cart
-        </Button>
+        <span className="text-muted-foreground">{items.length} items</span>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <Card key={`${item.productId}-${item.variantId}`}>
+          {items.map((item: any) => (
+            <Card key={item.uuid || item.sku}>
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   {/* Image */}
                   <div className="w-24 h-32 bg-muted rounded-md overflow-hidden shrink-0">
                     <img
-                      src={item.imageUrl || "/placeholder-product.jpg"}
-                      alt={item.name}
+                      src={item.imageUrl || `https://picsum.photos/seed/${item.sku}/200/300`}
+                      alt={item.productName}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -101,7 +171,7 @@ function CartPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between gap-2">
                       <div>
-                        <h3 className="font-medium line-clamp-2">{item.name}</h3>
+                        <h3 className="font-medium line-clamp-2">{item.productName}</h3>
                         <p className="text-sm text-muted-foreground mt-1">
                           {item.colorName} | {item.size}
                         </p>
@@ -113,9 +183,14 @@ function CartPage() {
                         variant="ghost"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => removeItem(item.productId, item.variantId)}
+                        onClick={() => handleRemoveItem(item.variantUuid)}
+                        disabled={removeFromCart.isPending}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {removeFromCart.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
 
@@ -126,14 +201,8 @@ function CartPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            updateQuantity(
-                              item.productId,
-                              item.variantId,
-                              item.quantity - 1
-                            )
-                          }
-                          disabled={item.quantity <= 1}
+                          onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity - 1)}
+                          disabled={item.quantity <= 1 || updateCartItem.isPending}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -142,22 +211,20 @@ function CartPage() {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            updateQuantity(
-                              item.productId,
-                              item.variantId,
-                              item.quantity + 1
-                            )
-                          }
+                          onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity + 1)}
+                          disabled={updateCartItem.isPending}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
 
                       {/* Price */}
-                      <p className="font-semibold">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
+                      <div className="text-right">
+                        <p className="font-semibold">{formatPrice(item.lineTotal)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatPrice(item.unitPrice)} each
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -183,17 +250,18 @@ function CartPage() {
                   <div className="flex items-center justify-between bg-green-50 dark:bg-green-950 p-3 rounded-md">
                     <div>
                       <Badge variant="secondary" className="font-mono">
-                        {appliedCoupon.code}
+                        {appliedCoupon}
                       </Badge>
                       <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                        {appliedCoupon.description}
+                        Coupon applied!
                       </p>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={removeCoupon}
+                      onClick={handleRemoveCoupon}
+                      disabled={removeCouponMutation.isPending}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -209,9 +277,13 @@ function CartPage() {
                     <Button
                       variant="outline"
                       onClick={handleApplyCoupon}
-                      disabled={!couponCode.trim()}
+                      disabled={!couponCode.trim() || applyCouponMutation.isPending}
                     >
-                      Apply
+                      {applyCouponMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
                     </Button>
                   </div>
                 )}
@@ -219,24 +291,6 @@ function CartPage() {
                   <p className="text-xs text-destructive">{couponError}</p>
                 )}
               </div>
-
-              {/* Available Coupons */}
-              {!appliedCoupon && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Available coupons:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {AVAILABLE_COUPONS.slice(0, 3).map((coupon) => (
-                      <button
-                        key={coupon.code}
-                        className="text-xs bg-muted px-2 py-1 rounded font-mono hover:bg-primary/10 transition-colors"
-                        onClick={() => setCouponCode(coupon.code)}
-                      >
-                        {coupon.code}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <Separator />
 
@@ -258,10 +312,10 @@ function CartPage() {
                     Shipping
                   </span>
                   <span>
-                    {shippingFee === 0 ? (
+                    {shipping === 0 ? (
                       <span className="text-green-600">Free</span>
                     ) : (
-                      formatPrice(shippingFee)
+                      formatPrice(shipping)
                     )}
                   </span>
                 </div>
@@ -279,7 +333,7 @@ function CartPage() {
               </div>
 
               {/* Free Shipping Progress */}
-              {shippingFee > 0 && (
+              {shipping > 0 && (
                 <div className="bg-muted/50 p-3 rounded-md">
                   <p className="text-xs text-muted-foreground">
                     Add {formatPrice(999 - subtotal)} more for free shipping!

@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import { KeyRound, Trash2 } from "lucide-react";
+import { useChangePassword } from "@/api/hooks/shop";
 
 interface SearchParams {
   tab?: string;
@@ -28,11 +29,11 @@ function SettingsPage() {
   const search = useSearch({ from: "/account/settings" }) as SearchParams;
   const defaultTab = search?.tab === "delete" ? "delete" : "password";
   const { user, logout } = useAuth();
+  const changePasswordMutation = useChangePassword();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -50,19 +51,19 @@ function SettingsPage() {
       return;
     }
 
-    setIsChangingPassword(true);
-    try {
-      // TODO: Implement API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Password changed successfully");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch {
-      toast.error("Failed to change password");
-    } finally {
-      setIsChangingPassword(false);
-    }
+    changePasswordMutation.mutate(
+      { currentPassword, newPassword },
+      {
+        onSuccess: () => {
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+        onError: (error: any) => {
+          toast.error(error?.response?.data?.message || "Failed to change password");
+        },
+      }
+    );
   };
 
   const handleDeleteAccount = async () => {
@@ -149,8 +150,8 @@ function SettingsPage() {
                       required
                     />
                   </div>
-                  <Button type="submit" disabled={isChangingPassword}>
-                    {isChangingPassword ? "Changing..." : "Change Password"}
+                  <Button type="submit" disabled={changePasswordMutation.isPending}>
+                    {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
                   </Button>
                 </form>
               </CardContent>

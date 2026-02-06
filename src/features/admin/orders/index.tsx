@@ -2,11 +2,28 @@
 import { useState, useMemo } from "react";
 import { ShoppingCart } from "lucide-react";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { createOrderColumns } from "./config/columns";
 import { OrderViewModal } from "./components/order-view-modal";
 import { OrderStatusModal } from "./components/order-status-modal";
-import { mockOrders, orderStatusOptions, paymentStatusOptions } from "./data/mock-data";
+import { useAdminOrders } from "@/api/hooks/admin";
 import type { Order } from "@/types/dto/order.dto";
+
+const orderStatusOptions = [
+  { label: "Pending", value: "PENDING" },
+  { label: "Confirmed", value: "CONFIRMED" },
+  { label: "Processing", value: "PROCESSING" },
+  { label: "Shipped", value: "SHIPPED" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Cancelled", value: "CANCELLED" },
+];
+
+const paymentStatusOptions = [
+  { label: "Pending", value: "PENDING" },
+  { label: "Paid", value: "PAID" },
+  { label: "Failed", value: "FAILED" },
+  { label: "Refunded", value: "REFUNDED" },
+];
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("en-IN", {
@@ -25,17 +42,23 @@ export default function Orders() {
   // Table state
   const tableState = useTableState<Order>({ debounceMs: 300 });
 
-  // Using mock data
-  const orderList = mockOrders;
+  // API Hook
+  const { data: ordersResponse, isLoading } = useAdminOrders();
+
+  // Get orders from API
+  const orderList = ((ordersResponse?.data as any)?.orders || ordersResponse?.data || []) as Order[];
 
   // Stats
   const totalRevenue = orderList
-    .filter((o) => o.paymentStatus === "paid")
-    .reduce((acc, o) => acc + o.total, 0);
+    .filter((o: any) => o.paymentStatus?.toLowerCase() === "paid")
+    .reduce((acc: number, o: any) => acc + (o.total || 0), 0);
 
-  const pendingOrders = orderList.filter((o) => o.status === "pending").length;
-  const processingOrders = orderList.filter((o) =>
-    ["confirmed", "processing", "shipped"].includes(o.status)
+  const pendingOrders = orderList.filter((o: any) =>
+    o.status?.toLowerCase() === "pending"
+  ).length;
+
+  const processingOrders = orderList.filter((o: any) =>
+    ["confirmed", "processing", "shipped"].includes(o.status?.toLowerCase())
   ).length;
 
   // Action handlers
@@ -54,6 +77,27 @@ export default function Orders() {
     () => createOrderColumns(handleView, handleUpdateStatus),
     []
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-32 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-20" />
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

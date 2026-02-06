@@ -28,8 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import {
   CreateCategoryRequestSchema,
   type Category,
-  type CreateCategoryRequest,
 } from "@/types/dto/product-catalog.dto";
+import { useCreateCategory, useUpdateCategory } from "@/api/hooks/admin";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -54,6 +54,9 @@ export function CategoryFormModal({
   parentCategories,
   mode,
 }: Props) {
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,15 +79,37 @@ export function CategoryFormModal({
   }, [category, open, form]);
 
   const onSubmit = async (values: FormData) => {
-    // TODO: Replace with actual API call
-    console.log("Submit category:", values);
-    toast.success(
-      mode === "add"
-        ? "Category created successfully"
-        : "Category updated successfully"
-    );
-    form.reset();
-    onOpenChange(false);
+    const { isActive, ...createData } = values;
+
+    if (mode === "add") {
+      createCategory.mutate(
+        { data: createData },
+        {
+          onSuccess: () => {
+            toast.success("Category created successfully");
+            form.reset();
+            onOpenChange(false);
+          },
+          onError: () => {
+            toast.error("Failed to create category");
+          },
+        }
+      );
+    } else if (category) {
+      updateCategory.mutate(
+        { uuid: category.uuid, data: { ...createData, isActive } },
+        {
+          onSuccess: () => {
+            toast.success("Category updated successfully");
+            form.reset();
+            onOpenChange(false);
+          },
+          onError: () => {
+            toast.error("Failed to update category");
+          },
+        }
+      );
+    }
   };
 
   const handleClose = () => {
@@ -92,7 +117,7 @@ export function CategoryFormModal({
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = createCategory.isPending || updateCategory.isPending;
 
   // Filter out current category from parent options (can't be its own parent)
   const filteredParentOptions = parentCategories.filter(

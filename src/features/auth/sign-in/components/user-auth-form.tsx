@@ -2,6 +2,7 @@ import { HTMLAttributes } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { useLogin } from "@/api";
+import { useCustomerLogin } from "@/api/hooks/shop";
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>;
 
@@ -28,13 +30,22 @@ const formSchema = z.object({
     .min(1, {
       message: "Please enter your password",
     })
-    .min(7, {
-      message: "Password must be at least 7 characters long",
+    .min(6, {
+      message: "Password must be at least 6 characters long",
     }),
 });
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const { loginUser, isLoading } = useLogin();
+  // Check if this is a customer login
+  const search = useSearch({ strict: false }) as { type?: string };
+  const isCustomerLogin = search?.type === "customer";
+
+  // Use appropriate login hook
+  const { loginUser: adminLoginFn, isLoading: adminLoading } = useLogin();
+  const { mutate: customerLoginFn, isPending: customerLoading } = useCustomerLogin();
+
+  const loginUser = isCustomerLogin ? customerLoginFn : adminLoginFn;
+  const isLoading = isCustomerLogin ? customerLoading : adminLoading;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,17 +89,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <PasswordInput placeholder="********" {...field} />
               </FormControl>
               <FormMessage />
-              {/* <Link
-                to="/forgot-password"
-                className="text-muted-foreground absolute -top-0.5 right-0 text-sm font-medium hover:opacity-75"
-              >
-                Forgot password?
-              </Link> */}
             </FormItem>
           )}
         />
         <Button type="submit" className="mt-2" disabled={isLoading}>
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
       </form>
     </Form>

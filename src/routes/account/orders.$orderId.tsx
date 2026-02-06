@@ -3,111 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Download, Package, Truck, CheckCircle, Clock } from "lucide-react";
-
-// Mock order data
-const mockOrderDetails: Record<string, any> = {
-  "NCB-2024-0001": {
-    id: "NCB-2024-0001",
-    date: "2024-12-28",
-    status: "delivered",
-    deliveredDate: "2024-12-31",
-    paymentMethod: "UPI",
-    paymentStatus: "paid",
-    shippingAddress: {
-      name: "John Doe",
-      phone: "+91 98765 43210",
-      address: "123, MG Road, Koramangala",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560034",
-    },
-    items: [
-      {
-        id: 1,
-        name: "Banarasi Silk Saree",
-        color: "Royal Blue",
-        size: "Free Size",
-        qty: 1,
-        price: 4599,
-        image: "https://picsum.photos/seed/saree1/100/100",
-      },
-    ],
-    subtotal: 4599,
-    shipping: 0,
-    tax: 0,
-    total: 4599,
-  },
-  "NCB-2024-0002": {
-    id: "NCB-2024-0002",
-    date: "2024-12-25",
-    status: "shipped",
-    trackingNumber: "TRACK123456789",
-    paymentMethod: "Card",
-    paymentStatus: "paid",
-    shippingAddress: {
-      name: "John Doe",
-      phone: "+91 98765 43210",
-      address: "123, MG Road, Koramangala",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560034",
-    },
-    items: [
-      {
-        id: 2,
-        name: "Cotton Casual Kurti",
-        color: "Maroon",
-        size: "M",
-        qty: 2,
-        price: 1099,
-        image: "https://picsum.photos/seed/kurti1/100/100",
-      },
-    ],
-    subtotal: 2198,
-    shipping: 0,
-    tax: 1,
-    total: 2199,
-  },
-  "NCB-2024-0003": {
-    id: "NCB-2024-0003",
-    date: "2024-12-20",
-    status: "processing",
-    paymentMethod: "COD",
-    paymentStatus: "pending",
-    shippingAddress: {
-      name: "John Doe",
-      phone: "+91 98765 43210",
-      address: "123, MG Road, Koramangala",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560034",
-    },
-    items: [
-      {
-        id: 3,
-        name: "Bridal Lehenga Set",
-        color: "Gold",
-        size: "L",
-        qty: 1,
-        price: 8999,
-        image: "https://picsum.photos/seed/lehenga1/100/100",
-      },
-    ],
-    subtotal: 8999,
-    shipping: 0,
-    tax: 0,
-    total: 8999,
-  },
-};
+import { useCustomerOrder } from "@/api/hooks/shop";
 
 const getStatusColor = (status: string) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case "delivered":
       return "default";
     case "shipped":
       return "secondary";
     case "processing":
+    case "pending":
       return "outline";
     case "cancelled":
       return "destructive";
@@ -117,12 +24,13 @@ const getStatusColor = (status: string) => {
 };
 
 const getStatusIcon = (status: string) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case "delivered":
       return <CheckCircle className="h-5 w-5 text-green-600" />;
     case "shipped":
       return <Truck className="h-5 w-5 text-blue-600" />;
     case "processing":
+    case "pending":
       return <Clock className="h-5 w-5 text-orange-600" />;
     default:
       return <Package className="h-5 w-5" />;
@@ -147,7 +55,33 @@ const formatDate = (dateStr: string) => {
 
 function OrderDetailPage() {
   const { orderId } = useParams({ from: "/account/orders/$orderId" });
-  const order = mockOrderDetails[orderId];
+  const { data: orderResponse, isLoading } = useCustomerOrder(orderId);
+
+  const order = orderResponse?.data as any;
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Skeleton className="h-10 w-10" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -165,9 +99,11 @@ function OrderDetailPage() {
   }
 
   const handleDownloadInvoice = () => {
-    // TODO: Implement invoice download
     console.log("Downloading invoice for:", orderId);
   };
+
+  const items = order.items || [];
+  const shippingAddress = order.shippingAddress || {};
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -180,16 +116,16 @@ function OrderDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold font-mono">{order.id}</h1>
+            <h1 className="text-2xl font-bold font-mono">{order.orderNumber}</h1>
             <Badge variant={getStatusColor(order.status) as any} className="capitalize">
               {order.status}
             </Badge>
           </div>
           <p className="text-muted-foreground">
-            Ordered on {formatDate(order.date)}
+            Ordered on {formatDate(order.createdAt)}
           </p>
         </div>
-        {order.status === "delivered" && (
+        {order.status?.toLowerCase() === "delivered" && (
           <Button variant="outline" onClick={handleDownloadInvoice}>
             <Download className="h-4 w-4 mr-2" />
             Download Invoice
@@ -208,17 +144,17 @@ function OrderDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {order.status === "delivered" && order.deliveredDate && (
+              {order.status?.toLowerCase() === "delivered" && order.deliveredAt && (
                 <p className="text-sm text-muted-foreground">
-                  Delivered on {formatDate(order.deliveredDate)}
+                  Delivered on {formatDate(order.deliveredAt)}
                 </p>
               )}
-              {order.status === "shipped" && order.trackingNumber && (
+              {order.status?.toLowerCase() === "shipped" && order.trackingNumber && (
                 <p className="text-sm text-muted-foreground">
                   Tracking Number: <span className="font-mono">{order.trackingNumber}</span>
                 </p>
               )}
-              {order.status === "processing" && (
+              {(order.status?.toLowerCase() === "processing" || order.status?.toLowerCase() === "pending") && (
                 <p className="text-sm text-muted-foreground">
                   Your order is being prepared for shipment
                 </p>
@@ -228,35 +164,38 @@ function OrderDetailPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Items ({order.items.length})</CardTitle>
+              <CardTitle>Items ({items.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {order.items.map((item: any) => (
-                <div key={item.id} className="flex gap-4">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-medium">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {item.color} / {item.size}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Qty: {item.qty}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{formatPrice(item.price * item.qty)}</p>
-                    {item.qty > 1 && (
+              {items.map((item: any, index: number) => {
+                const snapshot = item.productSnapshot || {};
+                return (
+                  <div key={item.uuid || index} className="flex gap-4">
+                    <img
+                      src={snapshot.imageUrl || `https://picsum.photos/seed/item${index}/100/100`}
+                      alt={snapshot.name || "Product"}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium">{snapshot.name || "Product"}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {formatPrice(item.price)} each
+                        {snapshot.colorName || "N/A"} / {snapshot.size || "N/A"}
                       </p>
-                    )}
+                      <p className="text-sm text-muted-foreground">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{formatPrice(item.lineTotal || item.unitPrice * item.quantity)}</p>
+                      {item.quantity > 1 && (
+                        <p className="text-sm text-muted-foreground">
+                          {formatPrice(item.unitPrice)} each
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
         </div>
@@ -270,13 +209,19 @@ function OrderDetailPage() {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+                <span>{formatPrice(order.subtotal || 0)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>{order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</span>
+                <span>{(order.shipping || 0) === 0 ? "Free" : formatPrice(order.shipping)}</span>
               </div>
-              {order.tax > 0 && (
+              {(order.discount || 0) > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount</span>
+                  <span>-{formatPrice(order.discount)}</span>
+                </div>
+              )}
+              {(order.tax || 0) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax</span>
                   <span>{formatPrice(order.tax)}</span>
@@ -285,17 +230,17 @@ function OrderDetailPage() {
               <Separator />
               <div className="flex justify-between font-medium">
                 <span>Total</span>
-                <span>{formatPrice(order.total)}</span>
+                <span>{formatPrice(order.total || 0)}</span>
               </div>
               <Separator />
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Payment Method</span>
-                <span>{order.paymentMethod}</span>
+                <span>{order.paymentMethod || "N/A"}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Payment Status</span>
-                <Badge variant={order.paymentStatus === "paid" ? "default" : "outline"} className="capitalize">
-                  {order.paymentStatus}
+                <Badge variant={order.paymentStatus?.toLowerCase() === "paid" ? "default" : "outline"} className="capitalize">
+                  {order.paymentStatus || "pending"}
                 </Badge>
               </div>
             </CardContent>
@@ -307,11 +252,14 @@ function OrderDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="text-sm space-y-1">
-                <p className="font-medium">{order.shippingAddress.name}</p>
-                <p className="text-muted-foreground">{order.shippingAddress.phone}</p>
-                <p className="text-muted-foreground">{order.shippingAddress.address}</p>
+                <p className="font-medium">{shippingAddress.name || "N/A"}</p>
+                <p className="text-muted-foreground">{shippingAddress.phone || ""}</p>
+                <p className="text-muted-foreground">{shippingAddress.addressLine1 || shippingAddress.address || ""}</p>
+                {shippingAddress.addressLine2 && (
+                  <p className="text-muted-foreground">{shippingAddress.addressLine2}</p>
+                )}
                 <p className="text-muted-foreground">
-                  {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}
+                  {shippingAddress.city || ""}, {shippingAddress.state || ""} - {shippingAddress.pincode || ""}
                 </p>
               </div>
             </CardContent>

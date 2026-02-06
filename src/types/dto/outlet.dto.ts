@@ -36,6 +36,7 @@ export type Outlet = z.infer<typeof OutletSchema>;
  */
 export const CreateOutletRequestSchema = z.object({
   code: z.string().min(1, "Outlet code is required"),
+  loginCode: z.string().min(4, "Login code must be at least 4 characters"),
   name: z.string().min(1, "Outlet name is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),

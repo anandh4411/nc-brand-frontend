@@ -26,10 +26,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { Switch } from "@/components/ui/switch";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { fabricTypeOptions, patternOptions, sizeOptions } from "../data/mock-data";
+import { useCreateProductGroup, useUpdateProductGroup } from "@/api/hooks/admin";
 import type { ProductGroup, Category } from "@/types/dto/product-catalog.dto";
 import { toast } from "sonner";
 import { ProductPreviewCard } from "./product-preview-card";
@@ -78,6 +78,9 @@ export function ProductFormModal({
   categories,
   mode,
 }: Props) {
+  const createProductGroup = useCreateProductGroup();
+  const updateProductGroup = useUpdateProductGroup();
+
   const defaultColorVariant = {
     colorCode: "#000000",
     colorName: "",
@@ -145,14 +148,52 @@ export function ProductFormModal({
   }, [product, open, form, mode]);
 
   const onSubmit = async (values: ProductFormData) => {
-    console.log("Submit product:", values);
-    toast.success(
-      mode === "add"
-        ? "Product created successfully"
-        : "Product updated successfully"
-    );
-    form.reset();
-    onOpenChange(false);
+    const apiData = {
+      name: values.name,
+      description: values.description,
+      basePrice: values.basePrice,
+      categoryId: values.categoryId,
+      fabricType: values.fabricType,
+      pattern: values.pattern,
+      careInstructions: values.careInstructions,
+      isFeatured: values.isFeatured,
+      isActive: values.isActive,
+      colorVariants: values.colorVariants.map((cv) => ({
+        colorCode: cv.colorCode,
+        colorName: cv.colorName,
+        sizeVariants: cv.sizes.map((s) => ({
+          size: s.size,
+          priceAdjustment: s.priceAdjustment,
+        })),
+      })),
+    };
+
+    if (mode === "add") {
+      createProductGroup.mutate(apiData as any, {
+        onSuccess: () => {
+          toast.success("Product created successfully");
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: () => {
+          toast.error("Failed to create product");
+        },
+      });
+    } else if (product) {
+      updateProductGroup.mutate(
+        { uuid: product.uuid, data: apiData as any },
+        {
+          onSuccess: () => {
+            toast.success("Product updated successfully");
+            form.reset();
+            onOpenChange(false);
+          },
+          onError: () => {
+            toast.error("Failed to update product");
+          },
+        }
+      );
+    }
   };
 
   const handleClose = () => {
@@ -160,7 +201,7 @@ export function ProductFormModal({
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = createProductGroup.isPending || updateProductGroup.isPending;
 
   const categoryOptions = categories
     .filter((c) => c.isActive)

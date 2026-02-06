@@ -24,13 +24,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
-import { Switch } from "@/components/ui/switch";
 import { indianStates } from "../data/mock-data";
 import {
   CreateOutletRequestSchema,
   type Outlet,
   type CreateOutletRequest,
 } from "@/types/dto/outlet.dto";
+import { useCreateOutlet, useUpdateOutlet } from "@/api/hooks/admin";
 import { toast } from "sonner";
 
 interface Props {
@@ -41,10 +41,14 @@ interface Props {
 }
 
 export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
+  const createOutlet = useCreateOutlet();
+  const updateOutlet = useUpdateOutlet();
+
   const form = useForm<CreateOutletRequest>({
     resolver: zodResolver(CreateOutletRequestSchema),
     defaultValues: {
       code: outlet?.code || "",
+      loginCode: outlet?.loginCode || "",
       name: outlet?.name || "",
       address: outlet?.address || "",
       city: outlet?.city || "",
@@ -59,6 +63,7 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
     if (open) {
       form.reset({
         code: outlet?.code || "",
+        loginCode: outlet?.loginCode || "",
         name: outlet?.name || "",
         address: outlet?.address || "",
         city: outlet?.city || "",
@@ -71,15 +76,32 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
   }, [outlet, open, form]);
 
   const onSubmit = async (values: CreateOutletRequest) => {
-    // TODO: Replace with actual API call
-    console.log("Submit outlet:", values);
-    toast.success(
-      mode === "add"
-        ? "Outlet created successfully"
-        : "Outlet updated successfully"
-    );
-    form.reset();
-    onOpenChange(false);
+    if (mode === "add") {
+      createOutlet.mutate(values, {
+        onSuccess: () => {
+          toast.success("Outlet created successfully");
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: () => {
+          toast.error("Failed to create outlet");
+        },
+      });
+    } else if (outlet) {
+      updateOutlet.mutate(
+        { uuid: outlet.uuid, data: values },
+        {
+          onSuccess: () => {
+            toast.success("Outlet updated successfully");
+            form.reset();
+            onOpenChange(false);
+          },
+          onError: () => {
+            toast.error("Failed to update outlet");
+          },
+        }
+      );
+    }
   };
 
   const handleClose = () => {
@@ -87,7 +109,7 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = createOutlet.isPending || updateOutlet.isPending;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -109,7 +131,7 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 max-h-[60vh] overflow-y-auto px-1"
           >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="code"
@@ -118,6 +140,20 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
                     <FormLabel>Outlet Code</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. OUT-001" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="loginCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Login Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. ABC123" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

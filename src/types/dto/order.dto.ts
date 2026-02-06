@@ -204,3 +204,56 @@ export const OrderListItemSchema = z.object({
 });
 
 export type OrderListItem = z.infer<typeof OrderListItemSchema>;
+
+// ============================================================================
+// CHECKOUT REQUEST
+// ============================================================================
+
+export const CheckoutRequestSchema = z.object({
+  shippingAddressUuid: z.string().uuid(),
+  billingAddressUuid: z.string().uuid().optional(),
+  paymentMethod: PaymentMethodSchema,
+  notes: z.string().optional(),
+});
+
+export type CheckoutRequest = z.infer<typeof CheckoutRequestSchema>;
+
+// ============================================================================
+// ORDER SUMMARY (For listing)
+// ============================================================================
+
+export const OrderSummarySchema = z.object({
+  id: z.number(),
+  uuid: z.string().uuid(),
+  orderNumber: z.string(),
+  status: z.string(),
+  total: z.number(),
+  paymentStatus: z.string(),
+  itemCount: z.number(),
+  createdAt: z.string(),
+});
+
+export type OrderSummary = z.infer<typeof OrderSummarySchema>;
+
+// ============================================================================
+// RAZORPAY
+// ============================================================================
+
+export const RazorpayOrderResponseSchema = z.object({
+  orderId: z.string(),
+  orderUuid: z.string(),
+  razorpayOrderId: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  keyId: z.string(),
+});
+
+export type RazorpayOrderResponse = z.infer<typeof RazorpayOrderResponseSchema>;
+
+export const VerifyPaymentRequestSchema = z.object({
+  razorpayOrderId: z.string(),
+  razorpayPaymentId: z.string(),
+  razorpaySignature: z.string(),
+});
+
+export type VerifyPaymentRequest = z.infer<typeof VerifyPaymentRequestSchema>;

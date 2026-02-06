@@ -264,4 +264,26 @@ export const queryKeys = {
     admin: () => [...queryKeys.dashboard.all, 'admin'] as const,
     outlet: (outletId?: number) => [...queryKeys.dashboard.all, 'outlet', outletId] as const,
   },
+
+  // Wishlist
+  wishlist: {
+    all: ['wishlist'] as const,
+    list: () => [...queryKeys.wishlist.all, 'list'] as const,
+  },
+
+  // Banners
+  banners: {
+    all: ['banners'] as const,
+    active: () => [...queryKeys.banners.all, 'active'] as const,
+  },
+
+  // Shop (public browsing)
+  shop: {
+    all: ['shop'] as const,
+    products: (params?: any) => [...queryKeys.shop.all, 'products', params] as const,
+    product: (slug: string) => [...queryKeys.shop.all, 'product', slug] as const,
+    featured: () => [...queryKeys.shop.all, 'featured'] as const,
+    categories: () => [...queryKeys.shop.all, 'categories'] as const,
+    offers: () => [...queryKeys.shop.all, 'offers'] as const,
+  },
 } as const;

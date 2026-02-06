@@ -85,3 +85,22 @@ export const ReviewSummarySchema = z.object({
 });
 
 export type ReviewSummary = z.infer<typeof ReviewSummarySchema>;
+
+// ============================================================================
+// PRODUCT REVIEWS RESPONSE (For shop product page)
+// ============================================================================
+
+export const ProductReviewsResponseSchema = z.object({
+  reviews: z.array(ReviewSchema),
+  averageRating: z.number(),
+  totalReviews: z.number(),
+  ratingDistribution: z.object({
+    1: z.number(),
+    2: z.number(),
+    3: z.number(),
+    4: z.number(),
+    5: z.number(),
+  }),
+});
+
+export type ProductReviewsResponse = z.infer<typeof ProductReviewsResponseSchema>;

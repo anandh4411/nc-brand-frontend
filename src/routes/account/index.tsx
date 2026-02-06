@@ -1,10 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, MapPin, Star, Heart, User } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ShoppingCart, MapPin, Star, Heart, User, Package } from "lucide-react";
+import { useCustomerOrders, useWishlist, useAddresses } from "@/api/hooks/shop";
 
 function AccountDashboard() {
   const { user } = useAuth();
+  const { data: ordersData, isLoading: ordersLoading } = useCustomerOrders();
+  const { data: wishlistData, isLoading: wishlistLoading } = useWishlist();
+  const { data: addressesData, isLoading: addressesLoading } = useAddresses();
+
+  const orders = (ordersData?.data || []) as any[];
+  const wishlistItems = (wishlistData?.data || []) as any[];
+  const addresses = (addressesData?.data || []) as any[];
+
+  const recentOrders = orders.slice(0, 3);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className="space-y-6">
@@ -23,7 +42,11 @@ function AccountDashboard() {
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-2xl font-bold">0</div>
+              {ordersLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <div className="text-2xl font-bold">{orders.length}</div>
+              )}
               <div className="text-sm text-muted-foreground">Total Orders</div>
             </div>
           </div>
@@ -34,7 +57,11 @@ function AccountDashboard() {
               <Heart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-2xl font-bold">0</div>
+              {wishlistLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <div className="text-2xl font-bold">{wishlistItems.length}</div>
+              )}
               <div className="text-sm text-muted-foreground">Wishlist Items</div>
             </div>
           </div>
@@ -45,7 +72,7 @@ function AccountDashboard() {
               <Star className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">-</div>
               <div className="text-sm text-muted-foreground">Reviews</div>
             </div>
           </div>
@@ -56,7 +83,11 @@ function AccountDashboard() {
               <MapPin className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-2xl font-bold">0</div>
+              {addressesLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <div className="text-2xl font-bold">{addresses.length}</div>
+              )}
               <div className="text-sm text-muted-foreground">Addresses</div>
             </div>
           </div>
@@ -67,12 +98,39 @@ function AccountDashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6">
           <h3 className="font-semibold mb-4">Recent Orders</h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            You haven't placed any orders yet.
-          </p>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/shop/products">Start Shopping</Link>
-          </Button>
+          {ordersLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : recentOrders.length > 0 ? (
+            <div className="space-y-3">
+              {recentOrders.map((order: any) => (
+                <div key={order.uuid} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">{order.orderNumber}</p>
+                      <p className="text-xs text-muted-foreground">{order.status}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium">{formatPrice(order.total)}</span>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+                <Link to="/account/orders">View All Orders</Link>
+              </Button>
+            </div>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm mb-4">
+                You haven't placed any orders yet.
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/shop/products">Start Shopping</Link>
+              </Button>
+            </>
+          )}
         </div>
         <div className="rounded-lg border bg-card p-6">
           <h3 className="font-semibold mb-4">Account Settings</h3>

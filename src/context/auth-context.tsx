@@ -51,7 +51,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const hasTokens = TokenManager.hasTokens();
       setIsAuthenticated(hasTokens);
 
-      // Try to restore user data from localStorage
       if (hasTokens) {
         const storedUser = localStorage.getItem('user_data');
         if (storedUser) {
@@ -63,6 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.error('Failed to parse user data:', e);
           }
         }
+      } else {
+        localStorage.removeItem('user_data');
       }
 
       setIsLoading(false);
@@ -103,11 +104,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const getLoginPath = (role: UserRole | null): string => {
     switch (role) {
       case 'outlet':
-        return '/outlet/login';
+        return '/outlet/sign-in';
       case 'customer':
         return '/sign-in?type=customer';
       default:
-        return '/sign-in';
+        return '/admin/sign-in';
     }
   };
 
@@ -128,17 +129,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    const currentRole = userRole;
-
     TokenManager.clearTokens();
     localStorage.removeItem('user_data');
     setIsAuthenticated(false);
     setUser(null);
     setUserRole(null);
 
-    // Redirect to appropriate login page
-    const loginPath = getLoginPath(currentRole);
-    if (window.location.pathname !== loginPath) {
+    // Redirect based on current URL, not role (role may be null/stale)
+    const currentPath = window.location.pathname;
+    let loginPath = '/admin/sign-in';
+    if (currentPath.startsWith('/outlet')) {
+      loginPath = '/outlet/sign-in';
+    } else if (currentPath.startsWith('/account') || currentPath.startsWith('/shop')) {
+      loginPath = '/sign-in';
+    }
+
+    if (currentPath !== loginPath) {
       window.location.href = loginPath;
     }
   };

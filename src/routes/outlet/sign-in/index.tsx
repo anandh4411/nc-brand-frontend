@@ -9,10 +9,10 @@ import { z } from "zod";
 import { useState } from "react";
 import { Loader2, Store } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { outletApi } from "@/api/endpoints/outlet";
 
 const outletLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  loginCode: z.string().min(6, "Login code must be at least 6 characters"),
+  loginCode: z.string().length(6, "Login code must be exactly 6 characters").regex(/^[A-Za-z0-9]{6}$/, "Login code must be 6 alphanumeric characters"),
 });
 
 type OutletLoginForm = z.infer<typeof outletLoginSchema>;
@@ -25,8 +25,7 @@ function OutletLoginPage() {
   const form = useForm<OutletLoginForm>({
     resolver: zodResolver(outletLoginSchema),
     defaultValues: {
-      email: "chennai@ncbrand.com",
-      loginCode: "NCB001",
+      loginCode: "",
     },
   });
 
@@ -35,29 +34,24 @@ function OutletLoginPage() {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await outletApi.login(data.loginCode);
+      const { outlet, accessToken, refreshToken } = response.data;
 
-      // Mock validation - accept any credentials for testing
-      // In real app, this would validate against backend
-
-      // Mock tokens and user data for outlet
-      const mockTokens = {
-        accessToken: "mock_outlet_access_token_" + Date.now(),
-        refreshToken: "mock_outlet_refresh_token_" + Date.now(),
-      };
-
-      const mockUserData = {
-        id: 1,
-        uuid: "outlet-uuid-" + data.loginCode,
-        name: "NC Brand Outlet",
-        email: data.email,
-        role: "outlet" as const,
-      };
-
-      login(mockTokens, mockUserData);
-    } catch (err) {
-      setError("Failed to login. Please try again.");
+      login(
+        { accessToken, refreshToken },
+        {
+          id: outlet.id,
+          uuid: outlet.uuid,
+          name: outlet.name,
+          email: outlet.email || "",
+          role: "outlet",
+          outletId: outlet.id,
+          outletName: outlet.name,
+          outletCode: outlet.code,
+        }
+      );
+    } catch {
+      setError("Invalid login code. Please try again.");
       setIsLoading(false);
     }
   };
@@ -74,7 +68,7 @@ function OutletLoginPage() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
             <CardDescription className="text-center">
-              Sign in to your outlet dashboard
+              Enter your 6-digit login code to access your outlet dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -86,26 +80,12 @@ function OutletLoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="outlet@ncbrand.com"
-                  {...form.register("email")}
-                />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="loginCode">Login Code</Label>
                 <Input
                   id="loginCode"
                   type="password"
-                  placeholder="Enter your login code"
+                  maxLength={6}
+                  placeholder="Enter 6-digit code"
                   {...form.register("loginCode")}
                 />
                 {form.formState.errors.loginCode && (
@@ -127,6 +107,6 @@ function OutletLoginPage() {
   );
 }
 
-export const Route = createFileRoute("/outlet/login/")({
+export const Route = createFileRoute("/outlet/sign-in/")({
   component: OutletLoginPage,
 });

@@ -26,6 +26,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ShopWishlistRouteImport } from './routes/shop/wishlist'
 import { Route as ShopCartRouteImport } from './routes/shop/cart'
+import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
 import { Route as AccountWishlistRouteImport } from './routes/account/wishlist'
 import { Route as AccountSettingsRouteImport } from './routes/account/settings'
 import { Route as AccountOrdersRouteImport } from './routes/account/orders'
@@ -41,9 +42,9 @@ import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
 import { Route as ShopProductsIndexRouteImport } from './routes/shop/products/index'
+import { Route as OutletSignInIndexRouteImport } from './routes/outlet/sign-in/index'
 import { Route as OutletShipmentsIndexRouteImport } from './routes/outlet/shipments/index'
 import { Route as OutletSalesIndexRouteImport } from './routes/outlet/sales/index'
-import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as OutletInventoryIndexRouteImport } from './routes/outlet/inventory/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as AdminShipmentsIndexRouteImport } from './routes/admin/shipments/index'
@@ -149,6 +150,11 @@ const ShopCartRoute = ShopCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => ShopRoute,
 } as any)
+const AdminSignInRoute = AdminSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountWishlistRoute = AccountWishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
@@ -231,6 +237,11 @@ const ShopProductsIndexRoute = ShopProductsIndexRouteImport.update({
   path: '/products/',
   getParentRoute: () => ShopRoute,
 } as any)
+const OutletSignInIndexRoute = OutletSignInIndexRouteImport.update({
+  id: '/sign-in/',
+  path: '/sign-in/',
+  getParentRoute: () => OutletRoute,
+} as any)
 const OutletShipmentsIndexRoute = OutletShipmentsIndexRouteImport.update({
   id: '/shipments/',
   path: '/shipments/',
@@ -239,11 +250,6 @@ const OutletShipmentsIndexRoute = OutletShipmentsIndexRouteImport.update({
 const OutletSalesIndexRoute = OutletSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
-  getParentRoute: () => OutletRoute,
-} as any)
-const OutletLoginIndexRoute = OutletLoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
   getParentRoute: () => OutletRoute,
 } as any)
 const OutletInventoryIndexRoute = OutletInventoryIndexRouteImport.update({
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
@@ -399,9 +406,9 @@ export interface FileRoutesByFullPath {
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/outlet/inventory': typeof OutletInventoryIndexRoute
-  '/outlet/login': typeof OutletLoginIndexRoute
   '/outlet/sales': typeof OutletSalesIndexRoute
   '/outlet/shipments': typeof OutletShipmentsIndexRoute
+  '/outlet/sign-in': typeof OutletSignInIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/users': typeof DashboardUsersIndexLazyRoute
 }
@@ -422,6 +429,7 @@ export interface FileRoutesByTo {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account': typeof AccountIndexRoute
@@ -447,9 +455,9 @@ export interface FileRoutesByTo {
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/outlet/inventory': typeof OutletInventoryIndexRoute
-  '/outlet/login': typeof OutletLoginIndexRoute
   '/outlet/sales': typeof OutletSalesIndexRoute
   '/outlet/shipments': typeof OutletShipmentsIndexRoute
+  '/outlet/sign-in': typeof OutletSignInIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
   '/dashboard/users': typeof DashboardUsersIndexLazyRoute
 }
@@ -477,6 +485,7 @@ export interface FileRoutesById {
   '/account/orders': typeof AccountOrdersRouteWithChildren
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
@@ -502,9 +511,9 @@ export interface FileRoutesById {
   '/admin/shipments/': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/outlet/inventory/': typeof OutletInventoryIndexRoute
-  '/outlet/login/': typeof OutletLoginIndexRoute
   '/outlet/sales/': typeof OutletSalesIndexRoute
   '/outlet/shipments/': typeof OutletShipmentsIndexRoute
+  '/outlet/sign-in/': typeof OutletSignInIndexRoute
   '/shop/products/': typeof ShopProductsIndexRoute
   '/dashboard/users/': typeof DashboardUsersIndexLazyRoute
 }
@@ -533,6 +542,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/settings'
     | '/account/wishlist'
+    | '/admin/sign-in'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account/'
@@ -558,9 +568,9 @@ export interface FileRouteTypes {
     | '/admin/shipments'
     | '/dashboard/settings/'
     | '/outlet/inventory'
-    | '/outlet/login'
     | '/outlet/sales'
     | '/outlet/shipments'
+    | '/outlet/sign-in'
     | '/shop/products'
     | '/dashboard/users'
   fileRoutesByTo: FileRoutesByTo
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/settings'
     | '/account/wishlist'
+    | '/admin/sign-in'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account'
@@ -606,9 +617,9 @@ export interface FileRouteTypes {
     | '/admin/shipments'
     | '/dashboard/settings'
     | '/outlet/inventory'
-    | '/outlet/login'
     | '/outlet/sales'
     | '/outlet/shipments'
+    | '/outlet/sign-in'
     | '/shop/products'
     | '/dashboard/users'
   id:
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/account/orders'
     | '/account/settings'
     | '/account/wishlist'
+    | '/admin/sign-in'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account/'
@@ -660,9 +672,9 @@ export interface FileRouteTypes {
     | '/admin/shipments/'
     | '/dashboard/settings/'
     | '/outlet/inventory/'
-    | '/outlet/login/'
     | '/outlet/sales/'
     | '/outlet/shipments/'
+    | '/outlet/sign-in/'
     | '/shop/products/'
     | '/dashboard/users/'
   fileRoutesById: FileRoutesById
@@ -794,6 +806,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopCartRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/admin/sign-in': {
+      id: '/admin/sign-in'
+      path: '/sign-in'
+      fullPath: '/admin/sign-in'
+      preLoaderRoute: typeof AdminSignInRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/wishlist': {
       id: '/account/wishlist'
       path: '/wishlist'
@@ -906,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopProductsIndexRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/outlet/sign-in/': {
+      id: '/outlet/sign-in/'
+      path: '/sign-in'
+      fullPath: '/outlet/sign-in'
+      preLoaderRoute: typeof OutletSignInIndexRouteImport
+      parentRoute: typeof OutletRoute
+    }
     '/outlet/shipments/': {
       id: '/outlet/shipments/'
       path: '/shipments'
@@ -918,13 +944,6 @@ declare module '@tanstack/react-router' {
       path: '/sales'
       fullPath: '/outlet/sales'
       preLoaderRoute: typeof OutletSalesIndexRouteImport
-      parentRoute: typeof OutletRoute
-    }
-    '/outlet/login/': {
-      id: '/outlet/login/'
-      path: '/login'
-      fullPath: '/outlet/login'
-      preLoaderRoute: typeof OutletLoginIndexRouteImport
       parentRoute: typeof OutletRoute
     }
     '/outlet/inventory/': {
@@ -1088,6 +1107,7 @@ const AccountRouteWithChildren =
   AccountRoute._addFileChildren(AccountRouteChildren)
 
 interface AdminRouteChildren {
+  AdminSignInRoute: typeof AdminSignInRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminOutletsOutletIdRoute: typeof AdminOutletsOutletIdRoute
   AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
@@ -1102,6 +1122,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminSignInRoute: AdminSignInRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminOutletsOutletIdRoute: AdminOutletsOutletIdRoute,
   AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
@@ -1159,17 +1180,17 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 interface OutletRouteChildren {
   OutletIndexRoute: typeof OutletIndexRoute
   OutletInventoryIndexRoute: typeof OutletInventoryIndexRoute
-  OutletLoginIndexRoute: typeof OutletLoginIndexRoute
   OutletSalesIndexRoute: typeof OutletSalesIndexRoute
   OutletShipmentsIndexRoute: typeof OutletShipmentsIndexRoute
+  OutletSignInIndexRoute: typeof OutletSignInIndexRoute
 }
 
 const OutletRouteChildren: OutletRouteChildren = {
   OutletIndexRoute: OutletIndexRoute,
   OutletInventoryIndexRoute: OutletInventoryIndexRoute,
-  OutletLoginIndexRoute: OutletLoginIndexRoute,
   OutletSalesIndexRoute: OutletSalesIndexRoute,
   OutletShipmentsIndexRoute: OutletShipmentsIndexRoute,
+  OutletSignInIndexRoute: OutletSignInIndexRoute,
 }
 
 const OutletRouteWithChildren =

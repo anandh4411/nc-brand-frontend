@@ -55,6 +55,23 @@ export interface PendingShipment {
   createdAt: string;
 }
 
+export interface AnalyticsData {
+  stats: {
+    totalRevenue: number;
+    revenueGrowth: number;
+    totalOrders: number;
+    ordersGrowth: number;
+    totalCustomers: number;
+    customersGrowth: number;
+    avgOrderValue: number;
+    avgOrderGrowth: number;
+  };
+  revenueData: { month: string; revenue: number; orders: number }[];
+  categoryData: { name: string; value: number; fill: string }[];
+  outletPerformance: { outlet: string; sales: number }[];
+  dailySales: { day: string; online: number; offline: number }[];
+}
+
 // ============================================================================
 // CATEGORIES
 // ============================================================================
@@ -434,6 +451,9 @@ export const adminApi = {
   getPendingShipments: (limit = 10) =>
     apiClient.get<PendingShipment[]>(`${BASE}/admin/dashboard/pending-shipments`, { params: { limit } }),
 
+  getAnalytics: () =>
+    apiClient.get<AnalyticsData>(`${BASE}/admin/analytics`),
+
   // Categories
   getCategories: () =>
     apiClient.get<Category[]>(`${BASE}/categories`),
@@ -552,6 +572,21 @@ export const adminApi = {
 
   getOutletSales: (uuid: string) =>
     apiClient.get<any>(`${BASE}/outlets/${uuid}/sales`),
+
+  getOutletStats: (uuid: string) =>
+    apiClient.get<{
+      stats: {
+        totalStock: number;
+        stockChange: number;
+        lowStockItems: number;
+        pendingShipments: number;
+        todaySales: number;
+        salesChange: number;
+        monthlyRevenue: number;
+      };
+      salesData: { month: string; sales: number }[];
+      categoryData: { category: string; value: number }[];
+    }>(`${BASE}/outlets/${uuid}/stats`),
 
   // Shipments
   getShipments: (params?: { page?: number; pageSize?: number; outlet?: string; status?: string }) =>

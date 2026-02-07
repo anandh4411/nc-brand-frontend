@@ -26,10 +26,23 @@ export class TokenManager {
     localStorage.removeItem(env.refreshTokenKey);
   }
 
+  static isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  }
+
   static hasTokens(): boolean {
     const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
-    const hasValid = accessToken !== null && refreshToken !== null;
-    return hasValid;
+    if (!accessToken || !refreshToken) return false;
+    if (this.isTokenExpired(accessToken)) {
+      this.clearTokens();
+      return false;
+    }
+    return true;
   }
 }

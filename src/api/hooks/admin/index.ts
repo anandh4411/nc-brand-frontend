@@ -24,6 +24,7 @@ import type {
 export const adminKeys = {
   // Dashboard
   dashboard: ['admin', 'dashboard'] as const,
+  analytics: ['admin', 'analytics'] as const,
   lowStock: (limit?: number) => ['admin', 'low-stock', limit] as const,
   recentOrders: (limit?: number) => ['admin', 'recent-orders', limit] as const,
   pendingShipments: (limit?: number) => ['admin', 'pending-shipments', limit] as const,
@@ -93,6 +94,13 @@ export function usePendingShipments(limit = 10) {
   return useQuery({
     queryKey: adminKeys.pendingShipments(limit),
     queryFn: () => adminApi.getPendingShipments(limit),
+  });
+}
+
+export function useAdminAnalytics() {
+  return useQuery({
+    queryKey: adminKeys.analytics,
+    queryFn: () => adminApi.getAnalytics(),
   });
 }
 
@@ -395,6 +403,14 @@ export function useOutletSales(uuid: string) {
   return useQuery({
     queryKey: ['admin', 'outlets', uuid, 'sales'],
     queryFn: () => adminApi.getOutletSales(uuid),
+    enabled: !!uuid,
+  });
+}
+
+export function useOutletStats(uuid: string) {
+  return useQuery({
+    queryKey: ['admin', 'outlets', uuid, 'stats'],
+    queryFn: () => adminApi.getOutletStats(uuid),
     enabled: !!uuid,
   });
 }

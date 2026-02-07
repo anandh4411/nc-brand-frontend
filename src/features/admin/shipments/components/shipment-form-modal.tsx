@@ -55,8 +55,8 @@ export function ShipmentFormModal({ open, onOpenChange }: Props) {
   const { data: inventoryResponse } = useAdminInventory();
   const createShipment = useCreateShipment();
 
-  const outlets = ((outletsResponse?.data as any)?.outlets || outletsResponse?.data || []) as Outlet[];
-  const inventoryItems = ((inventoryResponse?.data as any)?.items || inventoryResponse?.data || []) as InventoryItem[];
+  const outlets = (Array.isArray(outletsResponse?.data) ? outletsResponse?.data : (outletsResponse?.data as any)?.outlets || []) as Outlet[];
+  const inventoryItems = (Array.isArray(inventoryResponse?.data) ? inventoryResponse?.data : (inventoryResponse?.data as any)?.inventories || (inventoryResponse?.data as any)?.items || []) as InventoryItem[];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

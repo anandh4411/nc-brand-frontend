@@ -74,9 +74,9 @@ export default function AdminDashboard() {
   // Extract data with fallbacks
   const stats = (statsResponse?.data || {}) as any;
   const lowStockItems = (lowStockResponse?.data || []) as any[];
-  const recentOrders = (recentOrdersResponse?.data || []) as any[];
-  const pendingShipments = (pendingShipmentsResponse?.data || []) as any[];
-  const banners = (bannersResponse?.data || []) as any[];
+  const recentOrders = ((recentOrdersResponse?.data as any)?.orders || recentOrdersResponse?.data || []) as any[];
+  const pendingShipments = ((pendingShipmentsResponse?.data as any)?.shipments || pendingShipmentsResponse?.data || []) as any[];
+  const banners = (Array.isArray(bannersResponse?.data) ? bannersResponse?.data : (bannersResponse?.data as any)?.banners || []) as any[];
 
   // Banner state
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);

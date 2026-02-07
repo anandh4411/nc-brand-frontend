@@ -5,7 +5,7 @@ import {
   customColumn,
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
-import type { Shipment, ShipmentStatus, ShipmentItem } from "@/types/dto/inventory.dto";
+import type { Shipment, ShipmentItem } from "@/types/dto/inventory.dto";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,22 +15,29 @@ const formatDate = (dateString?: string | null) => {
 };
 
 const getStatusVariant = (
-  status: ShipmentStatus
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
-    case "delivered":
+    case "DELIVERED":
       return "default";
-    case "shipped":
+    case "SHIPPED":
       return "secondary";
-    case "cancelled":
+    case "CANCELLED":
       return "destructive";
     default:
       return "outline";
   }
 };
 
-const getStatusLabel = (status: ShipmentStatus) => {
-  return status.charAt(0).toUpperCase() + status.slice(1);
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    PENDING: "Pending",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered",
+    PARTIALLY_RECEIVED: "Partially Received",
+    CANCELLED: "Cancelled",
+  };
+  return labels[status] || status;
 };
 
 export const createShipmentColumns = (
@@ -43,17 +50,22 @@ export const createShipmentColumns = (
       <div className="font-mono text-sm font-medium">SHP-{String(value).padStart(4, "0")}</div>
     )),
 
-    customColumn<Shipment>("outletName", "Outlet", (value) => (
-      <div className="font-medium max-w-[200px] truncate" title={value}>
-        {value}
-      </div>
-    )),
+    {
+      id: "outletName",
+      accessorFn: (row) => row.outlet?.name || "—",
+      header: "Outlet",
+      cell: ({ getValue }) => (
+        <div className="font-medium max-w-[200px] truncate" title={getValue() as string}>
+          {getValue() as string}
+        </div>
+      ),
+    },
 
     customColumn<Shipment>("items", "Items", (value: ShipmentItem[]) => (
       <div className="text-sm">
-        <span className="font-medium">{value.length}</span>
+        <span className="font-medium">{value?.length || 0}</span>
         <span className="text-muted-foreground ml-1">
-          ({value.reduce((acc: number, item: ShipmentItem) => acc + item.quantity, 0)} units)
+          ({value?.reduce((acc: number, item: ShipmentItem) => acc + item.quantity, 0) || 0} units)
         </span>
       </div>
     )),

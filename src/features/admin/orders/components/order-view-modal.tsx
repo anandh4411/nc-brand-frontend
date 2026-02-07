@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Order, OrderStatus, PaymentStatus } from "@/types/dto/order.dto";
+import type { Order } from "@/types/dto/order.dto";
 
 interface Props {
   open: boolean;
@@ -27,19 +27,22 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-const getOrderStatusVariant = (status: OrderStatus) => {
-  switch (status) {
+const getOrderStatusVariant = (status: string) => {
+  const s = status?.toLowerCase();
+  switch (s) {
     case "delivered": return "default";
     case "shipped":
-    case "processing": return "secondary";
+    case "processing":
+    case "confirmed": return "secondary";
     case "cancelled":
     case "returned": return "destructive";
     default: return "outline";
   }
 };
 
-const getPaymentStatusVariant = (status: PaymentStatus) => {
-  switch (status) {
+const getPaymentStatusVariant = (status: string) => {
+  const s = status?.toLowerCase();
+  switch (s) {
     case "paid": return "default";
     case "refunded": return "secondary";
     case "failed": return "destructive";
@@ -95,8 +98,8 @@ export function OrderViewModal({ open, onOpenChange, order }: Props) {
               <User className="h-4 w-4 mt-1 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Customer</p>
-                <p className="text-sm text-muted-foreground">{order.customerName}</p>
-                <p className="text-sm text-muted-foreground">{order.customerEmail}</p>
+                <p className="text-sm text-muted-foreground">{order.customer?.name}</p>
+                <p className="text-sm text-muted-foreground">{order.customer?.email}</p>
               </div>
             </div>
 
@@ -179,6 +182,12 @@ export function OrderViewModal({ open, onOpenChange, order }: Props) {
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-mono">{formatPrice(order.subtotal)}</span>
               </div>
+              {(order.discount || 0) > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount</span>
+                  <span className="font-mono">-{formatPrice(order.discount || 0)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax (18% GST)</span>
                 <span className="font-mono">{formatPrice(order.tax)}</span>
@@ -186,7 +195,7 @@ export function OrderViewModal({ open, onOpenChange, order }: Props) {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="font-mono">
-                  {order.shippingFee === 0 ? "Free" : formatPrice(order.shippingFee)}
+                  {(order.shipping || 0) === 0 ? "Free" : formatPrice(order.shipping || 0)}
                 </span>
               </div>
               <Separator />

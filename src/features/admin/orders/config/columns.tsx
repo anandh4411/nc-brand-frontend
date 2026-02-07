@@ -5,10 +5,9 @@ import {
   customColumn,
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
-import type { Order, OrderStatus, PaymentStatus } from "@/types/dto/order.dto";
+import type { Order } from "@/types/dto/order.dto";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import type { OrderItem } from "@/types/dto/order.dto";
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -24,13 +23,15 @@ const formatPrice = (price: number) => {
 };
 
 const getOrderStatusVariant = (
-  status: OrderStatus
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
+  const s = status?.toLowerCase();
+  switch (s) {
     case "delivered":
       return "default";
     case "shipped":
     case "processing":
+    case "confirmed":
       return "secondary";
     case "cancelled":
     case "returned":
@@ -41,9 +42,10 @@ const getOrderStatusVariant = (
 };
 
 const getPaymentStatusVariant = (
-  status: PaymentStatus
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
+  const s = status?.toLowerCase();
+  switch (s) {
     case "paid":
       return "default";
     case "refunded":
@@ -77,21 +79,28 @@ export const createOrderColumns = (
       <div className="font-mono text-sm font-medium">{value}</div>
     )),
 
-    customColumn<Order>("customerName", "Customer", (value, row) => (
-      <div>
-        <p className="font-medium">{value}</p>
-        <p className="text-xs text-muted-foreground">{row.customerEmail}</p>
-      </div>
-    )),
+    {
+      id: "customerName",
+      accessorFn: (row) => row.customer?.name || "—",
+      header: "Customer",
+      cell: ({ row: { original } }) => (
+        <div>
+          <p className="font-medium">{original.customer?.name || "—"}</p>
+          <p className="text-xs text-muted-foreground">{original.customer?.email || ""}</p>
+        </div>
+      ),
+    },
 
-    customColumn<Order>("items", "Items", (value: OrderItem[]) => (
-      <div className="text-sm">
-        <span className="font-medium">{value.length}</span>
-        <span className="text-muted-foreground ml-1">
-          ({value.reduce((acc: number, item: OrderItem) => acc + item.quantity, 0)} units)
-        </span>
-      </div>
-    )),
+    {
+      id: "items",
+      accessorFn: (row: any) => row.itemCount ?? row.items?.length ?? 0,
+      header: "Items",
+      cell: ({ getValue }) => (
+        <div className="text-sm">
+          <span className="font-medium">{getValue() as number}</span>
+        </div>
+      ),
+    },
 
     customColumn<Order>("total", "Total", (value) => (
       <div className="font-mono font-medium">{formatPrice(value)}</div>
@@ -119,9 +128,19 @@ export const createOrderColumns = (
       { filterable: true }
     ),
 
-    customColumn<Order>("paymentMethod", "Method", (value) => (
-      <span className="text-sm capitalize">{value === "cod" ? "COD" : "Razorpay"}</span>
-    )),
+    {
+      id: "paymentMethod",
+      accessorFn: (row: any) => row.paymentMethod || "—",
+      header: "Method",
+      cell: ({ getValue }) => {
+        const val = getValue() as string;
+        return (
+          <span className="text-sm capitalize">
+            {val === "cod" ? "COD" : val === "razorpay" ? "Razorpay" : val || "—"}
+          </span>
+        );
+      },
+    },
 
     customColumn<Order>("createdAt", "Date", (value) => (
       <div className="text-muted-foreground text-sm">{formatDate(value)}</div>

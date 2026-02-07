@@ -20,18 +20,29 @@ interface Props {
 }
 
 const getStatusVariant = (
-  status: ShipmentStatus
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
-    case "delivered":
+    case "DELIVERED":
       return "default";
-    case "shipped":
+    case "SHIPPED":
       return "secondary";
-    case "cancelled":
+    case "CANCELLED":
       return "destructive";
     default:
       return "outline";
   }
+};
+
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    PENDING: "Pending",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered",
+    PARTIALLY_RECEIVED: "Partially Received",
+    CANCELLED: "Cancelled",
+  };
+  return labels[status] || status;
 };
 
 export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
@@ -70,7 +81,7 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
                 <p className="text-sm text-muted-foreground">{shipment.uuid}</p>
               </div>
               <Badge variant={getStatusVariant(shipment.status)}>
-                {shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1)}
+                {getStatusLabel(shipment.status)}
               </Badge>
             </div>
 
@@ -83,7 +94,7 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
                 <div>
                   <p className="text-sm font-medium">Destination Outlet</p>
                   <p className="text-sm text-muted-foreground">
-                    {shipment.outletName}
+                    {shipment.outlet?.name || "—"}
                   </p>
                 </div>
               </div>
@@ -92,7 +103,7 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
                 <div>
                   <p className="text-sm font-medium">Created By</p>
                   <p className="text-sm text-muted-foreground">
-                    {shipment.createdByName || "Unknown"}
+                    {shipment.createdBy?.name || "Unknown"}
                   </p>
                 </div>
               </div>
@@ -124,14 +135,6 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
               </div>
             </div>
 
-            {/* Notes */}
-            {shipment.notes && (
-              <div>
-                <p className="text-sm font-medium mb-1">Notes</p>
-                <p className="text-sm text-muted-foreground">{shipment.notes}</p>
-              </div>
-            )}
-
             <Separator />
 
             {/* Items */}
@@ -145,7 +148,7 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   Total: {totalQuantity} units
-                  {shipment.status === "delivered" && ` (${totalReceived} received)`}
+                  {shipment.status === "DELIVERED" && ` (${totalReceived} received)`}
                 </div>
               </div>
 
@@ -158,7 +161,7 @@ export function ShipmentViewModal({ open, onOpenChange, shipment }: Props) {
                     <div className="flex-1">
                       <p className="font-medium">{item.productName}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-mono">{item.productVariantSku}</span>
+                        <span className="font-mono">{item.sku}</span>
                         <span>•</span>
                         <span>{item.colorName}</span>
                         <span>•</span>

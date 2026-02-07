@@ -14,7 +14,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OutletRouteImport } from './routes/outlet'
-import { Route as InstitutionsRouteImport } from './routes/institutions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -22,7 +21,6 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShopIndexRouteImport } from './routes/shop/index'
 import { Route as OutletIndexRouteImport } from './routes/outlet/index'
-import { Route as InstitutionsIndexRouteImport } from './routes/institutions/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
@@ -42,13 +40,11 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
-import { Route as DashboardInstitutionsRouteRouteImport } from './routes/dashboard/institutions/route'
 import { Route as ShopProductsIndexRouteImport } from './routes/shop/products/index'
 import { Route as OutletShipmentsIndexRouteImport } from './routes/outlet/shipments/index'
 import { Route as OutletSalesIndexRouteImport } from './routes/outlet/sales/index'
 import { Route as OutletLoginIndexRouteImport } from './routes/outlet/login/index'
 import { Route as OutletInventoryIndexRouteImport } from './routes/outlet/inventory/index'
-import { Route as InstitutionsLoginIndexRouteImport } from './routes/institutions/login/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as AdminShipmentsIndexRouteImport } from './routes/admin/shipments/index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
@@ -63,33 +59,8 @@ import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$sl
 import { Route as AdminOutletsOutletIdRouteImport } from './routes/admin/outlets/$outletId'
 import { Route as AccountOrdersOrderIdRouteImport } from './routes/account/orders.$orderId'
 
-const InstitutionsSubmissionsIndexLazyRouteImport = createFileRoute(
-  '/institutions/submissions/',
-)()
-const InstitutionsDashboardIndexLazyRouteImport = createFileRoute(
-  '/institutions/dashboard/',
-)()
 const DashboardUsersIndexLazyRouteImport =
   createFileRoute('/dashboard/users/')()
-const DashboardTemplatesIndexLazyRouteImport = createFileRoute(
-  '/dashboard/templates/',
-)()
-const DashboardSubmissionsIndexLazyRouteImport = createFileRoute(
-  '/dashboard/submissions/',
-)()
-const DashboardProductsIndexLazyRouteImport = createFileRoute(
-  '/dashboard/products/',
-)()
-const DashboardProductCategoriesIndexLazyRouteImport = createFileRoute(
-  '/dashboard/product-categories/',
-)()
-const DashboardPhasesIndexLazyRouteImport =
-  createFileRoute('/dashboard/phases/')()
-const DashboardInstitutionsIndexLazyRouteImport = createFileRoute(
-  '/dashboard/institutions/',
-)()
-const DashboardFormsIndexLazyRouteImport =
-  createFileRoute('/dashboard/forms/')()
 const DashboardSettingsNotificationsLazyRouteImport = createFileRoute(
   '/dashboard/settings/notifications',
 )()
@@ -116,11 +87,6 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 const OutletRoute = OutletRouteImport.update({
   id: '/outlet',
   path: '/outlet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InstitutionsRoute = InstitutionsRouteImport.update({
-  id: '/institutions',
-  path: '/institutions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -157,11 +123,6 @@ const OutletIndexRoute = OutletIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => OutletRoute,
-} as any)
-const InstitutionsIndexRoute = InstitutionsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => InstitutionsRoute,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
@@ -258,91 +219,12 @@ const DashboardSettingsRouteRoute = DashboardSettingsRouteRouteImport.update({
   path: '/settings',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardInstitutionsRouteRoute =
-  DashboardInstitutionsRouteRouteImport.update({
-    id: '/institutions',
-    path: '/institutions',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const InstitutionsSubmissionsIndexLazyRoute =
-  InstitutionsSubmissionsIndexLazyRouteImport.update({
-    id: '/submissions/',
-    path: '/submissions/',
-    getParentRoute: () => InstitutionsRoute,
-  } as any).lazy(() =>
-    import('./routes/institutions/submissions/index.lazy').then((d) => d.Route),
-  )
-const InstitutionsDashboardIndexLazyRoute =
-  InstitutionsDashboardIndexLazyRouteImport.update({
-    id: '/dashboard/',
-    path: '/dashboard/',
-    getParentRoute: () => InstitutionsRoute,
-  } as any).lazy(() =>
-    import('./routes/institutions/dashboard/index.lazy').then((d) => d.Route),
-  )
 const DashboardUsersIndexLazyRoute = DashboardUsersIndexLazyRouteImport.update({
   id: '/users/',
   path: '/users/',
   getParentRoute: () => DashboardRoute,
 } as any).lazy(() =>
   import('./routes/dashboard/users/index.lazy').then((d) => d.Route),
-)
-const DashboardTemplatesIndexLazyRoute =
-  DashboardTemplatesIndexLazyRouteImport.update({
-    id: '/templates/',
-    path: '/templates/',
-    getParentRoute: () => DashboardRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/templates/index.lazy').then((d) => d.Route),
-  )
-const DashboardSubmissionsIndexLazyRoute =
-  DashboardSubmissionsIndexLazyRouteImport.update({
-    id: '/submissions/',
-    path: '/submissions/',
-    getParentRoute: () => DashboardRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/submissions/index.lazy').then((d) => d.Route),
-  )
-const DashboardProductsIndexLazyRoute =
-  DashboardProductsIndexLazyRouteImport.update({
-    id: '/products/',
-    path: '/products/',
-    getParentRoute: () => DashboardRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/products/index.lazy').then((d) => d.Route),
-  )
-const DashboardProductCategoriesIndexLazyRoute =
-  DashboardProductCategoriesIndexLazyRouteImport.update({
-    id: '/product-categories/',
-    path: '/product-categories/',
-    getParentRoute: () => DashboardRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/product-categories/index.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-const DashboardPhasesIndexLazyRoute =
-  DashboardPhasesIndexLazyRouteImport.update({
-    id: '/phases/',
-    path: '/phases/',
-    getParentRoute: () => DashboardRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/phases/index.lazy').then((d) => d.Route),
-  )
-const DashboardInstitutionsIndexLazyRoute =
-  DashboardInstitutionsIndexLazyRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardInstitutionsRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/dashboard/institutions/index.lazy').then((d) => d.Route),
-  )
-const DashboardFormsIndexLazyRoute = DashboardFormsIndexLazyRouteImport.update({
-  id: '/forms/',
-  path: '/forms/',
-  getParentRoute: () => DashboardRoute,
-} as any).lazy(() =>
-  import('./routes/dashboard/forms/index.lazy').then((d) => d.Route),
 )
 const ShopProductsIndexRoute = ShopProductsIndexRouteImport.update({
   id: '/products/',
@@ -368,11 +250,6 @@ const OutletInventoryIndexRoute = OutletInventoryIndexRouteImport.update({
   id: '/inventory/',
   path: '/inventory/',
   getParentRoute: () => OutletRoute,
-} as any)
-const InstitutionsLoginIndexRoute = InstitutionsLoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
-  getParentRoute: () => InstitutionsRoute,
 } as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/',
@@ -480,11 +357,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/institutions': typeof InstitutionsRouteWithChildren
   '/outlet': typeof OutletRouteWithChildren
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRouteWithChildren
-  '/dashboard/institutions': typeof DashboardInstitutionsRouteRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -504,7 +379,6 @@ export interface FileRoutesByFullPath {
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/institutions/': typeof InstitutionsIndexRoute
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -524,22 +398,12 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsIndexRoute
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
-  '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/inventory': typeof OutletInventoryIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
   '/outlet/sales': typeof OutletSalesIndexRoute
   '/outlet/shipments': typeof OutletShipmentsIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
-  '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
-  '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
-  '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
-  '/dashboard/product-categories': typeof DashboardProductCategoriesIndexLazyRoute
-  '/dashboard/products': typeof DashboardProductsIndexLazyRoute
-  '/dashboard/submissions': typeof DashboardSubmissionsIndexLazyRoute
-  '/dashboard/templates': typeof DashboardTemplatesIndexLazyRoute
   '/dashboard/users': typeof DashboardUsersIndexLazyRoute
-  '/institutions/dashboard': typeof InstitutionsDashboardIndexLazyRoute
-  '/institutions/submissions': typeof InstitutionsSubmissionsIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -563,7 +427,6 @@ export interface FileRoutesByTo {
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/institutions': typeof InstitutionsIndexRoute
   '/outlet': typeof OutletIndexRoute
   '/shop': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -583,22 +446,12 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsIndexRoute
   '/admin/shipments': typeof AdminShipmentsIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
-  '/institutions/login': typeof InstitutionsLoginIndexRoute
   '/outlet/inventory': typeof OutletInventoryIndexRoute
   '/outlet/login': typeof OutletLoginIndexRoute
   '/outlet/sales': typeof OutletSalesIndexRoute
   '/outlet/shipments': typeof OutletShipmentsIndexRoute
   '/shop/products': typeof ShopProductsIndexRoute
-  '/dashboard/forms': typeof DashboardFormsIndexLazyRoute
-  '/dashboard/institutions': typeof DashboardInstitutionsIndexLazyRoute
-  '/dashboard/phases': typeof DashboardPhasesIndexLazyRoute
-  '/dashboard/product-categories': typeof DashboardProductCategoriesIndexLazyRoute
-  '/dashboard/products': typeof DashboardProductsIndexLazyRoute
-  '/dashboard/submissions': typeof DashboardSubmissionsIndexLazyRoute
-  '/dashboard/templates': typeof DashboardTemplatesIndexLazyRoute
   '/dashboard/users': typeof DashboardUsersIndexLazyRoute
-  '/institutions/dashboard': typeof InstitutionsDashboardIndexLazyRoute
-  '/institutions/submissions': typeof InstitutionsSubmissionsIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -607,11 +460,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/institutions': typeof InstitutionsRouteWithChildren
   '/outlet': typeof OutletRouteWithChildren
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRouteWithChildren
-  '/dashboard/institutions': typeof DashboardInstitutionsRouteRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -631,7 +482,6 @@ export interface FileRoutesById {
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/institutions/': typeof InstitutionsIndexRoute
   '/outlet/': typeof OutletIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
@@ -651,22 +501,12 @@ export interface FileRoutesById {
   '/admin/settings/': typeof AdminSettingsIndexRoute
   '/admin/shipments/': typeof AdminShipmentsIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
-  '/institutions/login/': typeof InstitutionsLoginIndexRoute
   '/outlet/inventory/': typeof OutletInventoryIndexRoute
   '/outlet/login/': typeof OutletLoginIndexRoute
   '/outlet/sales/': typeof OutletSalesIndexRoute
   '/outlet/shipments/': typeof OutletShipmentsIndexRoute
   '/shop/products/': typeof ShopProductsIndexRoute
-  '/dashboard/forms/': typeof DashboardFormsIndexLazyRoute
-  '/dashboard/institutions/': typeof DashboardInstitutionsIndexLazyRoute
-  '/dashboard/phases/': typeof DashboardPhasesIndexLazyRoute
-  '/dashboard/product-categories/': typeof DashboardProductCategoriesIndexLazyRoute
-  '/dashboard/products/': typeof DashboardProductsIndexLazyRoute
-  '/dashboard/submissions/': typeof DashboardSubmissionsIndexLazyRoute
-  '/dashboard/templates/': typeof DashboardTemplatesIndexLazyRoute
   '/dashboard/users/': typeof DashboardUsersIndexLazyRoute
-  '/institutions/dashboard/': typeof InstitutionsDashboardIndexLazyRoute
-  '/institutions/submissions/': typeof InstitutionsSubmissionsIndexLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -676,11 +516,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/dashboard'
-    | '/institutions'
     | '/outlet'
     | '/privacy-policy'
     | '/shop'
-    | '/dashboard/institutions'
     | '/dashboard/settings'
     | '/forgot-password'
     | '/otp'
@@ -700,7 +538,6 @@ export interface FileRouteTypes {
     | '/account/'
     | '/admin/'
     | '/dashboard/'
-    | '/institutions/'
     | '/outlet/'
     | '/shop/'
     | '/account/orders/$orderId'
@@ -720,22 +557,12 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/shipments'
     | '/dashboard/settings/'
-    | '/institutions/login'
     | '/outlet/inventory'
     | '/outlet/login'
     | '/outlet/sales'
     | '/outlet/shipments'
     | '/shop/products'
-    | '/dashboard/forms'
-    | '/dashboard/institutions/'
-    | '/dashboard/phases'
-    | '/dashboard/product-categories'
-    | '/dashboard/products'
-    | '/dashboard/submissions'
-    | '/dashboard/templates'
     | '/dashboard/users'
-    | '/institutions/dashboard'
-    | '/institutions/submissions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -759,7 +586,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/dashboard'
-    | '/institutions'
     | '/outlet'
     | '/shop'
     | '/account/orders/$orderId'
@@ -779,22 +605,12 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/shipments'
     | '/dashboard/settings'
-    | '/institutions/login'
     | '/outlet/inventory'
     | '/outlet/login'
     | '/outlet/sales'
     | '/outlet/shipments'
     | '/shop/products'
-    | '/dashboard/forms'
-    | '/dashboard/institutions'
-    | '/dashboard/phases'
-    | '/dashboard/product-categories'
-    | '/dashboard/products'
-    | '/dashboard/submissions'
-    | '/dashboard/templates'
     | '/dashboard/users'
-    | '/institutions/dashboard'
-    | '/institutions/submissions'
   id:
     | '__root__'
     | '/'
@@ -802,11 +618,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/dashboard'
-    | '/institutions'
     | '/outlet'
     | '/privacy-policy'
     | '/shop'
-    | '/dashboard/institutions'
     | '/dashboard/settings'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
@@ -826,7 +640,6 @@ export interface FileRouteTypes {
     | '/account/'
     | '/admin/'
     | '/dashboard/'
-    | '/institutions/'
     | '/outlet/'
     | '/shop/'
     | '/account/orders/$orderId'
@@ -846,22 +659,12 @@ export interface FileRouteTypes {
     | '/admin/settings/'
     | '/admin/shipments/'
     | '/dashboard/settings/'
-    | '/institutions/login/'
     | '/outlet/inventory/'
     | '/outlet/login/'
     | '/outlet/sales/'
     | '/outlet/shipments/'
     | '/shop/products/'
-    | '/dashboard/forms/'
-    | '/dashboard/institutions/'
-    | '/dashboard/phases/'
-    | '/dashboard/product-categories/'
-    | '/dashboard/products/'
-    | '/dashboard/submissions/'
-    | '/dashboard/templates/'
     | '/dashboard/users/'
-    | '/institutions/dashboard/'
-    | '/institutions/submissions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -870,7 +673,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   DashboardRoute: typeof DashboardRouteWithChildren
-  InstitutionsRoute: typeof InstitutionsRouteWithChildren
   OutletRoute: typeof OutletRouteWithChildren
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ShopRoute: typeof ShopRouteWithChildren
@@ -906,13 +708,6 @@ declare module '@tanstack/react-router' {
       path: '/outlet'
       fullPath: '/outlet'
       preLoaderRoute: typeof OutletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/institutions': {
-      id: '/institutions'
-      path: '/institutions'
-      fullPath: '/institutions'
-      preLoaderRoute: typeof InstitutionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -963,13 +758,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/outlet/'
       preLoaderRoute: typeof OutletIndexRouteImport
       parentRoute: typeof OutletRoute
-    }
-    '/institutions/': {
-      id: '/institutions/'
-      path: '/'
-      fullPath: '/institutions/'
-      preLoaderRoute: typeof InstitutionsIndexRouteImport
-      parentRoute: typeof InstitutionsRoute
     }
     '/dashboard/': {
       id: '/dashboard/'
@@ -1104,81 +892,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsRouteRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/institutions': {
-      id: '/dashboard/institutions'
-      path: '/institutions'
-      fullPath: '/dashboard/institutions'
-      preLoaderRoute: typeof DashboardInstitutionsRouteRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/institutions/submissions/': {
-      id: '/institutions/submissions/'
-      path: '/submissions'
-      fullPath: '/institutions/submissions'
-      preLoaderRoute: typeof InstitutionsSubmissionsIndexLazyRouteImport
-      parentRoute: typeof InstitutionsRoute
-    }
-    '/institutions/dashboard/': {
-      id: '/institutions/dashboard/'
-      path: '/dashboard'
-      fullPath: '/institutions/dashboard'
-      preLoaderRoute: typeof InstitutionsDashboardIndexLazyRouteImport
-      parentRoute: typeof InstitutionsRoute
-    }
     '/dashboard/users/': {
       id: '/dashboard/users/'
       path: '/users'
       fullPath: '/dashboard/users'
       preLoaderRoute: typeof DashboardUsersIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/templates/': {
-      id: '/dashboard/templates/'
-      path: '/templates'
-      fullPath: '/dashboard/templates'
-      preLoaderRoute: typeof DashboardTemplatesIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/submissions/': {
-      id: '/dashboard/submissions/'
-      path: '/submissions'
-      fullPath: '/dashboard/submissions'
-      preLoaderRoute: typeof DashboardSubmissionsIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/products/': {
-      id: '/dashboard/products/'
-      path: '/products'
-      fullPath: '/dashboard/products'
-      preLoaderRoute: typeof DashboardProductsIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/product-categories/': {
-      id: '/dashboard/product-categories/'
-      path: '/product-categories'
-      fullPath: '/dashboard/product-categories'
-      preLoaderRoute: typeof DashboardProductCategoriesIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/phases/': {
-      id: '/dashboard/phases/'
-      path: '/phases'
-      fullPath: '/dashboard/phases'
-      preLoaderRoute: typeof DashboardPhasesIndexLazyRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/institutions/': {
-      id: '/dashboard/institutions/'
-      path: '/'
-      fullPath: '/dashboard/institutions/'
-      preLoaderRoute: typeof DashboardInstitutionsIndexLazyRouteImport
-      parentRoute: typeof DashboardInstitutionsRouteRoute
-    }
-    '/dashboard/forms/': {
-      id: '/dashboard/forms/'
-      path: '/forms'
-      fullPath: '/dashboard/forms'
-      preLoaderRoute: typeof DashboardFormsIndexLazyRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/shop/products/': {
@@ -1215,13 +933,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/outlet/inventory'
       preLoaderRoute: typeof OutletInventoryIndexRouteImport
       parentRoute: typeof OutletRoute
-    }
-    '/institutions/login/': {
-      id: '/institutions/login/'
-      path: '/login'
-      fullPath: '/institutions/login'
-      preLoaderRoute: typeof InstitutionsLoginIndexRouteImport
-      parentRoute: typeof InstitutionsRoute
     }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
@@ -1406,20 +1117,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface DashboardInstitutionsRouteRouteChildren {
-  DashboardInstitutionsIndexLazyRoute: typeof DashboardInstitutionsIndexLazyRoute
-}
-
-const DashboardInstitutionsRouteRouteChildren: DashboardInstitutionsRouteRouteChildren =
-  {
-    DashboardInstitutionsIndexLazyRoute: DashboardInstitutionsIndexLazyRoute,
-  }
-
-const DashboardInstitutionsRouteRouteWithChildren =
-  DashboardInstitutionsRouteRoute._addFileChildren(
-    DashboardInstitutionsRouteRouteChildren,
-  )
-
 interface DashboardSettingsRouteRouteChildren {
   DashboardSettingsAccountLazyRoute: typeof DashboardSettingsAccountLazyRoute
   DashboardSettingsAppearanceLazyRoute: typeof DashboardSettingsAppearanceLazyRoute
@@ -1444,52 +1141,19 @@ const DashboardSettingsRouteRouteWithChildren =
   )
 
 interface DashboardRouteChildren {
-  DashboardInstitutionsRouteRoute: typeof DashboardInstitutionsRouteRouteWithChildren
   DashboardSettingsRouteRoute: typeof DashboardSettingsRouteRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardFormsIndexLazyRoute: typeof DashboardFormsIndexLazyRoute
-  DashboardPhasesIndexLazyRoute: typeof DashboardPhasesIndexLazyRoute
-  DashboardProductCategoriesIndexLazyRoute: typeof DashboardProductCategoriesIndexLazyRoute
-  DashboardProductsIndexLazyRoute: typeof DashboardProductsIndexLazyRoute
-  DashboardSubmissionsIndexLazyRoute: typeof DashboardSubmissionsIndexLazyRoute
-  DashboardTemplatesIndexLazyRoute: typeof DashboardTemplatesIndexLazyRoute
   DashboardUsersIndexLazyRoute: typeof DashboardUsersIndexLazyRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardInstitutionsRouteRoute: DashboardInstitutionsRouteRouteWithChildren,
   DashboardSettingsRouteRoute: DashboardSettingsRouteRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardFormsIndexLazyRoute: DashboardFormsIndexLazyRoute,
-  DashboardPhasesIndexLazyRoute: DashboardPhasesIndexLazyRoute,
-  DashboardProductCategoriesIndexLazyRoute:
-    DashboardProductCategoriesIndexLazyRoute,
-  DashboardProductsIndexLazyRoute: DashboardProductsIndexLazyRoute,
-  DashboardSubmissionsIndexLazyRoute: DashboardSubmissionsIndexLazyRoute,
-  DashboardTemplatesIndexLazyRoute: DashboardTemplatesIndexLazyRoute,
   DashboardUsersIndexLazyRoute: DashboardUsersIndexLazyRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
-)
-
-interface InstitutionsRouteChildren {
-  InstitutionsIndexRoute: typeof InstitutionsIndexRoute
-  InstitutionsLoginIndexRoute: typeof InstitutionsLoginIndexRoute
-  InstitutionsDashboardIndexLazyRoute: typeof InstitutionsDashboardIndexLazyRoute
-  InstitutionsSubmissionsIndexLazyRoute: typeof InstitutionsSubmissionsIndexLazyRoute
-}
-
-const InstitutionsRouteChildren: InstitutionsRouteChildren = {
-  InstitutionsIndexRoute: InstitutionsIndexRoute,
-  InstitutionsLoginIndexRoute: InstitutionsLoginIndexRoute,
-  InstitutionsDashboardIndexLazyRoute: InstitutionsDashboardIndexLazyRoute,
-  InstitutionsSubmissionsIndexLazyRoute: InstitutionsSubmissionsIndexLazyRoute,
-}
-
-const InstitutionsRouteWithChildren = InstitutionsRoute._addFileChildren(
-  InstitutionsRouteChildren,
 )
 
 interface OutletRouteChildren {
@@ -1535,7 +1199,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   DashboardRoute: DashboardRouteWithChildren,
-  InstitutionsRoute: InstitutionsRouteWithChildren,
   OutletRoute: OutletRouteWithChildren,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ShopRoute: ShopRouteWithChildren,

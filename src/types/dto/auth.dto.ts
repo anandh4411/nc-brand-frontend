@@ -86,10 +86,9 @@ export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 
 /**
  * User Role
- * TextileHub has 3 roles: admin (manufacturing unit), outlet, customer
- * Note: "institution" is kept for backward compatibility with old Impressaa code
+ * NC Brand has 3 roles: admin (super admin), outlet (store staff), customer
  */
-export const UserRoleSchema = z.enum(['admin', 'outlet', 'customer', 'institution']);
+export const UserRoleSchema = z.enum(['admin', 'outlet', 'customer']);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
 /**

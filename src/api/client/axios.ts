@@ -134,10 +134,10 @@ class ApiClient {
     this.failedQueue = [];
   }
 
-  private getTokenType(token: string): 'admin' | 'institution' | null {
+  private getTokenType(token: string): 'admin' | 'customer' | 'outlet' | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.type || 'admin'; // Default to admin for backward compatibility
+      return payload.type || 'admin';
     } catch {
       return null;
     }
@@ -150,17 +150,11 @@ class ApiClient {
       const tokenType = currentToken ? this.getTokenType(currentToken) : 'admin';
 
       // Use appropriate refresh endpoint based on token type
-      const refreshEndpoint = tokenType === 'institution'
-        ? `${env.apiBaseUrl}${env.apiVersion}/auth/institution-refresh`
-        : `${env.apiBaseUrl}${env.apiVersion}/auth/refresh`;
-
-      // Institution refresh requires the access token in header
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-
-      if (tokenType === 'institution' && currentToken) {
-        headers.Authorization = `Bearer ${currentToken}`;
+      let refreshEndpoint = `${env.apiBaseUrl}${env.apiVersion}/auth/refresh`;
+      if (tokenType === 'customer') {
+        refreshEndpoint = `${env.apiBaseUrl}${env.apiVersion}/shop/auth/refresh`;
+      } else if (tokenType === 'outlet') {
+        refreshEndpoint = `${env.apiBaseUrl}${env.apiVersion}/auth/outlet-refresh`;
       }
 
       // Don't use the interceptor for refresh call to avoid infinite loops
@@ -168,7 +162,7 @@ class ApiClient {
         refreshEndpoint,
         { refreshToken: refreshToken },
         {
-          headers,
+          headers: { "Content-Type": "application/json" },
           timeout: env.apiRefreshTimeout,
         }
       );

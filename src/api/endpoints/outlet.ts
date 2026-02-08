@@ -55,6 +55,59 @@ export interface OutletShipment {
   shippedAt: string | null;
 }
 
+export interface POSInventoryProduct {
+  id: number;
+  sku: string;
+  name: string;
+  color: string;
+  size: string;
+  stock: number;
+  price: number;
+}
+
+export interface OutletSaleItem {
+  sku: string;
+  name: string;
+  color: string;
+  size: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface OutletSale {
+  id: number;
+  uuid: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerPhone: string | null;
+  paymentMethod: string;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+  status: string;
+  date: string;
+  time: string;
+  items: OutletSaleItem[];
+}
+
+export interface CreateSalePayload {
+  customerName: string;
+  customerPhone?: string;
+  paymentMethod: "cash" | "card" | "upi";
+  discount: number;
+  items: {
+    productVariantId: number;
+    sku: string;
+    name: string;
+    color: string;
+    size: string;
+    quantity: number;
+    unitPrice: number;
+  }[];
+}
+
 // === API ===
 
 export const outletApi = {
@@ -105,4 +158,28 @@ export const outletApi = {
   // Shipments
   getShipments: (params?: { status?: string }) =>
     apiClient.get<OutletShipment[]>(`${BASE}/outlet/shipments`, { params }),
+
+  // POS / Sales
+  getPosInventory: () =>
+    apiClient.get<POSInventoryProduct[]>(`${BASE}/outlet/pos/inventory`),
+
+  getSales: (params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+  }) =>
+    apiClient.get<{
+      sales: OutletSale[];
+      pagination: {
+        total: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+      };
+    }>(`${BASE}/outlet/sales`, { params }),
+
+  createSale: (data: CreateSalePayload) =>
+    apiClient.post<OutletSale>(`${BASE}/outlet/sales`, data),
 };

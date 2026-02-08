@@ -11,10 +11,16 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import {
-  shopCategories,
-  fabricTypeOptions,
-} from "../data/mock-data";
+import { useShopCategories } from "@/api/hooks/shop";
+
+const fabricTypeOptions = [
+  { label: "Cotton", value: "cotton" },
+  { label: "Silk", value: "silk" },
+  { label: "Linen", value: "linen" },
+  { label: "Polyester", value: "polyester" },
+  { label: "Wool", value: "wool" },
+  { label: "Blend", value: "blend" },
+];
 
 export interface FilterState {
   categories: number[];
@@ -35,7 +41,9 @@ export function ProductFilters({
   onFiltersChange,
   maxPrice = 50000,
 }: ProductFiltersProps) {
-  const mainCategories = shopCategories.filter((c) => c.parentId === null);
+  const { data: categoriesData } = useShopCategories();
+  const categories = categoriesData?.data || [];
+  const mainCategories = categories.filter((c: any) => !c.parentId);
 
   const handleCategoryChange = (categoryId: number, checked: boolean) => {
     const newCategories = checked
@@ -256,8 +264,11 @@ export function FilterTags({
     });
   };
 
+  const { data: categoriesData } = useShopCategories();
+  const categories = categoriesData?.data || [];
+
   const getCategoryName = (id: number) =>
-    shopCategories.find((c) => c.id === id)?.name || "";
+    categories.find((c: any) => c.id === id)?.name || "";
 
   const hasActiveFilters =
     filters.categories.length > 0 ||

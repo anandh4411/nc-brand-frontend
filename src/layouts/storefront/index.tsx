@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { shopCategories } from "@/features/shop/data/mock-data";
+import { useShopCategories } from "@/api/hooks/shop";
 
 interface StorefrontLayoutProps {
   children: React.ReactNode;
@@ -40,6 +40,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const { itemCount: wishlistCount } = useWishlist();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: categoriesData } = useShopCategories();
+  const mainCategories = (categoriesData?.data || []).filter((c: any) => !c.parentId);
 
   const handleNavigate = (path: string) => {
     router.navigate({ to: path });
@@ -82,10 +84,10 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                 </Link>
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Categories</p>
-                  {shopCategories.filter(c => c.parentId === null).map((category) => (
+                  {mainCategories.map((category: any) => (
                     <Link
                       key={category.id}
-                      to={`/shop/products?category=${category.id}` as any}
+                      to={`/shop/products?category=${category.slug}` as any}
                       className="block py-2 text-sm hover:text-primary"
                     >
                       {category.name}
@@ -144,10 +146,10 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                 <ChevronDown className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {shopCategories.filter(c => c.parentId === null).map((category) => (
+                {mainCategories.map((category: any) => (
                   <DropdownMenuItem
                     key={category.id}
-                    onClick={() => handleNavigate(`/shop/products?category=${category.id}`)}
+                    onClick={() => handleNavigate(`/shop/products?category=${category.slug}`)}
                   >
                     {category.name}
                   </DropdownMenuItem>

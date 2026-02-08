@@ -3,6 +3,7 @@ import { Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useWishlist } from "@/context/wishlist-context";
 
 // API-compatible product type
 export interface ProductCardData {
@@ -25,6 +26,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const inWishlist = product.id ? isInWishlist(product.id) : false;
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -62,10 +66,19 @@ export function ProductCard({ product, className }: ProductCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              // TODO: Integrate with wishlist API
+              if (product.id) {
+                toggleWishlist({
+                  productGroupId: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  basePrice: product.basePrice,
+                  imageUrl: product.primaryImage || undefined,
+                  categoryName: product.categoryName || "Product",
+                });
+              }
             }}
           >
-            <Heart className="h-3.5 w-3.5 text-gray-600" />
+            <Heart className={cn("h-3.5 w-3.5", inWishlist ? "fill-red-500 text-red-500" : "text-gray-600")} />
           </Button>
         </div>
 

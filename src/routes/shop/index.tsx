@@ -6,7 +6,6 @@ import { ArrowRight, Truck, Shield, CreditCard, RefreshCw, ChevronLeft, ChevronR
 import { ProductGrid } from "@/features/shop/components/product-grid";
 import {
   shopBanners,
-  shopCategories,
   getFeaturedProducts,
   getNewArrivals,
   getOnSaleProducts,
@@ -17,7 +16,6 @@ function ShopHomepage() {
   const featuredProducts = getFeaturedProducts().slice(0, 8);
   const newArrivals = getNewArrivals().slice(0, 8);
   const saleProducts = getOnSaleProducts().slice(0, 4);
-  const mainCategories = shopCategories.filter(c => c.parentId === null);
 
   // Auto-rotate banners
   useEffect(() => {
@@ -131,42 +129,6 @@ function ShopHomepage() {
                 <p className="text-xs text-muted-foreground">7 days policy</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Shop by Category */}
-      <section className="py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">Shop by Category</h2>
-              <p className="text-muted-foreground">Explore our collections</p>
-            </div>
-            <Button variant="ghost" asChild>
-              <Link to="/shop/products">View All</Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {mainCategories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/shop/categories/${category.slug}` as any}
-                className="group text-center"
-              >
-                <div className="aspect-square rounded-full bg-muted mb-3 overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors">
-                  <img
-                    src={`https://picsum.photos/seed/${category.slug}/200/200`}
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-xs text-muted-foreground">{category.productCount} items</p>
-              </Link>
-            ))}
           </div>
         </div>
       </section>

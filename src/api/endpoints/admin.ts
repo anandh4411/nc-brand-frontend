@@ -434,6 +434,63 @@ export interface AdminReview {
 }
 
 // ============================================================================
+// OUTLET SALES & SHIPMENTS (Admin Profile View)
+// ============================================================================
+
+export interface OutletSaleItemDetail {
+  sku: string;
+  name: string;
+  color: string;
+  size: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface OutletSaleItem {
+  id: number;
+  uuid: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerPhone: string | null;
+  paymentMethod: string;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+  status: string;
+  date: string;
+  time: string;
+  itemCount: number;
+  totalQuantity: number;
+  items: OutletSaleItemDetail[];
+  createdAt: string;
+}
+
+export interface OutletShipmentItemDetail {
+  id: number;
+  sku: string;
+  name: string;
+  color: string;
+  size: string;
+  quantity: number;
+  receivedQuantity: number;
+}
+
+export interface OutletShipmentItem {
+  id: number;
+  uuid: string;
+  status: string;
+  itemCount: number;
+  totalQuantity: number;
+  items: OutletShipmentItemDetail[];
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  createdBy: { id: number; name: string } | null;
+  createdAt: string;
+}
+
+// ============================================================================
 // API FUNCTIONS
 // ============================================================================
 
@@ -570,8 +627,17 @@ export const adminApi = {
   getOutletInventory: (uuid: string) =>
     apiClient.get<any>(`${BASE}/outlets/${uuid}/inventory`),
 
-  getOutletSales: (uuid: string) =>
-    apiClient.get<any>(`${BASE}/outlets/${uuid}/sales`),
+  getOutletSales: (uuid: string, params?: { page?: number; pageSize?: number; search?: string; sortBy?: string; sortOrder?: string }) =>
+    apiClient.get<{
+      sales: OutletSaleItem[];
+      pagination: { total: number; page: number; pageSize: number; totalPages: number };
+    }>(`${BASE}/outlets/${uuid}/sales`, { params }),
+
+  getOutletShipments: (uuid: string, params?: { page?: number; pageSize?: number; search?: string; status?: string; sortBy?: string; sortOrder?: string }) =>
+    apiClient.get<{
+      shipments: OutletShipmentItem[];
+      pagination: { total: number; page: number; pageSize: number; totalPages: number };
+    }>(`${BASE}/outlets/${uuid}/shipments`, { params }),
 
   getOutletStats: (uuid: string) =>
     apiClient.get<{

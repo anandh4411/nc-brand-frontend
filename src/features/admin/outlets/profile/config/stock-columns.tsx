@@ -5,7 +5,7 @@ import {
   customColumn,
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
-import type { Shipment, ShipmentStatus, ShipmentItem } from "@/types/dto/inventory.dto";
+import type { OutletShipmentItem } from "@/api/endpoints/admin";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,65 +15,64 @@ const formatDate = (dateString?: string | null) => {
 };
 
 const getStatusVariant = (
-  status: ShipmentStatus
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
-    case "delivered":
+    case "DELIVERED":
       return "default";
-    case "shipped":
+    case "SHIPPED":
       return "secondary";
-    case "cancelled":
+    case "CANCELLED":
       return "destructive";
     default:
       return "outline";
   }
 };
 
-const getStatusLabel = (status: ShipmentStatus) =>
-  status.charAt(0).toUpperCase() + status.slice(1);
-
 export const createStockColumns = (
-  onView: (shipment: Shipment) => void
-): ColumnDef<Shipment>[] => {
+  onView: (shipment: OutletShipmentItem) => void
+): ColumnDef<OutletShipmentItem>[] => {
   return [
-    selectColumn<Shipment>(),
+    selectColumn<OutletShipmentItem>(),
 
-    customColumn<Shipment>("id", "Shipment #", (value) => (
+    customColumn<OutletShipmentItem>("uuid", "Shipment #", (value) => (
       <div className="font-mono text-sm font-medium">
-        SHP-{String(value).padStart(4, "0")}
+        {value.substring(0, 8).toUpperCase()}
       </div>
     )),
 
-    customColumn<Shipment>("items", "Items", (value: ShipmentItem[]) => (
+    customColumn<OutletShipmentItem>("itemCount", "Items", (value, row) => (
       <div className="text-sm">
-        <span className="font-medium">{value.length}</span>
+        <span className="font-medium">{value}</span>
         <span className="text-muted-foreground ml-1">
-          ({value.reduce((acc: number, item: ShipmentItem) => acc + item.quantity, 0)} units)
+          ({row.totalQuantity} units)
         </span>
       </div>
     )),
 
-    customColumn<Shipment>(
+    customColumn<OutletShipmentItem>(
       "status",
       "Status",
       (value) => (
-        <Badge variant={getStatusVariant(value)}>{getStatusLabel(value)}</Badge>
+        <Badge variant={getStatusVariant(value)} className="capitalize">
+          {value.toLowerCase()}
+        </Badge>
       ),
       { filterable: true, sortable: true }
     ),
 
-    customColumn<Shipment>("shippedAt", "Shipped", (value) => (
+    customColumn<OutletShipmentItem>("shippedAt", "Shipped", (value) => (
       <div className="text-muted-foreground text-sm">{formatDate(value)}</div>
     )),
 
-    customColumn<Shipment>("deliveredAt", "Delivered", (value) => (
+    customColumn<OutletShipmentItem>("deliveredAt", "Delivered", (value) => (
       <div className="text-muted-foreground text-sm">{formatDate(value)}</div>
     )),
 
-    customColumn<Shipment>("createdByName", "Created By", (value) => (
-      <div className="text-sm">{value || "Unknown"}</div>
+    customColumn<OutletShipmentItem>("createdBy", "Created By", (value) => (
+      <div className="text-sm">{value?.name || "—"}</div>
     )),
 
-    actionsColumn<Shipment>([{ label: "View Details", onClick: onView }]),
+    actionsColumn<OutletShipmentItem>([{ label: "View Details", onClick: onView }]),
   ];
 };

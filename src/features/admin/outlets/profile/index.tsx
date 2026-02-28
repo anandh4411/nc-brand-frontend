@@ -17,6 +17,7 @@ import {
   MapPin,
   Copy,
   Check,
+  Loader2,
 } from "lucide-react";
 import {
   ChartConfig,
@@ -25,18 +26,14 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Area, AreaChart, Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
-import { mockOutlets } from "../data/mock-data";
-import { getOutletProfileData } from "./data/mock-data";
-import { getOutletSales } from "./data/sales-mock-data";
-import { getOutletShipments } from "./data/stock-mock-data";
 import { createSalesColumns } from "./config/sales-columns";
 import { createStockColumns } from "./config/stock-columns";
 import { SaleViewModal } from "./components/sale-view-modal";
 import { StockViewModal } from "./components/stock-view-modal";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
 import { useMemo, useState } from "react";
-import type { Order } from "@/types/dto/order.dto";
-import type { Shipment } from "@/types/dto/inventory.dto";
+import { useAdminOutlet, useOutletStats, useOutletSales, useOutletShipments } from "@/api/hooks/admin";
+import type { OutletSaleItem, OutletShipmentItem } from "@/api/endpoints/admin";
 
 const salesChartConfig = {
   sales: {
@@ -65,31 +62,35 @@ export default function OutletProfile() {
   const [copied, setCopied] = useState(false);
 
   // Sales table state
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedSale, setSelectedSale] = useState<OutletSaleItem | null>(null);
   const [saleViewOpen, setSaleViewOpen] = useState(false);
-  const salesTableState = useTableState<Order>({ debounceMs: 300 });
+  const salesTableState = useTableState<OutletSaleItem>({ debounceMs: 300 });
 
   // Stock table state
-  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [selectedShipment, setSelectedShipment] = useState<OutletShipmentItem | null>(null);
   const [stockViewOpen, setStockViewOpen] = useState(false);
-  const stockTableState = useTableState<Shipment>({ debounceMs: 300 });
+  const stockTableState = useTableState<OutletShipmentItem>({ debounceMs: 300 });
 
-  const outlet = mockOutlets.find((o) => o.uuid === outletId);
-  const profile = getOutletProfileData(outletId ?? "");
-  const salesData = getOutletSales(outletId ?? "");
-  const shipmentsData = getOutletShipments(outletId ?? "");
+  // API hooks
+  const { data: outletData, isLoading: outletLoading } = useAdminOutlet(outletId ?? "");
+  const { data: statsData, isLoading: statsLoading } = useOutletStats(outletId ?? "");
+  const { data: salesResponse } = useOutletSales(outletId ?? "");
+  const { data: shipmentsResponse } = useOutletShipments(outletId ?? "");
 
-  const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order);
+  const outlet = outletData?.data;
+  const stats = statsData?.data;
+
+  const handleViewSale = (sale: OutletSaleItem) => {
+    setSelectedSale(sale);
     setSaleViewOpen(true);
   };
 
-  const handleViewShipment = (shipment: Shipment) => {
+  const handleViewShipment = (shipment: OutletShipmentItem) => {
     setSelectedShipment(shipment);
     setStockViewOpen(true);
   };
 
-  const salesColumns = useMemo(() => createSalesColumns(handleViewOrder), []);
+  const salesColumns = useMemo(() => createSalesColumns(handleViewSale), []);
   const stockColumns = useMemo(() => createStockColumns(handleViewShipment), []);
 
   const handleCopyLoginCode = () => {
@@ -98,6 +99,14 @@ export default function OutletProfile() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (outletLoading || statsLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!outlet) {
     return (
@@ -111,7 +120,8 @@ export default function OutletProfile() {
     );
   }
 
-  const { stats, salesData: chartSalesData, categoryData } = profile;
+  const salesData = salesResponse?.data?.sales ?? [];
+  const shipmentsData = shipmentsResponse?.data?.shipments ?? [];
 
   return (
     <div className="space-y-6">
@@ -139,10 +149,12 @@ export default function OutletProfile() {
               </Badge>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                {outlet.city}, {outlet.state}
-              </span>
+              {(outlet.city || outlet.state) && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {[outlet.city, outlet.state].filter(Boolean).join(", ")}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 Login Code:
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs font-medium">
@@ -168,17 +180,19 @@ export default function OutletProfile() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStock.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {(stats?.stats.totalStock ?? 0).toLocaleString()}
+            </div>
             <div className="flex items-center text-xs text-muted-foreground mt-1">
-              {stats.stockChange >= 0 ? (
+              {(stats?.stats.stockChange ?? 0) >= 0 ? (
                 <>
                   <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
-                  <span className="text-green-500">+{stats.stockChange}%</span>
+                  <span className="text-green-500">+{stats?.stats.stockChange ?? 0}%</span>
                 </>
               ) : (
                 <>
                   <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
-                  <span className="text-red-500">{stats.stockChange}%</span>
+                  <span className="text-red-500">{stats?.stats.stockChange ?? 0}%</span>
                 </>
               )}
               <span className="ml-1">from last month</span>
@@ -192,7 +206,9 @@ export default function OutletProfile() {
             <AlertTriangle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">{stats.lowStockItems}</div>
+            <div className="text-2xl font-bold text-orange-500">
+              {stats?.stats.lowStockItems ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Requires immediate attention</p>
           </CardContent>
         </Card>
@@ -203,7 +219,9 @@ export default function OutletProfile() {
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingShipments}</div>
+            <div className="text-2xl font-bold">
+              {stats?.stats.pendingShipments ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Expected this week</p>
           </CardContent>
         </Card>
@@ -214,17 +232,19 @@ export default function OutletProfile() {
             <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPrice(stats.todaySales)}</div>
+            <div className="text-2xl font-bold">
+              {formatPrice(stats?.stats.todaySales ?? 0)}
+            </div>
             <div className="flex items-center text-xs text-muted-foreground mt-1">
-              {stats.salesChange >= 0 ? (
+              {(stats?.stats.salesChange ?? 0) >= 0 ? (
                 <>
                   <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                  <span className="text-green-500">+{stats.salesChange}%</span>
+                  <span className="text-green-500">+{stats?.stats.salesChange ?? 0}%</span>
                 </>
               ) : (
                 <>
                   <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
-                  <span className="text-red-500">{stats.salesChange}%</span>
+                  <span className="text-red-500">{stats?.stats.salesChange ?? 0}%</span>
                 </>
               )}
               <span className="ml-1">vs yesterday</span>
@@ -234,68 +254,76 @@ export default function OutletProfile() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-7">
-        <Card className="md:col-span-4">
-          <CardHeader>
-            <CardTitle>Sales Trend</CardTitle>
-            <CardDescription>Monthly sales performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={salesChartConfig} className="h-[250px] w-full">
-              <AreaChart data={chartSalesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `₹${value / 1000}k`}
-                  className="text-xs"
-                />
-                <ChartTooltip
-                  content={<ChartTooltipContent />}
-                  formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Sales"]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="sales"
-                  stroke="hsl(var(--chart-1))"
-                  fill="hsl(var(--chart-1))"
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-7">
+          <Card className="md:col-span-4">
+            <CardHeader>
+              <CardTitle>Sales Trend</CardTitle>
+              <CardDescription>Monthly sales performance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={salesChartConfig} className="h-[250px] w-full">
+                <AreaChart data={stats.salesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `₹${value / 1000}k`}
+                    className="text-xs"
+                  />
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Sales"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="sales"
+                    stroke="hsl(var(--chart-1))"
+                    fill="hsl(var(--chart-1))"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
 
-        <Card className="md:col-span-3">
-          <CardHeader>
-            <CardTitle>Stock by Category</CardTitle>
-            <CardDescription>Current inventory distribution</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={categoryChartConfig} className="h-[250px] w-full">
-              <BarChart data={categoryData} layout="vertical" margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} className="text-xs" />
-                <YAxis
-                  dataKey="category"
-                  type="category"
-                  tickLine={false}
-                  axisLine={false}
-                  width={80}
-                  className="text-xs"
-                />
-                <ChartTooltip
-                  content={<ChartTooltipContent />}
-                  formatter={(value) => [`${value}%`, "Stock"]}
-                />
-                <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="md:col-span-3">
+            <CardHeader>
+              <CardTitle>Stock by Category</CardTitle>
+              <CardDescription>Current inventory distribution</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {stats.categoryData.length > 0 ? (
+                <ChartContainer config={categoryChartConfig} className="h-[250px] w-full">
+                  <BarChart data={stats.categoryData} layout="vertical" margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                    <XAxis type="number" tickLine={false} axisLine={false} className="text-xs" />
+                    <YAxis
+                      dataKey="category"
+                      type="category"
+                      tickLine={false}
+                      axisLine={false}
+                      width={80}
+                      className="text-xs"
+                    />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                      formatter={(value) => [`${value}%`, "Stock"]}
+                    />
+                    <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
+                  No inventory data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Transaction History Tables */}
       <Tabs defaultValue="sales">
@@ -311,8 +339,8 @@ export default function OutletProfile() {
             config={{
               search: {
                 enabled: true,
-                placeholder: "Search by order number...",
-                columnKey: "orderNumber",
+                placeholder: "Search by invoice number...",
+                columnKey: "invoiceNumber",
               },
               pagination: {
                 enabled: true,
@@ -335,11 +363,11 @@ export default function OutletProfile() {
             }}
           />
 
-          {selectedOrder && (
+          {selectedSale && (
             <SaleViewModal
               open={saleViewOpen}
               onOpenChange={setSaleViewOpen}
-              order={selectedOrder}
+              sale={selectedSale}
             />
           )}
         </TabsContent>
@@ -352,7 +380,7 @@ export default function OutletProfile() {
               search: {
                 enabled: true,
                 placeholder: "Search by shipment ID...",
-                columnKey: "id",
+                columnKey: "uuid",
               },
               pagination: {
                 enabled: true,

@@ -400,10 +400,18 @@ export function useOutletInventory(uuid: string) {
   });
 }
 
-export function useOutletSales(uuid: string) {
+export function useOutletSales(uuid: string, params?: { page?: number; pageSize?: number; search?: string }) {
   return useQuery({
-    queryKey: ['admin', 'outlets', uuid, 'sales'],
-    queryFn: () => adminApi.getOutletSales(uuid),
+    queryKey: ['admin', 'outlets', uuid, 'sales', params],
+    queryFn: () => adminApi.getOutletSales(uuid, params),
+    enabled: !!uuid,
+  });
+}
+
+export function useOutletShipments(uuid: string, params?: { page?: number; pageSize?: number; search?: string; status?: string }) {
+  return useQuery({
+    queryKey: ['admin', 'outlets', uuid, 'shipments', params],
+    queryFn: () => adminApi.getOutletShipments(uuid, params),
     enabled: !!uuid,
   });
 }

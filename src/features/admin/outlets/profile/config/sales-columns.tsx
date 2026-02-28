@@ -5,14 +5,8 @@ import {
   customColumn,
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
-import type { Order, OrderStatus, PaymentStatus, OrderItem } from "@/types/dto/order.dto";
-import { format } from "date-fns";
+import type { OutletSaleItem } from "@/api/endpoints/admin";
 import { Badge } from "@/components/ui/badge";
-
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "N/A";
-  return format(new Date(dateString), "MMM dd, yyyy");
-};
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -21,94 +15,96 @@ const formatPrice = (price: number) =>
     maximumFractionDigits: 0,
   }).format(price);
 
-const getOrderStatusVariant = (
-  status: OrderStatus
+const getStatusVariant = (
+  status: string
 ): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
-    case "delivered":
+    case "COMPLETED":
       return "default";
-    case "shipped":
-    case "processing":
+    case "PENDING":
       return "secondary";
-    case "cancelled":
-    case "returned":
+    case "CANCELLED":
+    case "REFUNDED":
       return "destructive";
     default:
       return "outline";
   }
 };
 
-const getPaymentStatusVariant = (
-  status: PaymentStatus
-): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "paid":
-      return "default";
-    case "refunded":
-      return "secondary";
-    case "failed":
-      return "destructive";
+const getPaymentBadge = (method: string) => {
+  switch (method) {
+    case "cash":
+      return "Cash";
+    case "card":
+      return "Card";
+    case "upi":
+      return "UPI";
     default:
-      return "outline";
+      return method;
   }
 };
 
 export const createSalesColumns = (
-  onView: (order: Order) => void
-): ColumnDef<Order>[] => {
+  onView: (sale: OutletSaleItem) => void
+): ColumnDef<OutletSaleItem>[] => {
   return [
-    selectColumn<Order>(),
+    selectColumn<OutletSaleItem>(),
 
-    customColumn<Order>("orderNumber", "Order #", (value) => (
+    customColumn<OutletSaleItem>("invoiceNumber", "Invoice #", (value) => (
       <div className="font-mono text-sm font-medium">{value}</div>
     )),
 
-    customColumn<Order>("customerName", "Customer", (value, row) => (
+    customColumn<OutletSaleItem>("customerName", "Customer", (value, row) => (
       <div>
         <p className="font-medium">{value}</p>
-        <p className="text-xs text-muted-foreground">{row.customerEmail}</p>
+        {row.customerPhone && (
+          <p className="text-xs text-muted-foreground">{row.customerPhone}</p>
+        )}
       </div>
     )),
 
-    customColumn<Order>("items", "Items", (value: OrderItem[]) => (
+    customColumn<OutletSaleItem>("itemCount", "Items", (value, row) => (
       <div className="text-sm">
-        <span className="font-medium">{value.length}</span>
+        <span className="font-medium">{value}</span>
         <span className="text-muted-foreground ml-1">
-          ({value.reduce((acc: number, item: OrderItem) => acc + item.quantity, 0)} units)
+          ({row.totalQuantity} units)
         </span>
       </div>
     )),
 
-    customColumn<Order>("total", "Total", (value) => (
+    customColumn<OutletSaleItem>("total", "Total", (value) => (
       <div className="font-mono font-medium">{formatPrice(value)}</div>
     )),
 
-    customColumn<Order>(
-      "status",
-      "Order Status",
-      (value) => (
-        <Badge variant={getOrderStatusVariant(value)} className="capitalize">
-          {value}
-        </Badge>
-      ),
-      { filterable: true, sortable: true }
-    ),
-
-    customColumn<Order>(
-      "paymentStatus",
+    customColumn<OutletSaleItem>(
+      "paymentMethod",
       "Payment",
       (value) => (
-        <Badge variant={getPaymentStatusVariant(value)} className="capitalize">
-          {value}
+        <Badge variant="outline" className="capitalize">
+          {getPaymentBadge(value)}
         </Badge>
       ),
       { filterable: true }
     ),
 
-    customColumn<Order>("createdAt", "Date", (value) => (
-      <div className="text-muted-foreground text-sm">{formatDate(value)}</div>
+    customColumn<OutletSaleItem>(
+      "status",
+      "Status",
+      (value) => (
+        <Badge variant={getStatusVariant(value)} className="capitalize">
+          {value.toLowerCase()}
+        </Badge>
+      ),
+      { filterable: true, sortable: true }
+    ),
+
+    customColumn<OutletSaleItem>("date", "Date", (value, row) => (
+      <div className="text-muted-foreground text-sm">
+        <div>{value}</div>
+        <div className="text-xs">{row.time}</div>
+      </div>
     )),
 
-    actionsColumn<Order>([{ label: "View Details", onClick: onView }]),
+    actionsColumn<OutletSaleItem>([{ label: "View Details", onClick: onView }]),
   ];
 };

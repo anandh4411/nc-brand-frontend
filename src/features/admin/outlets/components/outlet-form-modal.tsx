@@ -76,8 +76,11 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
   }, [outlet, open, form]);
 
   const onSubmit = async (values: CreateOutletRequest) => {
+    const payload = { ...values };
+    if (!payload.email) delete payload.email;
+
     if (mode === "add") {
-      createOutlet.mutate(values, {
+      createOutlet.mutate(payload, {
         onSuccess: () => {
           toast.success("Outlet created successfully");
           form.reset();
@@ -89,7 +92,7 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
       });
     } else if (outlet) {
       updateOutlet.mutate(
-        { uuid: outlet.uuid, data: values },
+        { uuid: outlet.uuid, data: payload },
         {
           onSuccess: () => {
             toast.success("Outlet updated successfully");
@@ -260,7 +263,7 @@ export function OutletFormModal({ open, onOpenChange, outlet, mode }: Props) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                     <FormControl>
                       <Input
                         type="email"

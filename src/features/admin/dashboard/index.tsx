@@ -10,7 +10,7 @@ import {
   ImagePlus,
   Trash2,
   Image,
-  Link as LinkIcon,
+  Pencil,
   Loader2,
   Users,
 } from "lucide-react";
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { Link } from "@tanstack/react-router";
 import {
   Dialog,
@@ -85,12 +86,13 @@ export default function AdminDashboard() {
     imageUrl: "",
     title: "",
     link: "",
+    isActive: true,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleAddBanner = () => {
     setEditingBanner(null);
-    setBannerForm({ imageUrl: "", title: "", link: "" });
+    setBannerForm({ imageUrl: "", title: "", link: "", isActive: true });
     setImageFile(null);
     setBannerDialogOpen(true);
   };
@@ -101,6 +103,7 @@ export default function AdminDashboard() {
       imageUrl: banner.imageUrl,
       title: banner.title,
       link: banner.link || "",
+      isActive: banner.isActive ?? true,
     });
     setImageFile(null);
     setBannerDialogOpen(true);
@@ -116,7 +119,7 @@ export default function AdminDashboard() {
       updateBanner.mutate(
         {
           uuid: editingBanner.uuid,
-          data: { title: bannerForm.title, link: bannerForm.link },
+          data: { title: bannerForm.title, link: bannerForm.link, isActive: bannerForm.isActive },
           image: imageFile || undefined,
         },
         {
@@ -134,7 +137,7 @@ export default function AdminDashboard() {
       }
       createBanner.mutate(
         {
-          data: { title: bannerForm.title, link: bannerForm.link },
+          data: { title: bannerForm.title, link: bannerForm.link, isActive: bannerForm.isActive },
           image: imageFile,
         },
         {
@@ -467,7 +470,7 @@ export default function AdminDashboard() {
                       size="icon"
                       onClick={() => handleEditBanner(banner)}
                     >
-                      <LinkIcon className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -590,6 +593,22 @@ export default function AdminDashboard() {
               <p className="text-xs text-muted-foreground">
                 Where should users go when they click this banner?
               </p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="isActive">Active</Label>
+                <p className="text-xs text-muted-foreground">
+                  Only active banners are shown on the shop page
+                </p>
+              </div>
+              <Switch
+                id="isActive"
+                checked={bannerForm.isActive}
+                onCheckedChange={(checked) =>
+                  setBannerForm({ ...bannerForm, isActive: checked })
+                }
+              />
             </div>
           </div>
 

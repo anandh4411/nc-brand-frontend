@@ -6,6 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../../endpoints/admin';
+import { queryKeys } from '../../query-keys';
 import type {
   CreateCategoryRequest,
   UpdateCategoryRequest,
@@ -508,6 +509,7 @@ export function useCreateBanner() {
       adminApi.createBanner(data, image),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.banners });
+      queryClient.invalidateQueries({ queryKey: queryKeys.banners.all });
     },
   });
 }
@@ -519,6 +521,7 @@ export function useUpdateBanner() {
       adminApi.updateBanner(uuid, data, image),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.banners });
+      queryClient.invalidateQueries({ queryKey: queryKeys.banners.all });
     },
   });
 }
@@ -529,6 +532,7 @@ export function useDeleteBanner() {
     mutationFn: (uuid: string) => adminApi.deleteBanner(uuid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.banners });
+      queryClient.invalidateQueries({ queryKey: queryKeys.banners.all });
     },
   });
 }

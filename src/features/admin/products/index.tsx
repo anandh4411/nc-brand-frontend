@@ -1,5 +1,6 @@
 // src/features/admin/products/index.tsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +14,9 @@ import type { ProductGroup, Category } from "@/types/dto/product-catalog.dto";
 import { toast } from "sonner";
 
 export default function Products() {
+  // Check if navigated with openAdd search param
+  const { openAdd } = useSearch({ from: "/admin/products/" });
+
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -30,9 +34,16 @@ export default function Products() {
 
   // Get data from API
   const productList = ((productsResponse?.data as any)?.productGroups || productsResponse?.data || []) as ProductGroup[];
-  const categories = (categoriesResponse?.data || []) as Category[];
+  const categories = ((categoriesResponse?.data as any)?.categories || categoriesResponse?.data || []) as Category[];
 
   const isLoading = productsLoading || categoriesLoading;
+
+  // Auto-open add modal when navigated from inventory page
+  useEffect(() => {
+    if (openAdd && !isLoading) {
+      setAddDialogOpen(true);
+    }
+  }, [openAdd, isLoading]);
 
   // Action handlers
   const handleView = (product: ProductGroup) => {

@@ -1,6 +1,7 @@
 // src/features/admin/inventory/index.tsx
 import { useState, useMemo } from "react";
-import { AlertTriangle, Package } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { AlertTriangle, Package, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +18,7 @@ export default function Inventory() {
   const [adjustDialogOpen, setAdjustDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const navigate = useNavigate();
 
   // Table state
   const tableState = useTableState<InventoryItem>({ debounceMs: 300 });
@@ -89,31 +91,16 @@ export default function Inventory() {
               Low Stock ({lowStockAlerts.length})
             </Button>
           )}
-        </div>
-      </div>
-
-      {/* Low Stock Alert Banner */}
-      {lowStockAlerts.length > 0 && !showLowStockOnly && (
-        <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          <div className="flex-1">
-            <p className="font-medium text-destructive">
-              {lowStockAlerts.length} item(s) below low stock threshold
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {lowStockAlerts.slice(0, 5).map((a: any) => a.variant?.sku || a.sku || a.productVariantSku).join(", ")}
-              {lowStockAlerts.length > 5 && ` and ${lowStockAlerts.length - 5} more...`}
-            </p>
-          </div>
           <Button
-            variant="outline"
             size="sm"
-            onClick={() => setShowLowStockOnly(true)}
+            className="h-9"
+            onClick={() => navigate({ to: "/admin/products", search: { openAdd: true } } as any)}
           >
-            View All
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
           </Button>
         </div>
-      )}
+      </div>
 
       {/* Table */}
       <DataTable

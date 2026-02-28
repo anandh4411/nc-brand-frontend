@@ -203,7 +203,7 @@ export function ProductFormModal({
 
   const isSubmitting = createProductGroup.isPending || updateProductGroup.isPending;
 
-  const categoryOptions = categories
+  const categoryOptions = (Array.isArray(categories) ? categories : [])
     .filter((c) => c.isActive)
     .map((c) => ({ label: c.name, value: String(c.id) }));
 

@@ -144,7 +144,7 @@ export default function OutletProfile() {
               <Badge variant="outline" className="font-mono text-xs">
                 {outlet.code}
               </Badge>
-              <Badge variant={outlet.isActive ? "default" : "secondary"}>
+              <Badge variant={outlet.isActive ? "success" : "secondary"}>
                 {outlet.isActive ? "Active" : "Inactive"}
               </Badge>
             </div>

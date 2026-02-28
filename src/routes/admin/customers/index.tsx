@@ -116,7 +116,7 @@ function AdminCustomers() {
         accessorFn: (row) => row.isActive,
         header: "Status",
         cell: ({ row: { original } }) => (
-          <Badge variant={original.isActive ? "default" : "secondary"}>
+          <Badge variant={original.isActive ? "success" : "secondary"}>
             {original.isActive ? "Active" : "Inactive"}
           </Badge>
         ),
@@ -320,7 +320,7 @@ function AdminCustomers() {
                   <span className="text-sm text-muted-foreground">Status</span>
                   <Badge
                     variant={
-                      selectedCustomer.isActive ? "default" : "secondary"
+                      selectedCustomer.isActive ? "success" : "secondary"
                     }
                   >
                     {selectedCustomer.isActive ? "Active" : "Inactive"}

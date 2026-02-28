@@ -47,7 +47,7 @@ export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
                 {outlet.code}
               </p>
             </div>
-            <Badge variant={outlet.isActive ? "default" : "secondary"}>
+            <Badge variant={outlet.isActive ? "success" : "secondary"}>
               {outlet.isActive ? "Active" : "Inactive"}
             </Badge>
           </div>

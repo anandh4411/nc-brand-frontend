@@ -62,7 +62,7 @@ export function ProductViewModal({ open, onOpenChange, product }: Props) {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Badge variant={product.isActive ? "default" : "secondary"}>
+                <Badge variant={product.isActive ? "success" : "secondary"}>
                   {product.isActive ? "Active" : "Inactive"}
                 </Badge>
                 {product.isFeatured && (

@@ -28,7 +28,7 @@ export default function Categories() {
   const tableState = useTableState<Category>({ debounceMs: 300 });
 
   // Get categories from API
-  const categoryList = (categoriesResponse?.data || []) as Category[];
+  const categoryList = ((categoriesResponse?.data as any)?.categories || categoriesResponse?.data || []) as Category[];
 
   // Parent category options (categories without parent)
   const parentCategories = categoryList

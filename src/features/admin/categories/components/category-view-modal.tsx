@@ -52,7 +52,7 @@ export function CategoryViewModal({
                 /{category.slug}
               </p>
             </div>
-            <Badge variant={category.isActive ? "default" : "secondary"}>
+            <Badge variant={category.isActive ? "success" : "secondary"}>
               {category.isActive ? "Active" : "Inactive"}
             </Badge>
           </div>

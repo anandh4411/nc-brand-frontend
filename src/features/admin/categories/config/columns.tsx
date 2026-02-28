@@ -77,7 +77,7 @@ export const createCategoryColumns = (
       "isActive",
       "Status",
       (value) => (
-        <Badge variant={value ? "default" : "secondary"}>
+        <Badge variant={value ? "success" : "secondary"}>
           {value ? "Active" : "Inactive"}
         </Badge>
       ),

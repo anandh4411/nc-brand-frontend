@@ -459,7 +459,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Status badge */}
-                  <Badge variant={banner.isActive ? "default" : "secondary"}>
+                  <Badge variant={banner.isActive ? "success" : "secondary"}>
                     {banner.isActive ? "Active" : "Inactive"}
                   </Badge>
 

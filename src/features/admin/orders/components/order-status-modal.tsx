@@ -97,7 +97,7 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
   };
 
   const isSubmitting = form.formState.isSubmitting;
-  const nextStatuses = getNextStatuses(order.status);
+  const nextStatuses = getNextStatuses(order.status as OrderStatus);
   const availableStatuses = orderStatusOptions.filter(
     (opt) =>
       opt.value === order.status || nextStatuses.includes(opt.value as OrderStatus)

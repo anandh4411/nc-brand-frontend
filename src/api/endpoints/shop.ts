@@ -140,7 +140,7 @@ export const shopApi = {
    * GET /v1/shop/products/:slug
    */
   getProductBySlug: (slug: string) =>
-    apiClient.get<ProductGroup>(`${BASE}/products/${slug}`),
+    apiClient.get<any>(`${BASE}/products/${slug}`),
 
   /**
    * Get Categories

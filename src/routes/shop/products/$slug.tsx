@@ -28,6 +28,7 @@ import {
   MessageSquare,
   Loader2,
   Tag,
+  Percent,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,8 @@ import {
   useWishlist,
   useProductReviews,
   useCreateReview,
+  useApplyCoupon,
+  useCart,
 } from "@/api/hooks/shop";
 import { useAuth } from "@/context/auth-context";
 
@@ -86,6 +89,8 @@ function ProductDetailPage() {
 
   // Cart
   const addToCart = useAddToCart();
+  const { data: cartData } = useCart();
+  const applyCoupon = useApplyCoupon();
 
   // Reviews
   const createReview = useCreateReview();
@@ -100,6 +105,7 @@ function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState("description");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 5, title: "", comment: "" });
+  const [couponCode, setCouponCode] = useState("");
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -551,6 +557,91 @@ function ProductDetailPage() {
               )}
             </Button>
           </div>
+
+          {/* Coupon Code */}
+          {isAuthenticated && isCustomer && (
+            <div className="pt-4 border-t">
+              <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                <Percent className="h-4 w-4" />
+                Have a coupon code?
+              </p>
+              {(cartData as any)?.coupon ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge variant="secondary" className="font-mono">
+                    {(cartData as any).coupon.code}
+                  </Badge>
+                  <span className="text-green-600">Applied!</span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="flex-1 h-9 font-mono"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9"
+                      disabled={!couponCode.trim() || !selectedVariant || applyCoupon.isPending || addToCart.isPending}
+                      onClick={() => {
+                        const cart = cartData as any;
+                        const items = cart?.items || [];
+                        const alreadyInCart = items.some(
+                          (item: any) => item.variantUuid === selectedVariant?.uuid
+                        );
+
+                        const doApply = () => {
+                          applyCoupon.mutate(couponCode.trim(), {
+                            onSuccess: () => {
+                              toast.success("Coupon applied!");
+                              setCouponCode("");
+                            },
+                            onError: (err: any) => {
+                              const message =
+                                err?.response?.data?.error?.message ||
+                                err?.message ||
+                                "Invalid or expired coupon";
+                              toast.error(message);
+                            },
+                          });
+                        };
+
+                        if (alreadyInCart) {
+                          doApply();
+                        } else {
+                          // Add product to cart first, then apply coupon
+                          addToCart.mutate(
+                            { productVariantId: selectedVariant!.id, quantity } as any,
+                            {
+                              onSuccess: () => {
+                                toast.success("Added to cart");
+                                doApply();
+                              },
+                              onError: () => {
+                                toast.error("Failed to add to cart. Add to cart first, then apply coupon.");
+                              },
+                            }
+                          );
+                        }
+                      }}
+                    >
+                      {(applyCoupon.isPending || addToCart.isPending) ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                  {!selectedVariant && (
+                    <p className="text-xs text-muted-foreground">Select a size first</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t">

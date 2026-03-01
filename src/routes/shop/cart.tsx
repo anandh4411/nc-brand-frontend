@@ -61,7 +61,13 @@ function CartPage() {
     setCouponError("");
     applyCouponMutation.mutate(couponCode.toUpperCase().trim(), {
       onSuccess: () => setCouponCode(""),
-      onError: () => setCouponError("Invalid or expired coupon code"),
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.error?.message ||
+          err?.message ||
+          "Invalid or expired coupon code";
+        setCouponError(message);
+      },
     });
   };
 

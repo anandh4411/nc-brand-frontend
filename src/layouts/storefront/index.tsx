@@ -12,7 +12,6 @@ import {
   User,
   Menu,
   Heart,
-  ChevronDown,
   Package,
   KeyRound,
   Trash2,
@@ -312,84 +311,6 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             <img src="/logo.jpg" alt="NC Brand" className="h-8 w-8 rounded-lg" />
             <span className="font-bold text-xl">NC Brand</span>
           </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              to="/shop"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Home
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
-                Categories
-                <ChevronDown className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {mainCategories.map((category: any) => (
-                  <DropdownMenuItem
-                    key={category.id}
-                    onClick={() => handleNavigate(`/shop/products?category=${category.slug}`)}
-                  >
-                    {category.name}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/products")}>
-                  All Products
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link
-              to="/shop/products"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              All Products
-            </Link>
-            {isLoggedIn && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
-                  Account
-                  <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleNavigate("/account")}>
-                    <User className="h-4 w-4 mr-2" />
-                    My Account
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Wishlist
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
-                    <Package className="h-4 w-4 mr-2" />
-                    Order History
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleNavigate("/account/settings")}>
-                    <KeyRound className="h-4 w-4 mr-2" />
-                    Change Password
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => handleNavigate("/account/settings?tab=delete")}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => logout()}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </nav>
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-4">

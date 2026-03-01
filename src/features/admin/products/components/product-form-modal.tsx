@@ -648,6 +648,9 @@ export function ProductFormModal({
                 pattern={watchedValues.pattern}
                 isFeatured={watchedValues.isFeatured}
                 colorVariants={watchedValues.colorVariants || []}
+                categoryName={
+                  categoryOptions.find((c) => c.value === String(watchedValues.categoryId))?.label
+                }
                 imagePreview={
                   // Show first existing image or first pending file
                   (mode === "edit" && product?.colorVariants?.[0]?.images?.[0]?.imageUrl) ||

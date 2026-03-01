@@ -1,7 +1,7 @@
 // src/features/admin/products/components/product-preview-card.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Star } from "lucide-react";
+import { Package, Star, Palette, Ruler } from "lucide-react";
 
 interface ColorVariant {
   colorCode: string;
@@ -17,6 +17,7 @@ interface ProductPreviewCardProps {
   isFeatured?: boolean;
   colorVariants: ColorVariant[];
   imagePreview?: string;
+  categoryName?: string;
 }
 
 export function ProductPreviewCard({
@@ -27,10 +28,14 @@ export function ProductPreviewCard({
   isFeatured,
   colorVariants,
   imagePreview,
+  categoryName,
 }: ProductPreviewCardProps) {
   const hasName = name.trim().length > 0;
   const hasPrice = basePrice > 0;
-  const selectedColor = colorVariants[0];
+
+  // Collect all unique sizes across all color variants
+  const allSizes = new Set<string>();
+  colorVariants.forEach((cv) => cv.sizes.forEach((s) => allSizes.add(s.size)));
 
   return (
     <div className="space-y-3 w-full">
@@ -85,6 +90,13 @@ export function ProductPreviewCard({
 
         {/* Content */}
         <CardContent className="p-4 space-y-2">
+          {/* Category */}
+          {categoryName && (
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              {categoryName}
+            </span>
+          )}
+
           {/* Name */}
           <h3 className="font-semibold text-foreground line-clamp-1">
             {hasName ? name : (
@@ -109,14 +121,14 @@ export function ProductPreviewCard({
           )}
 
           {/* Sizes */}
-          {selectedColor && selectedColor.sizes.length > 0 && (
+          {allSizes.size > 0 && (
             <div className="flex flex-wrap gap-1">
-              {selectedColor.sizes.map((s, idx) => (
+              {Array.from(allSizes).map((size, idx) => (
                 <span
                   key={idx}
                   className="text-[10px] px-1.5 py-0.5 bg-muted rounded text-muted-foreground"
                 >
-                  {s.size}
+                  {size}
                 </span>
               ))}
             </div>
@@ -130,6 +142,20 @@ export function ProductPreviewCard({
               )}
             </span>
           </div>
+
+          {/* Summary */}
+          {colorVariants.length > 0 && (
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground pt-1 border-t">
+              <span className="flex items-center gap-1">
+                <Palette className="h-3 w-3" />
+                {colorVariants.length} color{colorVariants.length > 1 ? "s" : ""}
+              </span>
+              <span className="flex items-center gap-1">
+                <Ruler className="h-3 w-3" />
+                {allSizes.size} size{allSizes.size > 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

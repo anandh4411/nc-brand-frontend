@@ -132,7 +132,7 @@ export default function Products() {
             enabled: true,
             defaultPageSize: 10,
           },
-          selection: { enabled: true },
+          selection: { enabled: false },
           sorting: {
             enabled: true,
             defaultSort: { columnKey: "createdAt", desc: true },

@@ -56,8 +56,8 @@ export function ProductDeleteDialog({
     onOpenChange(open);
   };
 
-  const totalVariants = product.colorVariants.reduce(
-    (acc, color) => acc + color.sizeVariants.length,
+  const totalVariants = (product.colorVariants || []).reduce(
+    (acc, color) => acc + (color.sizeVariants?.length || 0),
     0
   );
 
@@ -83,7 +83,7 @@ export function ProductDeleteDialog({
             <span className="font-bold">{product.name}</span>?
             <br />
             This will remove the product along with{" "}
-            <span className="font-bold">{product.colorVariants.length}</span>{" "}
+            <span className="font-bold">{product.colorVariants?.length || 0}</span>{" "}
             color variant(s) and{" "}
             <span className="font-bold">{totalVariants}</span> size variant(s).
           </p>

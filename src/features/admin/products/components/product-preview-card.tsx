@@ -11,7 +11,6 @@ interface ColorVariant {
 
 interface ProductPreviewCardProps {
   name: string;
-  description: string;
   basePrice: number;
   fabricType?: string;
   pattern?: string;
@@ -22,7 +21,6 @@ interface ProductPreviewCardProps {
 
 export function ProductPreviewCard({
   name,
-  description,
   basePrice,
   fabricType,
   pattern,
@@ -31,7 +29,6 @@ export function ProductPreviewCard({
   imagePreview,
 }: ProductPreviewCardProps) {
   const hasName = name.trim().length > 0;
-  const hasDescription = description.trim().length > 0;
   const hasPrice = basePrice > 0;
   const selectedColor = colorVariants[0];
 
@@ -94,13 +91,6 @@ export function ProductPreviewCard({
               <span className="text-muted-foreground/50 italic">Product name</span>
             )}
           </h3>
-
-          {/* Description */}
-          <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
-            {hasDescription ? description : (
-              <span className="text-muted-foreground/40 italic">Product description will appear here...</span>
-            )}
-          </p>
 
           {/* Attributes */}
           {(fabricType || pattern) && (

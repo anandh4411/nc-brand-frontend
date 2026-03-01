@@ -126,10 +126,10 @@ export function ProductViewModal({ open, onOpenChange, product }: Props) {
             {/* Color Variants */}
             <div>
               <p className="text-sm font-medium mb-3">
-                Color Variants ({product.colorVariants.length})
+                Color Variants ({product.colorVariants?.length || 0})
               </p>
               <div className="space-y-3">
-                {product.colorVariants.map((color) => (
+                {(product.colorVariants || []).map((color) => (
                   <div
                     key={color.id}
                     className="flex items-start gap-3 p-3 border rounded-lg"

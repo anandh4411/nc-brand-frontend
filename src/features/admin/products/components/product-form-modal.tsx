@@ -639,7 +639,6 @@ export function ProductFormModal({
             <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
               <ProductPreviewCard
                 name={watchedValues.name || ""}
-                description={watchedValues.description || ""}
                 basePrice={watchedValues.basePrice || 0}
                 fabricType={watchedValues.fabricType}
                 pattern={watchedValues.pattern}

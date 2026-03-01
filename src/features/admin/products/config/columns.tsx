@@ -1,7 +1,6 @@
 // src/features/admin/products/config/columns.tsx
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  selectColumn,
   customColumn,
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
@@ -49,7 +48,16 @@ export const createProductColumns = (
   ];
 
   return [
-    selectColumn<ProductGroup>(),
+    {
+      id: "slNo",
+      header: "#",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-sm">{row.index + 1}</span>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      meta: { className: "w-12" },
+    } as ColumnDef<ProductGroup>,
 
     customColumn<ProductGroup>("name", "Product Name", (value, row) => (
       <div className="flex items-center gap-2">

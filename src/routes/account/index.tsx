@@ -127,7 +127,7 @@ function AccountDashboard() {
                 You haven't placed any orders yet.
               </p>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/shop/products">Start Shopping</Link>
+                <Link to="/shop">Start Shopping</Link>
               </Button>
             </>
           )}

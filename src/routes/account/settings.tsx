@@ -60,7 +60,7 @@ function SettingsPage() {
           setConfirmPassword("");
         },
         onError: (error: any) => {
-          toast.error(error?.response?.data?.message || "Failed to change password");
+          toast.error(error?.message || "Failed to change password");
         },
       }
     );

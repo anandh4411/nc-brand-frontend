@@ -1,5 +1,5 @@
 // src/features/admin/products/components/product-view-modal.tsx
-import { Package, Star, Calendar, IndianRupee } from "lucide-react";
+import { Package, Star, Calendar, ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -158,6 +158,35 @@ export function ProductViewModal({ open, onOpenChange, product }: Props) {
                       <p className="text-xs text-muted-foreground mt-1">
                         SKUs: {color.sizeVariants.map((s) => s.sku).join(", ")}
                       </p>
+
+                      {/* Product Images */}
+                      {color.images && color.images.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                            <ImageIcon className="h-3 w-3" />
+                            Images ({color.images.length})
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {color.images.map((img) => (
+                              <div
+                                key={img.uuid}
+                                className="relative w-14 h-14 rounded-md overflow-hidden border"
+                              >
+                                <img
+                                  src={img.imageUrl}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                                {img.isPrimary && (
+                                  <div className="absolute top-0.5 left-0.5">
+                                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

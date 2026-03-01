@@ -1,8 +1,8 @@
 // src/features/admin/products/components/product-form-modal.tsx
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Package, Plus, Save, Trash2, Palette } from "lucide-react";
-import { useEffect } from "react";
+import { Package, Plus, Save, Trash2, Palette, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +29,11 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { fabricTypeOptions, patternOptions, sizeOptions } from "../data/mock-data";
-import { useCreateProductGroup, useUpdateProductGroup } from "@/api/hooks/admin";
-import type { ProductGroup, Category } from "@/types/dto/product-catalog.dto";
+import { useCreateProductGroup, useUpdateProductGroup, useUploadProductImage, useDeleteProductImage } from "@/api/hooks/admin";
+import type { ProductGroup, Category, ProductImage } from "@/types/dto/product-catalog.dto";
 import { toast } from "sonner";
 import { ProductPreviewCard } from "./product-preview-card";
+import { ImageUploadArea, type PendingFile } from "./image-upload-area";
 
 interface Props {
   open: boolean;
@@ -80,11 +81,88 @@ export function ProductFormModal({
 }: Props) {
   const createProductGroup = useCreateProductGroup();
   const updateProductGroup = useUpdateProductGroup();
+  const uploadImage = useUploadProductImage();
+  const deleteImage = useDeleteProductImage();
+
+  // Track pending image files per color variant index
+  const [pendingImageFiles, setPendingImageFiles] = useState<Map<number, PendingFile[]>>(new Map());
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [deletingImageIds, setDeletingImageIds] = useState<Set<string>>(new Set());
 
   const defaultColorVariant = {
     colorCode: "#000000",
     colorName: "",
     sizes: [{ size: "M", priceAdjustment: 0 }],
+  };
+
+  const handleFilesAdd = useCallback((colorIndex: number, files: PendingFile[]) => {
+    setPendingImageFiles((prev) => {
+      const next = new Map(prev);
+      const existing = next.get(colorIndex) || [];
+      next.set(colorIndex, [...existing, ...files]);
+      return next;
+    });
+  }, []);
+
+  const handleFileRemove = useCallback((colorIndex: number, fileId: string) => {
+    setPendingImageFiles((prev) => {
+      const next = new Map(prev);
+      const existing = next.get(colorIndex) || [];
+      const removed = existing.find((f) => f.id === fileId);
+      if (removed) URL.revokeObjectURL(removed.preview);
+      next.set(colorIndex, existing.filter((f) => f.id !== fileId));
+      return next;
+    });
+  }, []);
+
+  const handleExistingImageDelete = useCallback(async (imageUuid: string) => {
+    setDeletingImageIds((prev) => new Set(prev).add(imageUuid));
+    try {
+      await deleteImage.mutateAsync(imageUuid);
+      toast.success("Image deleted");
+    } catch {
+      toast.error("Failed to delete image");
+    } finally {
+      setDeletingImageIds((prev) => {
+        const next = new Set(prev);
+        next.delete(imageUuid);
+        return next;
+      });
+    }
+  }, [deleteImage]);
+
+  const cleanupPendingPreviews = useCallback(() => {
+    pendingImageFiles.forEach((files) => {
+      files.forEach((f) => URL.revokeObjectURL(f.preview));
+    });
+    setPendingImageFiles(new Map());
+  }, [pendingImageFiles]);
+
+  const uploadPendingImages = async (colorVariants: Array<{ uuid: string }>) => {
+    const uploads: Promise<void>[] = [];
+
+    pendingImageFiles.forEach((files, colorIndex) => {
+      const variant = colorVariants[colorIndex];
+      if (!variant || files.length === 0) return;
+
+      files.forEach((pf, fileIndex) => {
+        // First image of each variant is primary (if variant has no existing images)
+        const existingCount = product?.colorVariants?.[colorIndex]?.images?.length ?? 0;
+        const isPrimary = existingCount === 0 && fileIndex === 0;
+
+        uploads.push(
+          uploadImage.mutateAsync({
+            productUuid: variant.uuid,
+            file: pf.file,
+            isPrimary,
+          }).then(() => {})
+        );
+      });
+    });
+
+    if (uploads.length > 0) {
+      await Promise.all(uploads);
+    }
   };
 
   const form = useForm<ProductFormData>({
@@ -110,6 +188,7 @@ export function ProductFormModal({
 
   useEffect(() => {
     if (open) {
+      cleanupPendingPreviews();
       if (product && mode === "edit") {
         form.reset({
           name: product.name,
@@ -168,40 +247,62 @@ export function ProductFormModal({
       })),
     };
 
+    const hasPendingImages = Array.from(pendingImageFiles.values()).some((f) => f.length > 0);
+
     if (mode === "add") {
-      createProductGroup.mutate(apiData as any, {
-        onSuccess: () => {
+      try {
+        const result = await createProductGroup.mutateAsync(apiData as any);
+        // Upload images after product is created
+        if (hasPendingImages && result.data?.colorVariants) {
+          setIsUploadingImages(true);
+          try {
+            await uploadPendingImages(result.data.colorVariants);
+            toast.success("Product created with images");
+          } catch {
+            toast.success("Product created, but some images failed to upload");
+          } finally {
+            setIsUploadingImages(false);
+          }
+        } else {
           toast.success("Product created successfully");
-          form.reset();
-          onOpenChange(false);
-        },
-        onError: () => {
-          toast.error("Failed to create product");
-        },
-      });
-    } else if (product) {
-      updateProductGroup.mutate(
-        { uuid: product.uuid, data: apiData as any },
-        {
-          onSuccess: () => {
-            toast.success("Product updated successfully");
-            form.reset();
-            onOpenChange(false);
-          },
-          onError: () => {
-            toast.error("Failed to update product");
-          },
         }
-      );
+        cleanupPendingPreviews();
+        form.reset();
+        onOpenChange(false);
+      } catch {
+        toast.error("Failed to create product");
+      }
+    } else if (product) {
+      try {
+        await updateProductGroup.mutateAsync({ uuid: product.uuid, data: apiData as any });
+        // Upload any new pending images for existing variants
+        if (hasPendingImages && product.colorVariants) {
+          setIsUploadingImages(true);
+          try {
+            await uploadPendingImages(product.colorVariants);
+          } catch {
+            toast.error("Some images failed to upload");
+          } finally {
+            setIsUploadingImages(false);
+          }
+        }
+        toast.success("Product updated successfully");
+        cleanupPendingPreviews();
+        form.reset();
+        onOpenChange(false);
+      } catch {
+        toast.error("Failed to update product");
+      }
     }
   };
 
   const handleClose = () => {
+    cleanupPendingPreviews();
     form.reset();
     onOpenChange(false);
   };
 
-  const isSubmitting = createProductGroup.isPending || updateProductGroup.isPending;
+  const isSubmitting = createProductGroup.isPending || updateProductGroup.isPending || isUploadingImages;
 
   const categoryOptions = (Array.isArray(categories) ? categories : [])
     .filter((c) => c.isActive)
@@ -212,8 +313,8 @@ export function ProductFormModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[950px] h-[90vh] p-0 gap-0 overflow-hidden">
-        <div className="flex flex-col sm:flex-row h-full">
+      <DialogContent className="sm:max-w-[950px] h-[90vh] p-0 gap-0">
+        <div className="flex flex-col sm:flex-row h-full overflow-auto">
           {/* Left Section - Form */}
           <div className="flex-1 flex flex-col min-w-0 h-full">
             <DialogHeader className="text-left px-6 pt-6 pb-4 shrink-0">
@@ -228,10 +329,9 @@ export function ProductFormModal({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="h-0 flex-1 flex flex-col overflow-y-scroll">
-              <div className="h-0 flex-1 overflow-y-auto px-6">
-                <Form {...form}>
-                  <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
+            <div className="flex-1 overflow-y-auto px-6">
+              <Form {...form}>
+                <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
                     {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -470,28 +570,56 @@ export function ProductFormModal({
                               variant="ghost"
                               size="icon"
                               className="text-destructive ml-2"
-                              onClick={() => removeColor(colorIndex)}
+                              onClick={() => {
+                                // Clean up blob URLs for removed variant
+                                const files = pendingImageFiles.get(colorIndex) || [];
+                                files.forEach((f) => URL.revokeObjectURL(f.preview));
+                                setPendingImageFiles((prev) => {
+                                  const next = new Map(prev);
+                                  next.delete(colorIndex);
+                                  return next;
+                                });
+                                removeColor(colorIndex);
+                              }}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
+
+                        {/* Image Upload */}
+                        <ImageUploadArea
+                          existingImages={
+                            mode === "edit" ? product?.colorVariants?.[colorIndex]?.images : undefined
+                          }
+                          pendingFiles={pendingImageFiles.get(colorIndex) || []}
+                          onFilesAdd={(files) => handleFilesAdd(colorIndex, files)}
+                          onFileRemove={(id) => handleFileRemove(colorIndex, id)}
+                          onExistingImageDelete={mode === "edit" ? handleExistingImageDelete : undefined}
+                          uploadingImageIds={deletingImageIds}
+                          disabled={isSubmitting}
+                        />
                       </div>
                     ))}
                   </div>
                   </div>
                   </form>
                 </Form>
-              </div>
+            </div>
 
-              <DialogFooter className="px-6 py-4 border-t shrink-0">
+            <DialogFooter className="px-6 py-4 border-t shrink-0">
                 <DialogClose asChild>
                   <Button variant="outline" disabled={isSubmitting}>
                     Cancel
                   </Button>
                 </DialogClose>
                 <Button type="submit" form="product-form" disabled={isSubmitting}>
-                  {mode === "add" ? (
+                  {isUploadingImages ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading images...
+                    </>
+                  ) : mode === "add" ? (
                     <>
                       <Plus className="mr-2 h-4 w-4" />
                       {isSubmitting ? "Adding..." : "Add Product"}
@@ -503,8 +631,7 @@ export function ProductFormModal({
                     </>
                   )}
                 </Button>
-              </DialogFooter>
-            </div>
+            </DialogFooter>
           </div>
 
           {/* Right Section - Preview */}
@@ -518,6 +645,11 @@ export function ProductFormModal({
                 pattern={watchedValues.pattern}
                 isFeatured={watchedValues.isFeatured}
                 colorVariants={watchedValues.colorVariants || []}
+                imagePreview={
+                  // Show first existing image or first pending file
+                  (mode === "edit" && product?.colorVariants?.[0]?.images?.[0]?.imageUrl) ||
+                  pendingImageFiles.get(0)?.[0]?.preview
+                }
               />
             </div>
           </div>

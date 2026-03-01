@@ -19,7 +19,7 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import { KeyRound, Trash2 } from "lucide-react";
-import { useChangePassword } from "@/api/hooks/shop";
+import { useChangePassword, useDeleteAccount } from "@/api/hooks/shop";
 
 interface SearchParams {
   tab?: string;
@@ -28,15 +28,15 @@ interface SearchParams {
 function SettingsPage() {
   const search = useSearch({ from: "/account/settings" }) as SearchParams;
   const defaultTab = search?.tab === "delete" ? "delete" : "password";
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const changePasswordMutation = useChangePassword();
+  const deleteAccountMutation = useDeleteAccount();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,23 +66,13 @@ function SettingsPage() {
     );
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (deleteConfirmation !== "DELETE") {
       toast.error("Please type DELETE to confirm");
       return;
     }
 
-    setIsDeleting(true);
-    try {
-      // TODO: Implement API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Account deleted successfully");
-      logout();
-    } catch {
-      toast.error("Failed to delete account");
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteAccountMutation.mutate();
   };
 
   return (
@@ -213,9 +203,9 @@ function SettingsPage() {
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        disabled={isDeleting}
+                        disabled={deleteAccountMutation.isPending}
                       >
-                        {isDeleting ? "Deleting..." : "Yes, delete my account"}
+                        {deleteAccountMutation.isPending ? "Deleting..." : "Yes, delete my account"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

@@ -22,8 +22,8 @@ export const useRoleGuard = (allowedRoles: UserRole[], options?: { skip?: boolea
       const currentPath = window.location.pathname;
       if (currentPath.startsWith('/outlet')) {
         navigate({ to: '/outlet/sign-in' as any });
-      } else if (currentPath.startsWith('/account') || currentPath.startsWith('/checkout')) {
-        navigate({ to: '/sign-in', search: { type: 'customer' } } as any);
+      } else if (currentPath.startsWith('/account') || currentPath.startsWith('/checkout') || currentPath.startsWith('/customer')) {
+        navigate({ to: '/customer/sign-in' as any });
       } else {
         navigate({ to: '/admin/sign-in' as any });
       }

@@ -3,6 +3,7 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
+import { useTheme } from "@/context/theme-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +22,9 @@ import {
   ShoppingBag,
   Settings,
   LogIn,
+  Moon,
+  Sun,
+  UserPlus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,6 +48,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const { isAuthenticated, user, isCustomer, logout } = useAuth();
   const { itemCount: cartItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
@@ -51,6 +56,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: categoriesData } = useShopCategories();
   const mainCategories = (categoriesData?.data || []).filter((c: any) => !c.parentId);
+
+  const isLoggedIn = isAuthenticated && isCustomer;
 
   const isActivePath = (path: string) => currentPath === path || currentPath.startsWith(path + "/");
 
@@ -71,6 +78,10 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
@@ -206,8 +217,8 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                   </div>
                 </div>
 
-                {/* Account Section */}
-                {isAuthenticated && isCustomer && (
+                {/* Account Section - only when logged in */}
+                {isLoggedIn && (
                   <div className="mt-6">
                     <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Account
@@ -244,7 +255,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
 
               {/* Drawer Footer */}
               <div className="mt-auto border-t p-4">
-                {isAuthenticated && isCustomer ? (
+                {isLoggedIn ? (
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-sm font-semibold text-primary">
@@ -268,16 +279,29 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleNavigate("/sign-in?type=customer");
-                    }}
-                  >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleNavigate("/customer/sign-in");
+                      }}
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleNavigate("/customer/sign-up");
+                      }}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Create Account
+                    </Button>
+                  </div>
                 )}
               </div>
             </SheetContent>
@@ -323,7 +347,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
             >
               All Products
             </Link>
-            {isAuthenticated && isCustomer && (
+            {isLoggedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors">
                   Account
@@ -390,7 +414,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {/* Mobile Search */}
             <Button
               variant="ghost"
@@ -399,6 +423,16 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               onClick={() => handleNavigate("/shop/products")}
             >
               <Search className="h-5 w-5" />
+            </Button>
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            >
+              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </Button>
 
             {/* Wishlist */}
@@ -431,7 +465,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               )}
             </Button>
 
-            {/* Account */}
+            {/* Account Dropdown - different content based on auth state */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -439,35 +473,53 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleNavigate("/account")}>
-                  <User className="h-4 w-4 mr-2" />
-                  My Account
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
-                  <Heart className="h-4 w-4 mr-2" />
-                  Wishlist
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
-                  <Package className="h-4 w-4 mr-2" />
-                  Order History
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate("/account/settings")}>
-                  <KeyRound className="h-4 w-4 mr-2" />
-                  Change Password
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => handleNavigate("/account/settings?tab=delete")}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Account
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate("/sign-in?type=customer")}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign In
-                </DropdownMenuItem>
+                {isLoggedIn ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/account")}>
+                      <User className="h-4 w-4 mr-2" />
+                      My Account
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
+                      <Heart className="h-4 w-4 mr-2" />
+                      Wishlist
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
+                      <Package className="h-4 w-4 mr-2" />
+                      Order History
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleNavigate("/account/settings")}>
+                      <KeyRound className="h-4 w-4 mr-2" />
+                      Change Password
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => handleNavigate("/account/settings?tab=delete")}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Account
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => logout()}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate("/customer/sign-in")}>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate("/customer/sign-up")}>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Create Account
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -520,12 +572,12 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               <h4 className="font-semibold mb-4">Account</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/shop" className="hover:text-foreground">
+                  <Link to={isLoggedIn ? "/account" : "/customer/sign-in"} className="hover:text-foreground">
                     My Account
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="hover:text-foreground">
+                  <Link to={isLoggedIn ? "/account/orders" : "/customer/sign-in"} className="hover:text-foreground">
                     Order History
                   </Link>
                 </li>

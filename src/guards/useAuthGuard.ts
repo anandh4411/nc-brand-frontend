@@ -15,7 +15,14 @@ export const useAuthGuard = (options?: { skip?: boolean }) => {
 
     // Redirect to login if not authenticated
     if (!isLoading && !isAuthenticated) {
-      router.navigate({ to: "/admin/sign-in" as any });
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/outlet')) {
+        router.navigate({ to: "/outlet/sign-in" as any });
+      } else if (currentPath.startsWith('/account') || currentPath.startsWith('/checkout') || currentPath.startsWith('/customer')) {
+        router.navigate({ to: "/customer/sign-in" as any });
+      } else {
+        router.navigate({ to: "/admin/sign-in" as any });
+      }
     }
   }, [isAuthenticated, isLoading, router, skip]);
 

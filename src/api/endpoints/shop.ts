@@ -117,6 +117,13 @@ export const shopApi = {
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     apiClient.post(`${BASE}/auth/change-password`, data),
 
+  /**
+   * Delete Account (soft delete)
+   * DELETE /v1/shop/auth/me
+   */
+  deleteAccount: () =>
+    apiClient.delete(`${BASE}/auth/me`),
+
   // ============================================================================
   // BROWSING (Public)
   // ============================================================================

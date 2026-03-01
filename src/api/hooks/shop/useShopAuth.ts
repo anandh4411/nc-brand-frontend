@@ -110,3 +110,17 @@ export const useChangePassword = () => {
     },
   });
 };
+
+export const useDeleteAccount = () => {
+  const { logout } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => shopApi.deleteAccount(),
+    onSuccess: () => {
+      queryClient.clear();
+      showSuccess("Account deleted", "Your account has been deleted successfully");
+      logout();
+    },
+  });
+};

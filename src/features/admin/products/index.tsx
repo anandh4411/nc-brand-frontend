@@ -32,8 +32,21 @@ export default function Products() {
   const { data: categoriesResponse, isLoading: categoriesLoading } = useAdminCategories();
   const deleteProduct = useDeleteProductGroup();
 
-  // Get data from API
-  const productList = ((productsResponse?.data as any)?.productGroups || productsResponse?.data || []) as ProductGroup[];
+  // Get data from API — map backend `products` to frontend `colorVariants`
+  const rawProductGroups = ((productsResponse?.data as any)?.productGroups || productsResponse?.data || []) as any[];
+  const productList: ProductGroup[] = rawProductGroups.map((pg) => ({
+    ...pg,
+    attributes: {
+      fabricType: pg.fabricType,
+      pattern: pg.pattern,
+      careInstructions: pg.careInstructions,
+    },
+    colorVariants: (pg.products || pg.colorVariants || []).map((p: any) => ({
+      ...p,
+      sizeVariants: p.variants || p.sizeVariants || [],
+      images: p.images || [],
+    })),
+  }));
   const categories = ((categoriesResponse?.data as any)?.categories || categoriesResponse?.data || []) as Category[];
 
   const isLoading = productsLoading || categoriesLoading;

@@ -46,6 +46,7 @@ interface Props {
 // Size variant schema
 const sizeVariantSchema = z.object({
   size: z.string().min(1, "Size is required"),
+  sku: z.string().optional(),
   priceAdjustment: z.number().default(0),
 });
 
@@ -92,7 +93,7 @@ export function ProductFormModal({
   const defaultColorVariant = {
     colorCode: "#000000",
     colorName: "",
-    sizes: [{ size: "M", priceAdjustment: 0 }],
+    sizes: [{ size: "M", sku: "", priceAdjustment: 0 }],
   };
 
   const handleFilesAdd = useCallback((colorIndex: number, files: PendingFile[]) => {
@@ -200,11 +201,12 @@ export function ProductFormModal({
           careInstructions: product.attributes?.careInstructions || "",
           isFeatured: product.isFeatured,
           isActive: product.isActive,
-          colorVariants: product.colorVariants.map((cv) => ({
+          colorVariants: (product.colorVariants || []).map((cv) => ({
             colorCode: cv.colorCode,
             colorName: cv.colorName,
-            sizes: cv.sizeVariants.map((sv) => ({
+            sizes: (cv.sizeVariants || []).map((sv) => ({
               size: sv.size,
+              sku: sv.sku || "",
               priceAdjustment: sv.priceAdjustment,
             })),
           })),
@@ -242,6 +244,7 @@ export function ProductFormModal({
         colorName: cv.colorName,
         sizeVariants: cv.sizes.map((s) => ({
           size: s.size,
+          sku: s.sku || undefined,
           priceAdjustment: s.priceAdjustment,
         })),
       })),
@@ -253,10 +256,11 @@ export function ProductFormModal({
       try {
         const result = await createProductGroup.mutateAsync(apiData as any);
         // Upload images after product is created
-        if (hasPendingImages && (result.data as any)?.colorVariants) {
+        const createdProducts = (result.data as any)?.products || (result.data as any)?.colorVariants;
+        if (hasPendingImages && createdProducts?.length) {
           setIsUploadingImages(true);
           try {
-            await uploadPendingImages((result.data as any).colorVariants);
+            await uploadPendingImages(createdProducts);
             toast.success("Product created with images");
           } catch {
             toast.success("Product created, but some images failed to upload");
@@ -395,8 +399,8 @@ export function ProductFormModal({
                           <Input
                             type="number"
                             min={0}
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -672,29 +676,32 @@ function ColorSizeManager({
   });
 
   return (
-    <div className="flex flex-wrap gap-1">
-      {fields.map((field, sizeIndex) => (
-        <Badge
-          key={field.id}
-          variant="secondary"
-          className="cursor-pointer hover:bg-destructive/20"
-          onClick={() => fields.length > 1 && remove(sizeIndex)}
-        >
-          {(field as any).size || "?"}
-          {fields.length > 1 && <span className="ml-1">×</span>}
-        </Badge>
-      ))}
-      <SelectDropdown
-        defaultValue=""
-        onValueChange={(val) => {
-          if (val && !fields.some((f: any) => f.size === val)) {
-            append({ size: val, priceAdjustment: 0 });
-          }
-        }}
-        placeholder="+"
-        items={sizeOptions}
-        className="h-6 text-xs w-12"
-      />
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1">
+        {fields.map((field, sizeIndex) => (
+          <Badge
+            key={field.id}
+            variant="secondary"
+            className="cursor-pointer hover:bg-destructive/20"
+            onClick={() => fields.length > 1 && remove(sizeIndex)}
+          >
+            {(field as any).size || "?"}
+            {fields.length > 1 && <span className="ml-1">×</span>}
+          </Badge>
+        ))}
+        <SelectDropdown
+          defaultValue=""
+          onValueChange={(val) => {
+            if (val && !fields.some((f: any) => f.size === val)) {
+              append({ size: val, sku: "", priceAdjustment: 0 });
+            }
+          }}
+          placeholder="+"
+          items={sizeOptions}
+          className="h-6 text-xs w-12"
+        />
+      </div>
+      <p className="text-[10px] text-muted-foreground">SKU auto-generated if left empty</p>
     </div>
   );
 }

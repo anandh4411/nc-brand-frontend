@@ -138,7 +138,7 @@ export function ProductFilters({
                     {category.name}
                   </Label>
                   <span className="text-xs text-muted-foreground">
-                    ({category.productCount})
+                    ({(category as any).productCount ?? 0})
                   </span>
                 </div>
               ))}

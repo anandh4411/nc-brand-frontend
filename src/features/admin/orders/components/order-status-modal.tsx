@@ -65,9 +65,9 @@ const getNextStatuses = (current: OrderStatus): OrderStatus[] => {
 
 export function OrderStatusModal({ open, onOpenChange, order }: Props) {
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
-      status: order.status,
+      status: order.status as FormData["status"],
       notes: "",
     },
   });
@@ -75,7 +75,7 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
   useEffect(() => {
     if (open) {
       form.reset({
-        status: order.status,
+        status: order.status as FormData["status"],
         notes: "",
       });
     }

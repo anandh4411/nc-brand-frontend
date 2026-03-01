@@ -253,10 +253,10 @@ export function ProductFormModal({
       try {
         const result = await createProductGroup.mutateAsync(apiData as any);
         // Upload images after product is created
-        if (hasPendingImages && result.data?.colorVariants) {
+        if (hasPendingImages && (result.data as any)?.colorVariants) {
           setIsUploadingImages(true);
           try {
-            await uploadPendingImages(result.data.colorVariants);
+            await uploadPendingImages((result.data as any).colorVariants);
             toast.success("Product created with images");
           } catch {
             toast.success("Product created, but some images failed to upload");

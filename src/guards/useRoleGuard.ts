@@ -23,7 +23,7 @@ export const useRoleGuard = (allowedRoles: UserRole[], options?: { skip?: boolea
       if (currentPath.startsWith('/outlet')) {
         navigate({ to: '/outlet/sign-in' as any });
       } else if (currentPath.startsWith('/account') || currentPath.startsWith('/checkout')) {
-        navigate({ to: '/sign-in' as any, search: { type: 'customer' } });
+        navigate({ to: '/sign-in', search: { type: 'customer' } } as any);
       } else {
         navigate({ to: '/admin/sign-in' as any });
       }

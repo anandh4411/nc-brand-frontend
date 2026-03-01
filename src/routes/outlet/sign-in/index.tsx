@@ -43,7 +43,7 @@ function OutletLoginPage() {
           id: outlet.id,
           uuid: outlet.uuid,
           name: outlet.name,
-          email: outlet.email || "",
+          email: "",
           role: "outlet",
           outletId: outlet.id,
           outletName: outlet.name,

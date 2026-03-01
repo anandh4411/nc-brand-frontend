@@ -7,7 +7,7 @@ import { useAuth } from "@/context/auth-context";
 import { shopApi } from "@/api/endpoints/shop";
 import { queryKeys } from "@/api/query-keys";
 import { showSuccess } from "@/lib/error-handler";
-import type { CustomerLoginRequest, CustomerRegisterRequest } from "@/types/dto/shop-auth.dto";
+import type { CustomerLoginRequest, CustomerRegisterRequest, VerifyEmailRequest } from "@/types/dto/shop-auth.dto";
 
 export const useCustomerLogin = () => {
   const { login } = useAuth();
@@ -28,10 +28,16 @@ export const useCustomerLogin = () => {
 };
 
 export const useCustomerRegister = () => {
+  return useMutation({
+    mutationFn: (data: CustomerRegisterRequest) => shopApi.register(data),
+  });
+};
+
+export const useVerifyEmail = () => {
   const { login } = useAuth();
 
   return useMutation({
-    mutationFn: (data: CustomerRegisterRequest) => shopApi.register(data),
+    mutationFn: (data: VerifyEmailRequest) => shopApi.verifyEmail(data),
     onSuccess: (response) => {
       if (response.success && response.data) {
         const { accessToken, refreshToken, customer } = response.data;
@@ -39,8 +45,17 @@ export const useCustomerRegister = () => {
           { accessToken, refreshToken },
           { ...customer, role: 'customer' } as any
         );
-        showSuccess("Welcome!", "Account created successfully");
+        showSuccess("Welcome!", "Email verified successfully");
       }
+    },
+  });
+};
+
+export const useResendOtp = () => {
+  return useMutation({
+    mutationFn: (email: string) => shopApi.resendOtp({ email }),
+    onSuccess: () => {
+      showSuccess("OTP Sent", "A new OTP has been sent to your email");
     },
   });
 };

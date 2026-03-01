@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       case 'outlet':
         return '/outlet/sign-in';
       case 'customer':
-        return '/sign-in?type=customer';
+        return '/customer/sign-in';
       default:
         return '/admin/sign-in';
     }
@@ -140,8 +140,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let loginPath = '/admin/sign-in';
     if (currentPath.startsWith('/outlet')) {
       loginPath = '/outlet/sign-in';
-    } else if (currentPath.startsWith('/account') || currentPath.startsWith('/shop')) {
-      loginPath = '/sign-in';
+    } else if (currentPath.startsWith('/account') || currentPath.startsWith('/shop') || currentPath.startsWith('/customer')) {
+      loginPath = '/customer/sign-in';
     }
 
     if (currentPath !== loginPath) {

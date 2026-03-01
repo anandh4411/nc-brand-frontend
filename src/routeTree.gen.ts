@@ -26,6 +26,9 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ShopWishlistRouteImport } from './routes/shop/wishlist'
 import { Route as ShopCartRouteImport } from './routes/shop/cart'
+import { Route as CustomerVerifyEmailRouteImport } from './routes/customer/verify-email'
+import { Route as CustomerSignUpRouteImport } from './routes/customer/sign-up'
+import { Route as CustomerSignInRouteImport } from './routes/customer/sign-in'
 import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
 import { Route as AccountWishlistRouteImport } from './routes/account/wishlist'
 import { Route as AccountSettingsRouteImport } from './routes/account/settings'
@@ -149,6 +152,21 @@ const ShopCartRoute = ShopCartRouteImport.update({
   id: '/cart',
   path: '/cart',
   getParentRoute: () => ShopRoute,
+} as any)
+const CustomerVerifyEmailRoute = CustomerVerifyEmailRouteImport.update({
+  id: '/customer/verify-email',
+  path: '/customer/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSignUpRoute = CustomerSignUpRouteImport.update({
+  id: '/customer/sign-up',
+  path: '/customer/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSignInRoute = CustomerSignInRouteImport.update({
+  id: '/customer/sign-in',
+  path: '/customer/sign-in',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSignInRoute = AdminSignInRouteImport.update({
   id: '/sign-in',
@@ -381,6 +399,9 @@ export interface FileRoutesByFullPath {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
@@ -430,6 +451,9 @@ export interface FileRoutesByTo {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account': typeof AccountIndexRoute
@@ -486,6 +510,9 @@ export interface FileRoutesById {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
   '/shop/cart': typeof ShopCartRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
@@ -543,6 +570,9 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account/'
@@ -592,6 +622,9 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account'
@@ -647,6 +680,9 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
     | '/shop/cart'
     | '/shop/wishlist'
     | '/account/'
@@ -697,6 +733,9 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  CustomerSignInRoute: typeof CustomerSignInRoute
+  CustomerSignUpRoute: typeof CustomerSignUpRoute
+  CustomerVerifyEmailRoute: typeof CustomerVerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -805,6 +844,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/shop/cart'
       preLoaderRoute: typeof ShopCartRouteImport
       parentRoute: typeof ShopRoute
+    }
+    '/customer/verify-email': {
+      id: '/customer/verify-email'
+      path: '/customer/verify-email'
+      fullPath: '/customer/verify-email'
+      preLoaderRoute: typeof CustomerVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/sign-up': {
+      id: '/customer/sign-up'
+      path: '/customer/sign-up'
+      fullPath: '/customer/sign-up'
+      preLoaderRoute: typeof CustomerSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/sign-in': {
+      id: '/customer/sign-in'
+      path: '/customer/sign-in'
+      fullPath: '/customer/sign-in'
+      preLoaderRoute: typeof CustomerSignInRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/sign-in': {
       id: '/admin/sign-in'
@@ -1232,6 +1292,9 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  CustomerSignInRoute: CustomerSignInRoute,
+  CustomerSignUpRoute: CustomerSignUpRoute,
+  CustomerVerifyEmailRoute: CustomerVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

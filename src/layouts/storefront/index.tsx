@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
@@ -16,6 +16,11 @@ import {
   KeyRound,
   Trash2,
   LogOut,
+  Home,
+  Grid3X3,
+  ShoppingBag,
+  Settings,
+  LogIn,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,8 +30,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { shopCategories } from "@/features/shop/data/mock-data";
+import { useShopCategories } from "@/api/hooks/shop";
 
 interface StorefrontLayoutProps {
   children: React.ReactNode;
@@ -39,7 +45,14 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const { itemCount: cartItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const router = useRouter();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: categoriesData } = useShopCategories();
+  const mainCategories = (categoriesData?.data || []).filter((c: any) => !c.parentId);
+
+  const isActivePath = (path: string) => currentPath === path || currentPath.startsWith(path + "/");
 
   const handleNavigate = (path: string) => {
     router.navigate({ to: path });
@@ -66,68 +79,214 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
       <header className="shrink-0 sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           {/* Mobile Menu */}
-          <Sheet>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                <Link to="/shop" className="text-lg font-medium hover:text-primary">
-                  Home
+            <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
+              {/* Drawer Header - Brand */}
+              <div className="p-5 pb-4">
+                <Link
+                  to="/shop"
+                  className="flex items-center gap-3"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <img src="/logo.jpg" alt="NC Brand" className="h-10 w-10 rounded-xl" />
+                  <div>
+                    <span className="font-bold text-lg block leading-tight">NC Brand</span>
+                    <span className="text-xs text-muted-foreground">Quality Textiles</span>
+                  </div>
                 </Link>
-                <Link to="/shop/products" className="text-lg font-medium hover:text-primary">
-                  All Products
-                </Link>
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Categories</p>
-                  {shopCategories.filter(c => c.parentId === null).map((category) => (
+              </div>
+
+              <Separator />
+
+              {/* Drawer Navigation */}
+              <nav className="flex-1 overflow-y-auto px-3 py-4">
+                {/* Main Links */}
+                <div className="space-y-1">
+                  <Link
+                    to="/shop"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      currentPath === "/shop"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Home className="h-4 w-4" />
+                    Home
+                  </Link>
+                  <Link
+                    to="/shop/products"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActivePath("/shop/products")
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    All Products
+                  </Link>
+                </div>
+
+                {/* Categories */}
+                {mainCategories.length > 0 && (
+                  <div className="mt-6">
+                    <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Categories
+                    </p>
+                    <div className="space-y-1">
+                      {mainCategories.map((category: any) => (
+                        <Link
+                          key={category.id}
+                          to={`/shop/products?category=${category.slug}` as any}
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Grid3X3 className="h-4 w-4" />
+                          {category.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Shopping */}
+                <div className="mt-6">
+                  <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Shopping
+                  </p>
+                  <div className="space-y-1">
                     <Link
-                      key={category.id}
-                      to={`/shop/products?category=${category.id}` as any}
-                      className="block py-2 text-sm hover:text-primary"
+                      to="/shop/cart"
+                      className={cn(
+                        "flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        isActivePath("/shop/cart")
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      {category.name}
+                      <span className="flex items-center gap-3">
+                        <ShoppingCart className="h-4 w-4" />
+                        Cart
+                      </span>
+                      {cartItemCount > 0 && (
+                        <span className="h-5 min-w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center px-1.5">
+                          {cartItemCount}
+                        </span>
+                      )}
                     </Link>
-                  ))}
+                    <Link
+                      to="/shop/wishlist"
+                      className={cn(
+                        "flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        isActivePath("/shop/wishlist")
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <span className="flex items-center gap-3">
+                        <Heart className="h-4 w-4" />
+                        Wishlist
+                      </span>
+                      {wishlistCount > 0 && (
+                        <span className="h-5 min-w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center px-1.5">
+                          {wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
                 </div>
-                <div className="border-t pt-4">
-                  <Link to="/shop/cart" className="block py-2 text-lg font-medium hover:text-primary">
-                    Cart
-                  </Link>
-                  <Link to="/shop/wishlist" className="block py-2 text-lg font-medium hover:text-primary">
-                    Wishlist
-                  </Link>
-                </div>
+
+                {/* Account Section */}
                 {isAuthenticated && isCustomer && (
-                  <div className="border-t pt-4">
-                    <p className="text-sm text-muted-foreground mb-2">Account</p>
-                    <Link to="/account" className="block py-2 text-sm hover:text-primary">
-                      My Account
-                    </Link>
-                    <Link to="/account/orders" className="block py-2 text-sm hover:text-primary">
-                      Order History
-                    </Link>
-                    <Link to="/account/settings" className="block py-2 text-sm hover:text-primary">
-                      Change Password
-                    </Link>
-                    <button
-                      onClick={() => logout()}
-                      className="block py-2 text-sm text-destructive hover:text-destructive/80 w-full text-left"
-                    >
-                      Sign Out
-                    </button>
+                  <div className="mt-6">
+                    <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Account
+                    </p>
+                    <div className="space-y-1">
+                      <Link
+                        to="/account"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        My Account
+                      </Link>
+                      <Link
+                        to="/account/orders"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Package className="h-4 w-4" />
+                        Order History
+                      </Link>
+                      <Link
+                        to="/account/settings"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Link>
+                    </div>
                   </div>
                 )}
               </nav>
+
+              {/* Drawer Footer */}
+              <div className="mt-auto border-t p-4">
+                {isAuthenticated && isCustomer ? (
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-primary">
+                        {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        logout();
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleNavigate("/sign-in?type=customer");
+                    }}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                )}
+              </div>
             </SheetContent>
           </Sheet>
 
-          {/* Logo */}
-          <Link to="/shop" className="flex items-center gap-2">
+          {/* Logo - hidden on mobile, shown in drawer instead */}
+          <Link to="/shop" className="hidden md:flex items-center gap-2">
             <img src="/logo.jpg" alt="NC Brand" className="h-8 w-8 rounded-lg" />
-            <span className="font-bold text-xl hidden sm:inline">NC Brand</span>
+            <span className="font-bold text-xl">NC Brand</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -144,10 +303,10 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                 <ChevronDown className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {shopCategories.filter(c => c.parentId === null).map((category) => (
+                {mainCategories.map((category: any) => (
                   <DropdownMenuItem
                     key={category.id}
-                    onClick={() => handleNavigate(`/shop/products?category=${category.id}`)}
+                    onClick={() => handleNavigate(`/shop/products?category=${category.slug}`)}
                   >
                     {category.name}
                   </DropdownMenuItem>

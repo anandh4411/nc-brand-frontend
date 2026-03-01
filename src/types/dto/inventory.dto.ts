@@ -9,17 +9,24 @@ import { z } from "zod";
 // MANUFACTURING INVENTORY
 // ============================================================================
 
+export const InventoryVariantSchema = z.object({
+  id: z.number(),
+  uuid: z.string(),
+  sku: z.string(),
+  size: z.string(),
+  productName: z.string(),
+  productGroupName: z.string(),
+  colorName: z.string(),
+});
+
 export const InventoryItemSchema = z.object({
   id: z.number(),
-  productVariantId: z.number(),
-  productVariantSku: z.string(),
-  productName: z.string(),
-  colorName: z.string(),
-  size: z.string(),
+  uuid: z.string(),
   quantity: z.number(),
   lowStockThreshold: z.number(),
-  batchNumber: z.string().optional(),
-  updatedAt: z.string(),
+  batchNumber: z.string().nullable(),
+  isLowStock: z.boolean(),
+  variant: InventoryVariantSchema,
 });
 
 export type InventoryItem = z.infer<typeof InventoryItemSchema>;
@@ -66,24 +73,24 @@ export type OutletInventoryItem = z.infer<typeof OutletInventoryItemSchema>;
 // ============================================================================
 
 export const ShipmentStatusSchema = z.enum([
-  "pending",
-  "shipped",
-  "delivered",
-  "cancelled",
+  "PENDING",
+  "SHIPPED",
+  "DELIVERED",
+  "PARTIALLY_RECEIVED",
+  "CANCELLED",
 ]);
 
 export type ShipmentStatus = z.infer<typeof ShipmentStatusSchema>;
 
 export const ShipmentItemSchema = z.object({
   id: z.number(),
-  shipmentId: z.number(),
-  productVariantId: z.number(),
-  productVariantSku: z.string(),
-  productName: z.string(),
-  colorName: z.string(),
+  uuid: z.string(),
+  sku: z.string(),
   size: z.string(),
+  colorName: z.string(),
+  productName: z.string(),
   quantity: z.number(),
-  receivedQuantity: z.number().optional(),
+  receivedQuantity: z.number(),
 });
 
 export type ShipmentItem = z.infer<typeof ShipmentItemSchema>;
@@ -91,32 +98,36 @@ export type ShipmentItem = z.infer<typeof ShipmentItemSchema>;
 export const ShipmentSchema = z.object({
   id: z.number(),
   uuid: z.string().uuid(),
-  outletId: z.number(),
-  outletName: z.string(),
   status: ShipmentStatusSchema,
+  outlet: z.object({
+    id: z.number(),
+    uuid: z.string(),
+    code: z.string(),
+    name: z.string(),
+  }),
+  createdBy: z.object({
+    id: z.number(),
+    uuid: z.string(),
+    name: z.string(),
+  }),
   items: z.array(ShipmentItemSchema),
   shippedAt: z.string().nullable(),
   deliveredAt: z.string().nullable(),
-  notes: z.string().optional(),
-  createdBy: z.number(),
-  createdByName: z.string().optional(),
   createdAt: z.string(),
-  updatedAt: z.string(),
 });
 
 export type Shipment = z.infer<typeof ShipmentSchema>;
 
 export const CreateShipmentItemRequestSchema = z.object({
-  productVariantId: z.number(),
+  variantUuid: z.string().uuid(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
 export type CreateShipmentItemRequest = z.infer<typeof CreateShipmentItemRequestSchema>;
 
 export const CreateShipmentRequestSchema = z.object({
-  outletId: z.number(),
+  outletUuid: z.string().uuid(),
   items: z.array(CreateShipmentItemRequestSchema).min(1, "At least one item is required"),
-  notes: z.string().optional(),
 });
 
 export type CreateShipmentRequest = z.infer<typeof CreateShipmentRequestSchema>;

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DataTable,
@@ -18,7 +17,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -44,8 +42,13 @@ import {
   Search,
 } from "lucide-react";
 import { toast } from "sonner";
+import { usePosInventory, useOutletSales, useCreateSale } from "@/api/hooks/outlet";
+import type { OutletSale, POSInventoryProduct } from "@/api/endpoints/outlet";
 
 // Types
+type Sale = OutletSale;
+type InventoryProduct = POSInventoryProduct;
+
 interface SaleItem {
   sku: string;
   name: string;
@@ -56,187 +59,6 @@ interface SaleItem {
   total: number;
 }
 
-interface Sale {
-  id: string;
-  invoiceNumber: string;
-  date: string;
-  time: string;
-  customerName: string;
-  customerPhone?: string;
-  paymentMethod: "cash" | "card" | "upi";
-  items: SaleItem[];
-  subtotal: number;
-  discount: number;
-  tax: number;
-  total: number;
-  status: "completed" | "refunded" | "partial_refund";
-}
-
-interface InventoryProduct {
-  id: number;
-  sku: string;
-  name: string;
-  color: string;
-  size: string;
-  stock: number;
-  price: number;
-}
-
-// Mock inventory for product selection
-const inventoryProducts: InventoryProduct[] = [
-  { id: 1, sku: "BSS-001-RB", name: "Banarasi Silk Saree", color: "Royal Blue", size: "Free Size", stock: 2, price: 4599 },
-  { id: 2, sku: "BSS-001-MR", name: "Banarasi Silk Saree", color: "Maroon", size: "Free Size", stock: 15, price: 4599 },
-  { id: 3, sku: "CCK-023-MR", name: "Cotton Casual Kurti", color: "Maroon", size: "M", stock: 3, price: 1099 },
-  { id: 4, sku: "CCK-023-BL", name: "Cotton Casual Kurti", color: "Blue", size: "L", stock: 22, price: 1099 },
-  { id: 5, sku: "CPS-045-PK", name: "Chiffon Printed Saree", color: "Pink", size: "Free Size", stock: 1, price: 2499 },
-  { id: 6, sku: "BLS-012-GD", name: "Bridal Lehenga Set", color: "Gold", size: "L", stock: 8, price: 8999 },
-  { id: 7, sku: "TSS-034-GR", name: "Tussar Silk Saree", color: "Green", size: "Free Size", stock: 12, price: 3299 },
-  { id: 8, sku: "CDM-056-WH", name: "Cotton Dress Material", color: "White", size: "Unstitched", stock: 4, price: 899 },
-  { id: 9, sku: "PKS-078-RD", name: "Pattu Kanchipuram Saree", color: "Red", size: "Free Size", stock: 6, price: 12999 },
-  { id: 10, sku: "SSS-101-YL", name: "Soft Silk Saree", color: "Yellow", size: "Free Size", stock: 9, price: 5499 },
-  { id: 11, sku: "PKR-112-PR", name: "Party Kurti", color: "Purple", size: "S", stock: 5, price: 1299 },
-  { id: 12, sku: "WLS-123-CR", name: "Wedding Lehenga Set", color: "Cream", size: "M", stock: 3, price: 15999 },
-];
-
-// Mock sales data
-const initialSalesData: Sale[] = [
-  {
-    id: "1",
-    invoiceNumber: "INV-2024-0156",
-    date: "2024-12-30",
-    time: "14:32",
-    customerName: "Priya Sharma",
-    customerPhone: "+91 98765 43210",
-    paymentMethod: "card",
-    items: [
-      { sku: "BSS-001-RB", name: "Banarasi Silk Saree", color: "Royal Blue", size: "Free Size", quantity: 1, unitPrice: 4599, total: 4599 },
-      { sku: "CCK-023-MR", name: "Cotton Casual Kurti", color: "Maroon", size: "M", quantity: 2, unitPrice: 1099, total: 2198 },
-    ],
-    subtotal: 6797,
-    discount: 500,
-    tax: 566,
-    total: 6863,
-    status: "completed",
-  },
-  {
-    id: "2",
-    invoiceNumber: "INV-2024-0155",
-    date: "2024-12-30",
-    time: "12:15",
-    customerName: "Meera Patel",
-    paymentMethod: "upi",
-    items: [
-      { sku: "BLS-012-GD", name: "Bridal Lehenga Set", color: "Gold", size: "L", quantity: 1, unitPrice: 8999, total: 8999 },
-    ],
-    subtotal: 8999,
-    discount: 0,
-    tax: 810,
-    total: 9809,
-    status: "completed",
-  },
-  {
-    id: "3",
-    invoiceNumber: "INV-2024-0154",
-    date: "2024-12-30",
-    time: "10:45",
-    customerName: "Anjali Reddy",
-    customerPhone: "+91 87654 32109",
-    paymentMethod: "cash",
-    items: [
-      { sku: "CPS-045-PK", name: "Chiffon Printed Saree", color: "Pink", size: "Free Size", quantity: 1, unitPrice: 2499, total: 2499 },
-      { sku: "CDM-056-WH", name: "Cotton Dress Material", color: "White", size: "Unstitched", quantity: 2, unitPrice: 899, total: 1798 },
-    ],
-    subtotal: 4297,
-    discount: 200,
-    tax: 369,
-    total: 4466,
-    status: "completed",
-  },
-  {
-    id: "4",
-    invoiceNumber: "INV-2024-0153",
-    date: "2024-12-29",
-    time: "17:20",
-    customerName: "Kavitha Nair",
-    paymentMethod: "card",
-    items: [
-      { sku: "SSS-101-YL", name: "Soft Silk Saree", color: "Yellow", size: "Free Size", quantity: 1, unitPrice: 5499, total: 5499 },
-    ],
-    subtotal: 5499,
-    discount: 0,
-    tax: 495,
-    total: 5994,
-    status: "completed",
-  },
-  {
-    id: "5",
-    invoiceNumber: "INV-2024-0152",
-    date: "2024-12-29",
-    time: "15:10",
-    customerName: "Lakshmi Iyer",
-    customerPhone: "+91 76543 21098",
-    paymentMethod: "upi",
-    items: [
-      { sku: "PKS-078-RD", name: "Pattu Kanchipuram Saree", color: "Red", size: "Free Size", quantity: 1, unitPrice: 12999, total: 12999 },
-    ],
-    subtotal: 12999,
-    discount: 1000,
-    tax: 1080,
-    total: 13079,
-    status: "completed",
-  },
-  {
-    id: "6",
-    invoiceNumber: "INV-2024-0151",
-    date: "2024-12-29",
-    time: "11:30",
-    customerName: "Divya Menon",
-    paymentMethod: "cash",
-    items: [
-      { sku: "EKR-089-NV", name: "Embroidered Kurti", color: "Navy", size: "XL", quantity: 3, unitPrice: 1499, total: 4497 },
-    ],
-    subtotal: 4497,
-    discount: 300,
-    tax: 378,
-    total: 4575,
-    status: "refunded",
-  },
-  {
-    id: "7",
-    invoiceNumber: "INV-2024-0150",
-    date: "2024-12-28",
-    time: "16:45",
-    customerName: "Radha Krishnan",
-    paymentMethod: "card",
-    items: [
-      { sku: "WLS-123-CR", name: "Wedding Lehenga Set", color: "Cream", size: "M", quantity: 1, unitPrice: 15999, total: 15999 },
-      { sku: "TSS-034-GR", name: "Tussar Silk Saree", color: "Green", size: "Free Size", quantity: 1, unitPrice: 3299, total: 3299 },
-    ],
-    subtotal: 19298,
-    discount: 1500,
-    tax: 1602,
-    total: 19400,
-    status: "completed",
-  },
-  {
-    id: "8",
-    invoiceNumber: "INV-2024-0149",
-    date: "2024-12-28",
-    time: "13:20",
-    customerName: "Shalini Gupta",
-    customerPhone: "+91 65432 10987",
-    paymentMethod: "upi",
-    items: [
-      { sku: "PKR-112-PR", name: "Party Kurti", color: "Purple", size: "S", quantity: 2, unitPrice: 1299, total: 2598 },
-    ],
-    subtotal: 2598,
-    discount: 0,
-    tax: 234,
-    total: 2832,
-    status: "completed",
-  },
-];
-
 interface CartItem extends SaleItem {
   productId: number;
   maxStock: number;
@@ -244,7 +66,11 @@ interface CartItem extends SaleItem {
 
 function OutletSales() {
   const tableState = useTableState<Sale>({ debounceMs: 300 });
-  const [salesData, setSalesData] = useState<Sale[]>(initialSalesData);
+  const { data: salesResponse } = useOutletSales();
+  const { data: posInventoryResponse } = usePosInventory();
+  const createSaleMutation = useCreateSale();
+  const salesData = salesResponse?.data?.sales || [];
+  const inventoryProducts: InventoryProduct[] = posInventoryResponse?.data || [];
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
@@ -376,7 +202,7 @@ function OutletSales() {
     setProductSearch("");
   };
 
-  const handleCompleteSale = () => {
+  const handleCompleteSale = async () => {
     if (!customerName.trim()) {
       toast.error("Please enter customer name");
       return;
@@ -386,27 +212,28 @@ function OutletSales() {
       return;
     }
 
-    const now = new Date();
-    const newSale: Sale = {
-      id: String(salesData.length + 1),
-      invoiceNumber: `INV-2024-${String(salesData.length + 157).padStart(4, "0")}`,
-      date: now.toISOString().split("T")[0],
-      time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim() || undefined,
-      paymentMethod,
-      items: cart.map(({ productId, maxStock, ...item }) => item),
-      subtotal,
-      discount,
-      tax,
-      total,
-      status: "completed",
-    };
-
-    setSalesData([newSale, ...salesData]);
-    toast.success(`Sale completed! Invoice: ${newSale.invoiceNumber}`);
-    resetNewSaleForm();
-    setNewSaleOpen(false);
+    try {
+      const result = await createSaleMutation.mutateAsync({
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim() || undefined,
+        paymentMethod,
+        discount,
+        items: cart.map((item) => ({
+          productVariantId: item.productId,
+          sku: item.sku,
+          name: item.name,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+      });
+      toast.success(`Sale completed! Invoice: ${result.data.invoiceNumber}`);
+      resetNewSaleForm();
+      setNewSaleOpen(false);
+    } catch {
+      toast.error("Failed to complete sale");
+    }
   };
 
   const columns = useMemo((): ColumnDef<Sale>[] => [
@@ -710,7 +537,7 @@ function OutletSales() {
               <Button variant="outline" onClick={() => setNewSaleOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCompleteSale} disabled={cart.length === 0} size="lg">
+              <Button onClick={handleCompleteSale} disabled={cart.length === 0 || createSaleMutation.isPending} size="lg">
                 <Receipt className="h-4 w-4 mr-2" />
                 Complete Sale
               </Button>

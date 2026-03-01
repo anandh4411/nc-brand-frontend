@@ -3,24 +3,23 @@ import { useAuth } from "@/context/auth-context";
 import { useRouter } from "@tanstack/react-router";
 import { env } from "@/config/env";
 
-export const useAuthGuard = () => {
+export const useAuthGuard = (options?: { skip?: boolean }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const skip = options?.skip;
 
   useEffect(() => {
-    // Skip auth guard if disabled via env (dev only)
-    if (env.isAuthGuardDisabled) {
+    if (skip || env.isAuthGuardDisabled) {
       return;
     }
 
     // Redirect to login if not authenticated
     if (!isLoading && !isAuthenticated) {
-      router.navigate({ to: "/sign-in" });
+      router.navigate({ to: "/admin/sign-in" as any });
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, skip]);
 
-  // If guard is disabled, always return authenticated
-  if (env.isAuthGuardDisabled) {
+  if (skip || env.isAuthGuardDisabled) {
     return {
       isAuthenticated: true,
       isLoading: false,

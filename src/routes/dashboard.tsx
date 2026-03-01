@@ -18,7 +18,7 @@ function DashboardLayoutRoute() {
   }
 
   // If not authenticated, guard will redirect to /sign-in
-  // If not admin role, useRoleGuard will redirect to /institutions/dashboard
+  // If not admin role, useRoleGuard will redirect to appropriate page
   if (!isAuthenticated) {
     return null;
   }

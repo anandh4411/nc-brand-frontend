@@ -9,17 +9,16 @@ function OutletLayoutRoute() {
   const location = useLocation();
   const router = useRouter();
   const { isAuthenticated, isLoading, userRole } = useAuth();
-  const isLoginPage = location.pathname === "/outlet/login";
+  const isSignInPage = location.pathname.startsWith("/outlet/sign-in");
 
   useEffect(() => {
-    // Redirect to outlet login if not authenticated (skip for login page)
-    if (!isLoginPage && !isLoading && !isAuthenticated) {
-      router.navigate({ to: "/outlet/login" });
+    if (!isSignInPage && !isLoading && !isAuthenticated) {
+      router.navigate({ to: "/outlet/sign-in" as any });
     }
-  }, [isLoginPage, isAuthenticated, isLoading, router]);
+  }, [isSignInPage, isAuthenticated, isLoading, router]);
 
-  // Login page is public
-  if (isLoginPage) {
+  // Sign-in page is public
+  if (isSignInPage) {
     return <Outlet />;
   }
 

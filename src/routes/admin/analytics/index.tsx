@@ -17,43 +17,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-
-// Mock data
-const revenueData = [
-  { month: "Jan", revenue: 245000, orders: 156 },
-  { month: "Feb", revenue: 312000, orders: 189 },
-  { month: "Mar", revenue: 289000, orders: 167 },
-  { month: "Apr", revenue: 378000, orders: 234 },
-  { month: "May", revenue: 356000, orders: 212 },
-  { month: "Jun", revenue: 423000, orders: 267 },
-  { month: "Jul", revenue: 489000, orders: 298 },
-];
-
-// Red shades for pie chart
-const categoryData = [
-  { name: "Sarees", value: 42, fill: "#dc2626" },
-  { name: "Kurtis", value: 28, fill: "#ef4444" },
-  { name: "Lehengas", value: 18, fill: "#f87171" },
-  { name: "Dress Materials", value: 12, fill: "#fca5a5" },
-];
-
-const outletPerformance = [
-  { outlet: "Chennai", sales: 189000 },
-  { outlet: "Bangalore", sales: 156000 },
-  { outlet: "Mumbai", sales: 142000 },
-  { outlet: "Delhi", sales: 128000 },
-  { outlet: "Hyderabad", sales: 98000 },
-];
-
-const dailySales = [
-  { day: "Mon", online: 12000, offline: 8500 },
-  { day: "Tue", online: 15000, offline: 9200 },
-  { day: "Wed", online: 11000, offline: 7800 },
-  { day: "Thu", online: 18000, offline: 12000 },
-  { day: "Fri", online: 22000, offline: 15000 },
-  { day: "Sat", online: 28000, offline: 21000 },
-  { day: "Sun", online: 19000, offline: 14000 },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAdminAnalytics } from "@/api/hooks/admin";
 
 const revenueChartConfig = {
   revenue: { label: "Revenue", color: "#dc2626" },
@@ -69,19 +34,19 @@ const outletChartConfig = {
   sales: { label: "Sales", color: "#dc2626" },
 } satisfies ChartConfig;
 
-// Stats
-const stats = {
-  totalRevenue: 2492000,
-  revenueGrowth: 18.5,
-  totalOrders: 1523,
-  ordersGrowth: 12.3,
-  totalCustomers: 856,
-  customersGrowth: 24.1,
-  avgOrderValue: 1636,
-  avgOrderGrowth: -2.4,
-};
-
 function AdminAnalytics() {
+  const { data: analyticsResponse, isLoading } = useAdminAnalytics();
+  const analytics = analyticsResponse?.data;
+
+  const stats = analytics?.stats || {
+    totalRevenue: 0, revenueGrowth: 0, totalOrders: 0, ordersGrowth: 0,
+    totalCustomers: 0, customersGrowth: 0, avgOrderValue: 0, avgOrderGrowth: 0,
+  };
+  const revenueData = analytics?.revenueData || [];
+  const categoryData = analytics?.categoryData || [];
+  const outletPerformance = analytics?.outletPerformance || [];
+  const dailySales = analytics?.dailySales || [];
+
   const formatPrice = (price: number) => {
     if (price >= 100000) {
       return `₹${(price / 100000).toFixed(1)}L`;

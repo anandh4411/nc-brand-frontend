@@ -8,35 +8,30 @@ import type { UserRole } from '@/types/dto/auth.dto';
  * Role-based route guard for TextileHub
  * Redirects users to appropriate pages based on their role
  */
-export const useRoleGuard = (allowedRoles: UserRole[]) => {
+export const useRoleGuard = (allowedRoles: UserRole[], options?: { skip?: boolean }) => {
   const { isLoading, isAuthenticated, userRole } = useAuth();
   const navigate = useNavigate();
+  const skip = options?.skip;
 
   useEffect(() => {
-    // Skip role guard if auth guard is disabled (dev only)
-    if (env.isAuthGuardDisabled) {
+    if (skip || env.isAuthGuardDisabled) {
       return;
     }
 
     if (!isLoading && !isAuthenticated) {
-      // Not authenticated, redirect to appropriate login
       const currentPath = window.location.pathname;
       if (currentPath.startsWith('/outlet')) {
-        navigate({ to: '/outlet/login' });
+        navigate({ to: '/outlet/sign-in' as any });
       } else if (currentPath.startsWith('/account') || currentPath.startsWith('/checkout')) {
-        // Customer routes - redirect to shop sign-in
-        navigate({ to: '/sign-in', search: { type: 'customer' } });
+        navigate({ to: '/sign-in' as any, search: { type: 'customer' } });
       } else {
-        // Admin routes
-        navigate({ to: '/sign-in' });
+        navigate({ to: '/admin/sign-in' as any });
       }
       return;
     }
 
     if (!isLoading && isAuthenticated && userRole) {
-      // Authenticated but wrong role
       if (!allowedRoles.includes(userRole)) {
-        // Redirect to appropriate dashboard based on actual role
         switch (userRole) {
           case 'admin':
             navigate({ to: '/admin' });
@@ -45,17 +40,16 @@ export const useRoleGuard = (allowedRoles: UserRole[]) => {
             navigate({ to: '/outlet' });
             break;
           case 'customer':
-            navigate({ to: '/account' });
+            navigate({ to: '/account' as any });
             break;
           default:
-            navigate({ to: '/shop' });
+            navigate({ to: '/shop' as any });
         }
       }
     }
-  }, [isLoading, isAuthenticated, userRole, allowedRoles, navigate]);
+  }, [isLoading, isAuthenticated, userRole, allowedRoles, navigate, skip]);
 
-  // If guard is disabled, always return allowed
-  if (env.isAuthGuardDisabled) {
+  if (skip || env.isAuthGuardDisabled) {
     return {
       isLoading: false,
       isAllowed: true,

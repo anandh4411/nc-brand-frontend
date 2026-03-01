@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
   CreditCard,
@@ -15,39 +16,85 @@ import {
   CheckCircle2,
   Wallet,
   Banknote,
+  Loader2,
 } from "lucide-react";
-import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { StorefrontLayout } from "@/layouts/storefront";
+import {
+  useCart,
+  useAddresses,
+  useCheckout,
+  useCreateRazorpayOrder,
+  useVerifyPayment,
+} from "@/api/hooks/shop";
+import { useAuth } from "@/context/auth-context";
 
 type CheckoutStep = "address" | "payment" | "confirmation";
 
 interface AddressForm {
-  fullName: string;
+  name: string;
   phone: string;
-  email: string;
-  address: string;
+  addressLine1: string;
+  addressLine2: string;
   city: string;
   state: string;
   pincode: string;
 }
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, discount, shippingFee, tax, total, appliedCoupon, clearCart } = useCart();
+  const { isAuthenticated, isCustomer, user } = useAuth();
+
+  // API hooks
+  const { data: cartData, isLoading: cartLoading } = useCart();
+  const { data: addressesData, isLoading: addressesLoading } = useAddresses();
+  const checkout = useCheckout();
+  const createRazorpayOrder = useCreateRazorpayOrder();
+  const verifyPayment = useVerifyPayment();
+
+  const cart = cartData?.data as any;
+  const items = cart?.items || [];
+  const addresses = addressesData?.data || [] as any[];
 
   const [step, setStep] = useState<CheckoutStep>("address");
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
+  const [selectedAddressUuid, setSelectedAddressUuid] = useState<string>("");
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
   const [addressForm, setAddressForm] = useState<AddressForm>({
-    fullName: "",
+    name: "",
     phone: "",
-    email: "",
-    address: "",
+    addressLine1: "",
+    addressLine2: "",
     city: "",
     state: "",
     pincode: "",
   });
+
+  // Set default address
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddressUuid) {
+      const defaultAddress = addresses.find((a: any) => a.isDefault) || addresses[0];
+      setSelectedAddressUuid(defaultAddress.uuid);
+    }
+  }, [addresses, selectedAddressUuid]);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -61,34 +108,149 @@ function CheckoutPage() {
     setAddressForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const validateAddress = () => {
-    const required = ["fullName", "phone", "address", "city", "state", "pincode"];
-    return required.every((field) => addressForm[field as keyof AddressForm].trim());
+  const validateNewAddress = () => {
+    const required: (keyof AddressForm)[] = ["name", "phone", "addressLine1", "city", "state", "pincode"];
+    return required.every((field) => addressForm[field].trim());
+  };
+
+  const getSelectedAddress = () => {
+    if (useNewAddress) {
+      return addressForm;
+    }
+    return addresses.find((a: any) => a.uuid === selectedAddressUuid);
   };
 
   const handleContinueToPayment = () => {
-    if (!validateAddress()) {
-      toast.error("Please fill in all required fields");
+    if (useNewAddress && !validateNewAddress()) {
+      toast.error("Please fill in all required address fields");
+      return;
+    }
+    if (!useNewAddress && !selectedAddressUuid) {
+      toast.error("Please select an address");
       return;
     }
     setStep("payment");
   };
 
   const handlePlaceOrder = async () => {
-    setIsProcessing(true);
+    const address = getSelectedAddress();
+    if (!address) {
+      toast.error("Please select an address");
+      return;
+    }
 
-    // Simulate order placement
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const shippingAddress = useNewAddress
+      ? addressForm
+      : {
+          name: address.name,
+          phone: address.phone,
+          addressLine1: address.addressLine1,
+          addressLine2: address.addressLine2 || "",
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+        };
 
-    const orderId = `TH${Date.now().toString().slice(-8)}`;
+    if (paymentMethod === "cod") {
+      // Place COD order
+      checkout.mutate(
+        {
+          shippingAddressUuid: useNewAddress ? undefined : selectedAddressUuid,
+          shippingAddress: useNewAddress ? shippingAddress : undefined,
+          paymentMethod: "cod",
+        } as any,
+        {
+          onSuccess: (data) => {
+            setOrderNumber(data.data.orderNumber);
+            setStep("confirmation");
+          },
+        }
+      );
+    } else {
+      // Create Razorpay order - pass cart total as orderUuid temporarily (will be fixed when order is created first)
+      createRazorpayOrder.mutate(
+        String(cart?.total || 0),
+        {
+          onSuccess: (data) => {
+            const razorpayOrderId = data.data.razorpayOrderId;
+            const options = {
+              key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+              amount: (cart?.total || 0) * 100,
+              currency: "INR",
+              name: "NC Brand Textiles",
+              description: "Order Payment",
+              order_id: razorpayOrderId,
+              handler: async (response: any) => {
+                // Verify payment
+                verifyPayment.mutate(
+                  {
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                  } as any,
+                  {
+                    onSuccess: (verifyData) => {
+                      setOrderNumber(verifyData.data.orderNumber);
+                      setStep("confirmation");
+                    },
+                  }
+                );
+              },
+              prefill: {
+                name: user?.name || shippingAddress.name,
+                email: user?.email || "",
+                contact: shippingAddress.phone,
+              },
+              theme: {
+                color: "#0f172a",
+              },
+            };
 
-    // Clear cart after successful order
-    clearCart();
-    setStep("confirmation");
-    setIsProcessing(false);
+            const razorpay = new window.Razorpay(options);
+            razorpay.open();
+          },
+        }
+      );
+    }
   };
 
-  // Redirect to cart if empty
+  // Not authenticated
+  if (!isAuthenticated || !isCustomer) {
+    return (
+      <StorefrontLayout>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
+          <p className="text-muted-foreground mb-8">Sign in to checkout.</p>
+          <Button asChild>
+            <Link to="/sign-in" search={{ type: "customer" }}>
+              Sign In
+            </Link>
+          </Button>
+        </div>
+      </StorefrontLayout>
+    );
+  }
+
+  // Loading
+  if (cartLoading || addressesLoading) {
+    return (
+      <StorefrontLayout>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Skeleton className="h-10 w-48 mb-8" />
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Skeleton className="h-96" />
+            </div>
+            <div className="lg:col-span-1">
+              <Skeleton className="h-64" />
+            </div>
+          </div>
+        </div>
+      </StorefrontLayout>
+    );
+  }
+
+  // Empty cart
   if (items.length === 0 && step !== "confirmation") {
     return (
       <StorefrontLayout>
@@ -112,13 +274,16 @@ function CheckoutPage() {
             <CheckCircle2 className="h-16 w-16 mx-auto mb-6 text-green-500" />
             <h1 className="text-2xl font-bold mb-4">Order Placed Successfully!</h1>
             <p className="text-muted-foreground mb-2">
-              Thank you for your order. We've sent a confirmation email to {addressForm.email || "your email"}.
+              Thank you for your order. We've sent a confirmation email.
             </p>
             <p className="text-sm text-muted-foreground mb-8">
-              Order ID: <span className="font-mono font-medium">TH{Date.now().toString().slice(-8)}</span>
+              Order ID: <span className="font-mono font-medium">{orderNumber}</span>
             </p>
             <div className="space-y-3">
               <Button asChild className="w-full">
+                <Link to="/account/orders">View Orders</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
                 <Link to="/shop">Continue Shopping</Link>
               </Button>
             </div>
@@ -128,290 +293,329 @@ function CheckoutPage() {
     );
   }
 
+  const selectedAddress = getSelectedAddress();
+  const subtotal = cart?.subtotal || 0;
+  const discount = cart?.discount || 0;
+  const shipping = cart?.shipping || 0;
+  const tax = cart?.tax || 0;
+  const total = cart?.total || 0;
+
   return (
     <StorefrontLayout>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
         {/* Header */}
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => step === "payment" ? setStep("address") : navigate({ to: "/shop/cart" })}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {step === "payment" ? "Back to Address" : "Back to Cart"}
-        </Button>
-        <h1 className="text-3xl font-bold">Checkout</h1>
-      </div>
-
-      {/* Progress Steps */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="flex items-center gap-2">
-          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-            step === "address" ? "bg-primary text-primary-foreground" : "bg-green-500 text-white"
-          }`}>
-            {step === "address" ? "1" : <CheckCircle2 className="h-4 w-4" />}
-          </div>
-          <span className="font-medium">Address</span>
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => step === "payment" ? setStep("address") : navigate({ to: "/shop/cart" })}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {step === "payment" ? "Back to Address" : "Back to Cart"}
+          </Button>
+          <h1 className="text-3xl font-bold">Checkout</h1>
         </div>
-        <div className="h-px flex-1 bg-border" />
-        <div className="flex items-center gap-2">
-          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-            step === "payment" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-          }`}>
-            2
-          </div>
-          <span className={step === "payment" ? "font-medium" : "text-muted-foreground"}>Payment</span>
-        </div>
-      </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Form */}
-        <div className="lg:col-span-2">
-          {step === "address" && (
-            <Card>
+        {/* Progress Steps */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-2">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+              step === "address" ? "bg-primary text-primary-foreground" : "bg-green-500 text-white"
+            }`}>
+              {step === "address" ? "1" : <CheckCircle2 className="h-4 w-4" />}
+            </div>
+            <span className="font-medium">Address</span>
+          </div>
+          <div className="h-px flex-1 bg-border" />
+          <div className="flex items-center gap-2">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+              step === "payment" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}>
+              2
+            </div>
+            <span className={step === "payment" ? "font-medium" : "text-muted-foreground"}>Payment</span>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Form */}
+          <div className="lg:col-span-2">
+            {step === "address" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Shipping Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Saved Addresses */}
+                  {addresses.length > 0 && !useNewAddress && (
+                    <div className="space-y-3">
+                      <Label>Select Address</Label>
+                      <RadioGroup value={selectedAddressUuid} onValueChange={setSelectedAddressUuid}>
+                        {addresses.map((address: any) => (
+                          <div
+                            key={address.uuid}
+                            className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer ${
+                              selectedAddressUuid === address.uuid ? "border-primary bg-primary/5" : ""
+                            }`}
+                            onClick={() => setSelectedAddressUuid(address.uuid)}
+                          >
+                            <RadioGroupItem value={address.uuid} id={address.uuid} />
+                            <Label htmlFor={address.uuid} className="cursor-pointer flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{address.name}</span>
+                                {address.isDefault && <Badge variant="secondary">Default</Badge>}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{address.phone}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {address.addressLine1}
+                                {address.addressLine2 && `, ${address.addressLine2}`}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {address.city}, {address.state} - {address.pincode}
+                              </p>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                      <Button variant="link" className="p-0" onClick={() => setUseNewAddress(true)}>
+                        + Add New Address
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* New Address Form */}
+                  {(useNewAddress || addresses.length === 0) && (
+                    <div className="space-y-4">
+                      {addresses.length > 0 && (
+                        <Button variant="link" className="p-0" onClick={() => setUseNewAddress(false)}>
+                          ← Use Saved Address
+                        </Button>
+                      )}
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Full Name *</Label>
+                          <Input
+                            id="name"
+                            placeholder="John Doe"
+                            value={addressForm.name}
+                            onChange={(e) => handleAddressChange("name", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number *</Label>
+                          <Input
+                            id="phone"
+                            placeholder="9876543210"
+                            value={addressForm.phone}
+                            onChange={(e) => handleAddressChange("phone", e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="addressLine1">Address Line 1 *</Label>
+                        <Input
+                          id="addressLine1"
+                          placeholder="123 Main Street, Apartment 4B"
+                          value={addressForm.addressLine1}
+                          onChange={(e) => handleAddressChange("addressLine1", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="addressLine2">Address Line 2</Label>
+                        <Input
+                          id="addressLine2"
+                          placeholder="Area, Landmark (optional)"
+                          value={addressForm.addressLine2}
+                          onChange={(e) => handleAddressChange("addressLine2", e.target.value)}
+                        />
+                      </div>
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="city">City *</Label>
+                          <Input
+                            id="city"
+                            placeholder="Chennai"
+                            value={addressForm.city}
+                            onChange={(e) => handleAddressChange("city", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="state">State *</Label>
+                          <Input
+                            id="state"
+                            placeholder="Tamil Nadu"
+                            value={addressForm.state}
+                            onChange={(e) => handleAddressChange("state", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="pincode">PIN Code *</Label>
+                          <Input
+                            id="pincode"
+                            placeholder="600001"
+                            value={addressForm.pincode}
+                            onChange={(e) => handleAddressChange("pincode", e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button className="w-full mt-4" onClick={handleContinueToPayment}>
+                    Continue to Payment
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {step === "payment" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Payment Method
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Shipping Address Summary */}
+                  {selectedAddress && (
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <p className="text-sm font-medium mb-1">Shipping to:</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedAddress.name}, {selectedAddress.addressLine1}
+                        {selectedAddress.addressLine2 && `, ${selectedAddress.addressLine2}`}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Phone: {selectedAddress.phone}</p>
+                    </div>
+                  )}
+
+                  <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "cod" | "razorpay")}>
+                    <div className="space-y-3">
+                      <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
+                        paymentMethod === "razorpay" ? "border-primary bg-primary/5" : ""
+                      }`}>
+                        <RadioGroupItem value="razorpay" id="razorpay" />
+                        <Label htmlFor="razorpay" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <Wallet className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium">Pay Online</p>
+                            <p className="text-xs text-muted-foreground">UPI, Card, Net Banking, Wallets</p>
+                          </div>
+                        </Label>
+                        <Badge>Recommended</Badge>
+                      </div>
+
+                      <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
+                        paymentMethod === "cod" ? "border-primary bg-primary/5" : ""
+                      }`}>
+                        <RadioGroupItem value="cod" id="cod" />
+                        <Label htmlFor="cod" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <Banknote className="h-5 w-5" />
+                          <div>
+                            <p className="font-medium">Cash on Delivery</p>
+                            <p className="text-xs text-muted-foreground">Pay when you receive</p>
+                          </div>
+                        </Label>
+                      </div>
+                    </div>
+                  </RadioGroup>
+
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handlePlaceOrder}
+                    disabled={checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending}
+                  >
+                    {(checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending) ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      `Place Order - ${formatPrice(total)}`
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Shipping Address
-                </CardTitle>
+                <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name *</Label>
-                    <Input
-                      id="fullName"
-                      placeholder="John Doe"
-                      value={addressForm.fullName}
-                      onChange={(e) => handleAddressChange("fullName", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
-                    <Input
-                      id="phone"
-                      placeholder="9876543210"
-                      value={addressForm.phone}
-                      onChange={(e) => handleAddressChange("phone", e.target.value)}
-                    />
-                  </div>
+                {/* Items */}
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {items.map((item: any) => (
+                    <div key={item.variantUuid} className="flex gap-3">
+                      <div className="w-12 h-16 bg-muted rounded overflow-hidden shrink-0">
+                        <img
+                          src={item.imageUrl || `https://picsum.photos/seed/${item.sku}/100/130`}
+                          alt={item.productName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium line-clamp-1">{item.productName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.colorName} | {item.size} × {item.quantity}
+                        </p>
+                        <p className="text-sm font-medium">
+                          {formatPrice(item.lineTotal)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
+                <Separator />
+
+                {/* Price Breakdown */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="john@example.com"
-                    value={addressForm.email}
-                    onChange={(e) => handleAddressChange("email", e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address *</Label>
-                  <Input
-                    id="address"
-                    placeholder="123 Main Street, Apartment 4B"
-                    value={addressForm.address}
-                    onChange={(e) => handleAddressChange("address", e.target.value)}
-                  />
-                </div>
-
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      placeholder="Chennai"
-                      value={addressForm.city}
-                      onChange={(e) => handleAddressChange("city", e.target.value)}
-                    />
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
-                    <Input
-                      id="state"
-                      placeholder="Tamil Nadu"
-                      value={addressForm.state}
-                      onChange={(e) => handleAddressChange("state", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pincode">PIN Code *</Label>
-                    <Input
-                      id="pincode"
-                      placeholder="600001"
-                      value={addressForm.pincode}
-                      onChange={(e) => handleAddressChange("pincode", e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <Button className="w-full mt-4" onClick={handleContinueToPayment}>
-                  Continue to Payment
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "payment" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Payment Method
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Shipping Address Summary */}
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm font-medium mb-1">Shipping to:</p>
-                  <p className="text-sm text-muted-foreground">
-                    {addressForm.fullName}, {addressForm.address}, {addressForm.city}, {addressForm.state} - {addressForm.pincode}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Phone: {addressForm.phone}</p>
-                </div>
-
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="space-y-3">
-                    <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
-                      paymentMethod === "cod" ? "border-primary bg-primary/5" : ""
-                    }`}>
-                      <RadioGroupItem value="cod" id="cod" />
-                      <Label htmlFor="cod" className="flex items-center gap-2 cursor-pointer flex-1">
-                        <Banknote className="h-5 w-5" />
-                        <div>
-                          <p className="font-medium">Cash on Delivery</p>
-                          <p className="text-xs text-muted-foreground">Pay when you receive</p>
-                        </div>
-                      </Label>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount</span>
+                      <span>-{formatPrice(discount)}</span>
                     </div>
-
-                    <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
-                      paymentMethod === "upi" ? "border-primary bg-primary/5" : ""
-                    }`}>
-                      <RadioGroupItem value="upi" id="upi" />
-                      <Label htmlFor="upi" className="flex items-center gap-2 cursor-pointer flex-1">
-                        <Wallet className="h-5 w-5" />
-                        <div>
-                          <p className="font-medium">UPI / Wallet</p>
-                          <p className="text-xs text-muted-foreground">Google Pay, PhonePe, Paytm</p>
-                        </div>
-                      </Label>
-                      <Badge variant="outline">Coming Soon</Badge>
-                    </div>
-
-                    <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
-                      paymentMethod === "card" ? "border-primary bg-primary/5" : ""
-                    }`}>
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
-                        <CreditCard className="h-5 w-5" />
-                        <div>
-                          <p className="font-medium">Credit/Debit Card</p>
-                          <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay</p>
-                        </div>
-                      </Label>
-                      <Badge variant="outline">Coming Soon</Badge>
-                    </div>
-                  </div>
-                </RadioGroup>
-
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handlePlaceOrder}
-                  disabled={isProcessing || paymentMethod !== "cod"}
-                >
-                  {isProcessing ? "Processing..." : `Place Order - ${formatPrice(total)}`}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Order Summary Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Items */}
-              <div className="space-y-3 max-h-48 overflow-y-auto">
-                {items.map((item) => (
-                  <div key={`${item.productId}-${item.variantId}`} className="flex gap-3">
-                    <div className="w-12 h-16 bg-muted rounded overflow-hidden shrink-0">
-                      <img
-                        src={item.imageUrl || "/placeholder-product.jpg"}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-1">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.colorName} | {item.size} × {item.quantity}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              {/* Price Breakdown */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span className="flex items-center gap-1">
-                      Discount
-                      {appliedCoupon && (
-                        <Badge variant="outline" className="text-xs font-mono">
-                          {appliedCoupon.code}
-                        </Badge>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Truck className="h-3 w-3" />
+                      Shipping
+                    </span>
+                    <span>
+                      {shipping === 0 ? (
+                        <span className="text-green-600">Free</span>
+                      ) : (
+                        formatPrice(shipping)
                       )}
                     </span>
-                    <span>-{formatPrice(discount)}</span>
                   </div>
-                )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Truck className="h-3 w-3" />
-                    Shipping
-                  </span>
-                  <span>
-                    {shippingFee === 0 ? (
-                      <span className="text-green-600">Free</span>
-                    ) : (
-                      formatPrice(shippingFee)
-                    )}
-                  </span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tax (5% GST)</span>
+                    <span>{formatPrice(tax)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax (5% GST)</span>
-                  <span>{formatPrice(tax)}</span>
+
+                <Separator />
+
+                <div className="flex justify-between font-semibold text-lg">
+                  <span>Total</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between font-semibold text-lg">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </StorefrontLayout>

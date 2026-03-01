@@ -1,3 +1,5 @@
 export * from "./auth";
 export * from "./users";
-export * from "./institutions";
+export * from "./admin";
+export * from "./shop";
+export * from "./outlet";

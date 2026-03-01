@@ -23,7 +23,7 @@ export const OutletSchema = z.object({
   state: z.string(),
   pincode: z.string(),
   phone: z.string(),
-  email: z.string().email(),
+  email: z.string().email().optional().nullable(),
   isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -36,13 +36,14 @@ export type Outlet = z.infer<typeof OutletSchema>;
  */
 export const CreateOutletRequestSchema = z.object({
   code: z.string().min(1, "Outlet code is required"),
+  loginCode: z.string().min(4, "Login code must be at least 4 characters"),
   name: z.string().min(1, "Outlet name is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   pincode: z.string().min(6, "Pincode must be 6 digits").max(6),
   phone: z.string().min(10, "Phone must be at least 10 digits"),
-  email: z.string().email("Invalid email format"),
+  email: z.string().email("Invalid email format").optional().or(z.literal("")),
 });
 
 export type CreateOutletRequest = z.infer<typeof CreateOutletRequestSchema>;

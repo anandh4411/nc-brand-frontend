@@ -1,14 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
 import { useWishlist } from "@/context/wishlist-context";
-import { useCart } from "@/context/cart-context";
-import { getProductById } from "@/features/shop/data/mock-data";
-import { toast } from "sonner";
 
 function AccountWishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlist();
-  const { addItem: addToCart } = useCart();
+  const router = useRouter();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -16,36 +13,6 @@ function AccountWishlistPage() {
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(price);
-  };
-
-  const handleAddToCart = (productGroupId: number) => {
-    const product = getProductById(productGroupId);
-    if (!product) {
-      toast.error("Product not found");
-      return;
-    }
-
-    const firstColor = product.colors[0];
-    const firstVariant = firstColor?.variants[0];
-
-    if (!firstColor || !firstVariant) {
-      toast.error("Product variant not available");
-      return;
-    }
-
-    addToCart({
-      productId: product.id,
-      productGroupId: product.id,
-      variantId: firstVariant.id,
-      name: product.name,
-      colorName: firstColor.colorName,
-      size: firstVariant.size,
-      price: product.basePrice + firstVariant.priceAdjustment,
-      quantity: 1,
-      imageUrl: firstColor.images[0],
-      sku: firstVariant.sku,
-      maxQuantity: firstVariant.stock,
-    });
   };
 
   if (items.length === 0) {
@@ -86,7 +53,7 @@ function AccountWishlistPage() {
             key={item.productGroupId}
             className="group bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow"
           >
-            <Link to={`/shop/products/${getProductById(item.productGroupId)?.slug || ""}` as any}>
+            <Link to={`/shop/products/${item.slug}` as any}>
               <div className="relative aspect-square overflow-hidden bg-muted">
                 <img
                   src={item.imageUrl || "/placeholder-product.jpg"}
@@ -121,10 +88,10 @@ function AccountWishlistPage() {
               <Button
                 className="w-full h-8 text-xs"
                 size="sm"
-                onClick={() => handleAddToCart(item.productGroupId)}
+                onClick={() => router.navigate({ to: `/shop/products/${item.slug}` as any })}
               >
                 <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                Add to Cart
+                View Product
               </Button>
             </div>
           </div>

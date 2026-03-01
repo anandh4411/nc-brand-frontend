@@ -2,14 +2,22 @@
 import { useState, useMemo } from "react";
 import { Plus, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
 import { createShipmentColumns } from "./config/columns";
 import { ShipmentFormModal } from "./components/shipment-form-modal";
 import { ShipmentViewModal } from "./components/shipment-view-modal";
-import { mockShipments, shipmentStatusOptions } from "./data/mock-data";
+import { useAdminShipments, useUpdateShipmentStatus } from "@/api/hooks/admin";
 import type { Shipment } from "@/types/dto/inventory.dto";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+
+const shipmentStatusOptions = [
+  { label: "Pending", value: "PENDING" },
+  { label: "Shipped", value: "SHIPPED" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Cancelled", value: "CANCELLED" },
+];
 
 export default function Shipments() {
   // Dialog states
@@ -22,8 +30,12 @@ export default function Shipments() {
   // Table state
   const tableState = useTableState<Shipment>({ debounceMs: 300 });
 
-  // Using mock data
-  const shipmentList = mockShipments;
+  // API Hooks
+  const { data: shipmentsResponse, isLoading } = useAdminShipments();
+  const updateStatus = useUpdateShipmentStatus();
+
+  // Get data from API
+  const shipmentList = ((shipmentsResponse?.data as any)?.shipments || shipmentsResponse?.data || []) as Shipment[];
 
   // Action handlers
   const handleView = (shipment: Shipment) => {
@@ -52,16 +64,31 @@ export default function Shipments() {
   const confirmAction = async () => {
     if (!selectedShipment || !pendingAction) return;
 
-    // TODO: API call
-    const messages = {
-      ship: "Shipment marked as shipped",
-      deliver: "Shipment marked as delivered",
-      cancel: "Shipment cancelled",
+    const statusMap = {
+      ship: "SHIPPED",
+      deliver: "DELIVERED",
+      cancel: "CANCELLED",
     };
-    toast.success(messages[pendingAction]);
-    setActionDialogOpen(false);
-    setPendingAction(null);
-    setSelectedShipment(null);
+
+    updateStatus.mutate(
+      { uuid: selectedShipment.uuid, status: statusMap[pendingAction] },
+      {
+        onSuccess: () => {
+          const messages = {
+            ship: "Shipment marked as shipped",
+            deliver: "Shipment marked as delivered",
+            cancel: "Shipment cancelled",
+          };
+          toast.success(messages[pendingAction]);
+          setActionDialogOpen(false);
+          setPendingAction(null);
+          setSelectedShipment(null);
+        },
+        onError: () => {
+          toast.error("Failed to update shipment status");
+        },
+      }
+    );
   };
 
   // Columns
@@ -77,10 +104,34 @@ export default function Shipments() {
   };
 
   const actionDescriptions = {
-    ship: `Are you sure you want to mark shipment SHP-${String(selectedShipment?.id || 0).padStart(4, "0")} as shipped?`,
-    deliver: `Are you sure you want to mark shipment SHP-${String(selectedShipment?.id || 0).padStart(4, "0")} as delivered? This will update the outlet's inventory.`,
-    cancel: `Are you sure you want to cancel shipment SHP-${String(selectedShipment?.id || 0).padStart(4, "0")}? This action cannot be undone.`,
+    ship: `Are you sure you want to mark this shipment as shipped?`,
+    deliver: `Are you sure you want to mark this shipment as delivered? This will update the outlet's inventory.`,
+    cancel: `Are you sure you want to cancel this shipment? This action cannot be undone.`,
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-9 w-40" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-20" />
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -103,7 +154,7 @@ export default function Shipments() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {shipmentStatusOptions.map((status) => {
-          const count = shipmentList.filter((s) => s.status === status.value).length;
+          const count = shipmentList.filter((s: any) => s.status?.toUpperCase() === status.value).length;
           return (
             <div
               key={status.value}
@@ -174,6 +225,7 @@ export default function Shipments() {
         desc={pendingAction ? actionDescriptions[pendingAction] : ""}
         confirmText={pendingAction === "cancel" ? "Cancel Shipment" : "Confirm"}
         destructive={pendingAction === "cancel"}
+        disabled={updateStatus.isPending}
       />
     </div>
   );

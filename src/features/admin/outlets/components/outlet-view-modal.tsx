@@ -1,6 +1,5 @@
 // src/features/admin/outlets/components/outlet-view-modal.tsx
-import { Store, MapPin, Phone, Mail, Calendar, Copy, KeyRound } from "lucide-react";
-import { format } from "date-fns";
+import { Store, MapPin, Phone, Mail, Copy, KeyRound } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +20,6 @@ interface Props {
 }
 
 export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    return format(new Date(dateString), "MMM dd, yyyy 'at' hh:mm a");
-  };
-
   const copyLoginCode = () => {
     navigator.clipboard.writeText(outlet.loginCode);
     toast.success("Login code copied to clipboard");
@@ -53,7 +47,7 @@ export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
                 {outlet.code}
               </p>
             </div>
-            <Badge variant={outlet.isActive ? "default" : "secondary"}>
+            <Badge variant={outlet.isActive ? "success" : "secondary"}>
               {outlet.isActive ? "Active" : "Inactive"}
             </Badge>
           </div>
@@ -108,29 +102,6 @@ export function OutletViewModal({ open, onOpenChange, outlet }: Props) {
             </div>
           </div>
 
-          <Separator />
-
-          {/* Timestamps */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-start gap-2">
-              <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Created</p>
-                <p className="text-muted-foreground text-xs">
-                  {formatDate(outlet.createdAt)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Updated</p>
-                <p className="text-muted-foreground text-xs">
-                  {formatDate(outlet.updatedAt)}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -4,90 +4,107 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Truck, Shield, CreditCard, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductGrid } from "@/features/shop/components/product-grid";
+import { PageSpinner } from "@/components/page-spinner";
 import {
-  shopBanners,
-  getFeaturedProducts,
-  getNewArrivals,
-  getOnSaleProducts,
-} from "@/features/shop/data/mock-data";
+  useShopFeatured,
+  useShopBanners,
+  useShopProducts,
+} from "@/api/hooks/shop";
 
 function ShopHomepage() {
   const [currentBanner, setCurrentBanner] = useState(0);
-  const featuredProducts = getFeaturedProducts().slice(0, 8);
-  const newArrivals = getNewArrivals().slice(0, 8);
-  const saleProducts = getOnSaleProducts().slice(0, 4);
+
+  // Fetch data from API
+  const { data: featuredData, isLoading: featuredLoading } = useShopFeatured();
+  const { data: bannersData, isLoading: bannersLoading } = useShopBanners();
+  const { data: productsData, isLoading: productsLoading } = useShopProducts({ pageSize: 8 });
+
+  const featuredProducts = featuredData?.data || [];
+  const banners = bannersData?.data || [];
+  const newArrivals = productsData?.data?.products || [];
+
+  const isLoading = featuredLoading || bannersLoading || productsLoading;
 
   // Auto-rotate banners
   useEffect(() => {
+    if (banners.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % shopBanners.length);
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length]);
 
-  const nextBanner = () => setCurrentBanner((prev) => (prev + 1) % shopBanners.length);
-  const prevBanner = () => setCurrentBanner((prev) => (prev - 1 + shopBanners.length) % shopBanners.length);
+  const nextBanner = () => setCurrentBanner((prev) => (prev + 1) % banners.length);
+  const prevBanner = () => setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
+
+  if (isLoading) {
+    return <PageSpinner className="min-h-[60vh]" size="lg" />;
+  }
 
   return (
     <div className="flex flex-col">
       {/* Hero Banner Carousel */}
-      <section className="relative overflow-hidden">
-        <div className="relative h-[300px] md:h-[400px]">
-          {shopBanners.map((banner, index) => (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                index === currentBanner ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-            >
-              <div className={`h-full bg-gradient-to-r ${banner.bgColor} flex items-center`}>
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="max-w-lg text-white">
-                    <Badge className="bg-white/20 text-white mb-4">Limited Time</Badge>
-                    <h1 className="text-3xl md:text-5xl font-bold mb-4">{banner.title}</h1>
-                    <p className="text-lg md:text-xl mb-6 text-white/90">{banner.subtitle}</p>
-                    <Button size="lg" variant="secondary" asChild>
-                      <Link to={banner.buttonLink as any}>
-                        {banner.buttonText}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
+      {banners.length > 0 && (
+        <section className="relative overflow-hidden">
+          <div className="relative grid">
+            {banners.map((banner: any, index: number) => (
+              <div
+                key={banner.id || index}
+                className={`col-start-1 row-start-1 transition-opacity duration-500 ${
+                  index === currentBanner ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
+              >
+                <Link to={banner.link || "/shop/products"} className="block w-full relative">
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.title || "Banner"}
+                    className="w-full h-auto block"
+                  />
+                  {banner.title && (
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+                        <h1 className="text-2xl md:text-4xl font-bold text-white">{banner.title}</h1>
+                      </div>
+                    </div>
+                  )}
+                </Link>
               </div>
-            </div>
-          ))}
-        </div>
-        {/* Banner Navigation */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white"
-          onClick={prevBanner}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white"
-          onClick={nextBanner}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
-        {/* Dots */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {shopBanners.map((_, index) => (
-            <button
-              key={index}
-              className={`h-2 rounded-full transition-all ${
-                index === currentBanner ? "w-6 bg-white" : "w-2 bg-white/50"
-              }`}
-              onClick={() => setCurrentBanner(index)}
-            />
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+          {/* Banner Navigation */}
+          {banners.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white"
+                onClick={prevBanner}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white"
+                onClick={nextBanner}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {banners.map((_: any, index: number) => (
+                  <button
+                    key={index}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentBanner ? "w-6 bg-white" : "w-2 bg-white/50"
+                    }`}
+                    onClick={() => setCurrentBanner(index)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+      )}
 
       {/* Features Strip */}
       <section className="py-6 border-y bg-muted/30">
@@ -134,22 +151,24 @@ function ShopHomepage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-12 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">Featured Products</h2>
-              <p className="text-muted-foreground">Hand-picked selections for you</p>
+      {featuredProducts.length > 0 && (
+        <section className="py-12 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold">Featured Products</h2>
+                <p className="text-muted-foreground">Hand-picked selections for you</p>
+              </div>
+              <Button variant="ghost" asChild>
+                <Link to="/shop/products">
+                  View All <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
-            <Button variant="ghost" asChild>
-              <Link to="/shop/products">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <ProductGrid products={featuredProducts} columns={4} />
           </div>
-          <ProductGrid products={featuredProducts} columns={4} />
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Sale Banner */}
       <section className="py-12">
@@ -158,14 +177,14 @@ function ShopHomepage() {
             <div className="relative z-10 max-w-lg text-white">
               <Badge className="bg-white/20 text-white mb-4">Special Offer</Badge>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                New Year Sale is Live!
+                New Collection is Live!
               </h2>
               <p className="text-lg mb-6 text-white/90">
-                Get up to 50% off on selected items. Limited time offer.
+                Check out our latest arrivals with premium quality fabrics.
               </p>
               <Button size="lg" variant="secondary" asChild>
                 <Link to="/shop/products">
-                  Shop Sale <ArrowRight className="ml-2 h-4 w-4" />
+                  Shop Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -179,40 +198,24 @@ function ShopHomepage() {
       </section>
 
       {/* New Arrivals */}
-      <section className="py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">New Arrivals</h2>
-              <p className="text-muted-foreground">Fresh additions to our collection</p>
+      {newArrivals.length > 0 && (
+        <section className="py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold">New Arrivals</h2>
+                <p className="text-muted-foreground">Fresh additions to our collection</p>
+              </div>
+              <Button variant="ghost" asChild>
+                <Link to="/shop/products">
+                  View All <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
-            <Button variant="ghost" asChild>
-              <Link to="/shop/products">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <ProductGrid products={newArrivals} columns={4} />
           </div>
-          <ProductGrid products={newArrivals} columns={4} />
-        </div>
-      </section>
-
-      {/* On Sale Products */}
-      <section className="py-12 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">On Sale</h2>
-              <p className="text-muted-foreground">Great deals you don't want to miss</p>
-            </div>
-            <Button variant="ghost" asChild>
-              <Link to="/shop/products">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <ProductGrid products={saleProducts} columns={4} />
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

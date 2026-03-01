@@ -1,8 +1,7 @@
-import { ProductCard } from "./product-card";
-import type { ShopProduct } from "../data/mock-data";
+import { ProductCard, type ProductCardData } from "./product-card";
 
 interface ProductGridProps {
-  products: ShopProduct[];
+  products: ProductCardData[];
   columns?: 2 | 3 | 4 | 5;
 }
 
@@ -25,7 +24,7 @@ export function ProductGrid({ products, columns = 4 }: ProductGridProps) {
   return (
     <div className={`grid ${gridCols[columns]} gap-4`}>
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.uuid || product.id || product.slug} product={product} />
       ))}
     </div>
   );

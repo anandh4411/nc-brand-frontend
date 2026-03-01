@@ -12,18 +12,32 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: ProductGroup;
+  onConfirm?: () => void;
+  isDeleting?: boolean;
 }
 
-export function ProductDeleteDialog({ open, onOpenChange, product }: Props) {
+export function ProductDeleteDialog({
+  open,
+  onOpenChange,
+  product,
+  onConfirm,
+  isDeleting: externalIsDeleting,
+}: Props) {
   const [value, setValue] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [internalIsDeleting, setInternalIsDeleting] = useState(false);
+  const isDeleting = externalIsDeleting ?? internalIsDeleting;
 
   const handleDelete = async () => {
     if (value.trim() !== product.name) return;
 
-    setIsDeleting(true);
+    if (onConfirm) {
+      onConfirm();
+      setValue("");
+      return;
+    }
+
+    setInternalIsDeleting(true);
     try {
-      // TODO: Replace with actual API call
       console.log("Delete product:", product.uuid);
       await new Promise((r) => setTimeout(r, 500));
       toast.success("Product deleted successfully");
@@ -33,7 +47,7 @@ export function ProductDeleteDialog({ open, onOpenChange, product }: Props) {
       toast.error("Failed to delete product");
       console.error("Failed to delete product:", error);
     } finally {
-      setIsDeleting(false);
+      setInternalIsDeleting(false);
     }
   };
 

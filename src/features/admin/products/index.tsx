@@ -1,17 +1,22 @@
 // src/features/admin/products/index.tsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
 import { createProductColumns } from "./config/columns";
 import { ProductFormModal } from "./components/product-form-modal";
 import { ProductDeleteDialog } from "./components/product-delete-dialog";
 import { ProductViewModal } from "./components/product-view-modal";
-import { mockProductGroups } from "./data/mock-data";
-import { mockCategories } from "../categories/data/mock-data";
-import type { ProductGroup } from "@/types/dto/product-catalog.dto";
+import { useAdminProductGroups, useAdminCategories, useDeleteProductGroup } from "@/api/hooks/admin";
+import type { ProductGroup, Category } from "@/types/dto/product-catalog.dto";
+import { toast } from "sonner";
 
 export default function Products() {
+  // Check if navigated with openAdd search param
+  const { openAdd } = useSearch({ from: "/admin/products/" });
+
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -22,8 +27,23 @@ export default function Products() {
   // Table state
   const tableState = useTableState<ProductGroup>({ debounceMs: 300 });
 
-  // Using mock data for now
-  const productList = mockProductGroups;
+  // API Hooks
+  const { data: productsResponse, isLoading: productsLoading } = useAdminProductGroups();
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useAdminCategories();
+  const deleteProduct = useDeleteProductGroup();
+
+  // Get data from API
+  const productList = ((productsResponse?.data as any)?.productGroups || productsResponse?.data || []) as ProductGroup[];
+  const categories = ((categoriesResponse?.data as any)?.categories || categoriesResponse?.data || []) as Category[];
+
+  const isLoading = productsLoading || categoriesLoading;
+
+  // Auto-open add modal when navigated from inventory page
+  useEffect(() => {
+    if (openAdd && !isLoading) {
+      setAddDialogOpen(true);
+    }
+  }, [openAdd, isLoading]);
 
   // Action handlers
   const handleView = (product: ProductGroup) => {
@@ -41,11 +61,44 @@ export default function Products() {
     setDeleteDialogOpen(true);
   };
 
+  const handleConfirmDelete = () => {
+    if (!selectedProduct) return;
+    deleteProduct.mutate(selectedProduct.uuid, {
+      onSuccess: () => {
+        toast.success("Product deleted");
+        setDeleteDialogOpen(false);
+        setSelectedProduct(null);
+      },
+      onError: () => {
+        toast.error("Failed to delete product");
+      },
+    });
+  };
+
   // Columns
   const columns = useMemo(
     () => createProductColumns(handleView, handleEdit, handleDelete),
     []
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-9 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -110,7 +163,7 @@ export default function Products() {
       <ProductFormModal
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        categories={mockCategories}
+        categories={categories}
         mode="add"
       />
 
@@ -126,7 +179,7 @@ export default function Products() {
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             product={selectedProduct}
-            categories={mockCategories}
+            categories={categories}
             mode="edit"
           />
 
@@ -134,6 +187,8 @@ export default function Products() {
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
             product={selectedProduct}
+            onConfirm={handleConfirmDelete}
+            isDeleting={deleteProduct.isPending}
           />
         </>
       )}

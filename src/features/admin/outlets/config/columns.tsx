@@ -6,21 +6,21 @@ import {
   actionsColumn,
 } from "@/components/elements/app-data-table/helpers/column-helpers";
 import type { Outlet } from "@/types/dto/outlet.dto";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, Trash2 } from "lucide-react";
-
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "N/A";
-  return format(new Date(dateString), "MMM dd, yyyy");
-};
+import { Edit, ExternalLink, Eye, Trash2 } from "lucide-react";
 
 export const createOutletColumns = (
   onView: (outlet: Outlet) => void,
   onEdit: (outlet: Outlet) => void,
-  onDelete: (outlet: Outlet) => void
+  onDelete: (outlet: Outlet) => void,
+  onViewProfile: (outlet: Outlet) => void
 ): ColumnDef<Outlet>[] => {
   const outletActions = [
+    {
+      label: "View Profile",
+      icon: ExternalLink,
+      onClick: onViewProfile,
+    },
     {
       label: "View Details",
       icon: Eye,
@@ -69,16 +69,12 @@ export const createOutletColumns = (
       "isActive",
       "Status",
       (value) => (
-        <Badge variant={value ? "default" : "secondary"}>
+        <Badge variant={value ? "success" : "secondary"}>
           {value ? "Active" : "Inactive"}
         </Badge>
       ),
       { filterable: true, sortable: true }
     ),
-
-    customColumn<Outlet>("createdAt", "Created", (value) => (
-      <div className="text-muted-foreground text-sm">{formatDate(value)}</div>
-    )),
 
     actionsColumn<Outlet>(outletActions),
   ];

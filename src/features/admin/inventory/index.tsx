@@ -1,13 +1,15 @@
 // src/features/admin/inventory/index.tsx
 import { useState, useMemo } from "react";
-import { AlertTriangle, Package } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { AlertTriangle, Package, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, useTableState } from "@/components/elements/app-data-table";
 import { createInventoryColumns } from "./config/columns";
 import { StockAdjustmentModal } from "./components/stock-adjustment-modal";
 import { InventoryViewModal } from "./components/inventory-view-modal";
-import { mockInventoryItems, mockLowStockAlerts } from "./data/mock-data";
+import { useAdminInventory, useLowStockItems } from "@/api/hooks/admin";
 import type { InventoryItem } from "@/types/dto/inventory.dto";
 
 export default function Inventory() {
@@ -16,14 +18,18 @@ export default function Inventory() {
   const [adjustDialogOpen, setAdjustDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const navigate = useNavigate();
 
   // Table state
   const tableState = useTableState<InventoryItem>({ debounceMs: 300 });
 
-  // Filter for low stock if enabled
-  const inventoryList = showLowStockOnly
-    ? mockInventoryItems.filter((item) => item.quantity <= item.lowStockThreshold)
-    : mockInventoryItems;
+  // API Hooks
+  const { data: inventoryResponse, isLoading } = useAdminInventory({ lowStock: showLowStockOnly || undefined });
+  const { data: lowStockResponse } = useLowStockItems(100);
+
+  // Get data from API
+  const inventoryList = ((inventoryResponse?.data as any)?.inventories || inventoryResponse?.data || []) as InventoryItem[];
+  const lowStockAlerts = (lowStockResponse?.data || []) as any[];
 
   // Action handlers
   const handleView = (item: InventoryItem) => {
@@ -42,6 +48,25 @@ export default function Inventory() {
     []
   );
 
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-9 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -55,7 +80,7 @@ export default function Inventory() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {mockLowStockAlerts.length > 0 && (
+          {lowStockAlerts.length > 0 && (
             <Button
               variant={showLowStockOnly ? "default" : "outline"}
               size="sm"
@@ -63,33 +88,19 @@ export default function Inventory() {
               className="h-9"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
-              Low Stock ({mockLowStockAlerts.length})
+              Low Stock ({lowStockAlerts.length})
             </Button>
           )}
-        </div>
-      </div>
-
-      {/* Low Stock Alert Banner */}
-      {mockLowStockAlerts.length > 0 && !showLowStockOnly && (
-        <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          <div className="flex-1">
-            <p className="font-medium text-destructive">
-              {mockLowStockAlerts.length} item(s) below low stock threshold
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {mockLowStockAlerts.map((a) => a.productVariantSku).join(", ")}
-            </p>
-          </div>
           <Button
-            variant="outline"
             size="sm"
-            onClick={() => setShowLowStockOnly(true)}
+            className="h-9"
+            onClick={() => navigate({ to: "/admin/products", search: { openAdd: true } } as any)}
           >
-            View All
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
           </Button>
         </div>
-      )}
+      </div>
 
       {/* Table */}
       <DataTable

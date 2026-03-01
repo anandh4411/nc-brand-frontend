@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 export interface WishlistItem {
   productGroupId: number;
+  slug: string;
   name: string;
   basePrice: number;
   imageUrl?: string;

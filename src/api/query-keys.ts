@@ -1,22 +1,12 @@
 /**
- * Query Key Factory
+ * Query Key Factory - NC Brand Textiles
  *
  * Centralized query key management for React Query.
  * Provides type-safe, consistent cache keys across the application.
- *
- * Usage:
- * - Use in useQuery: queryKey: queryKeys.users.detail(uuid)
- * - Use for invalidation: queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() })
  */
 
-// Import types from DTOs to avoid duplication
-import type { GetProductsParams } from '@/types/dto/product.dto';
-import type { GetMainCategoriesParams } from '@/types/dto/main-category.dto';
-import type { GetSubCategoriesParams } from '@/types/dto/sub-category.dto';
-
-// TextileHub specific imports
 import type { GetOutletsParams } from '@/types/dto/outlet.dto';
-import type { GetProductsParams as GetProductCatalogParams } from '@/types/dto/product-catalog.dto';
+import type { GetProductsParams } from '@/types/dto/product-catalog.dto';
 import type { GetInventoryParams, GetShipmentsParams } from '@/types/dto/inventory.dto';
 import type { GetOrdersParams } from '@/types/dto/order.dto';
 import type { GetReviewsParams } from '@/types/dto/review.dto';
@@ -37,22 +27,7 @@ export interface SortParams {
 }
 
 export type GetUsersParams = PaginationParams & SearchParams & SortParams;
-export type GetFormsParams = PaginationParams & SearchParams & SortParams;
-export type GetFormFieldsParams = PaginationParams & SearchParams & SortParams & { formId?: number };
-export type GetSubmissionsParams = PaginationParams & SearchParams & SortParams;
-export type GetTemplatesParams = PaginationParams & SearchParams & SortParams;
-export type GetPhasesParams = PaginationParams & SearchParams & SortParams;
 
-/**
- * Query Keys Factory
- *
- * Hierarchical structure:
- * - all: Base key for the resource
- * - lists(): Key for all list queries
- * - list(params): Key for specific list query with params
- * - details(): Key for all detail queries
- * - detail(id): Key for specific detail query
- */
 export const queryKeys = {
   // Auth queries
   auth: {
@@ -70,93 +45,6 @@ export const queryKeys = {
     detail: (uuid: string) => [...queryKeys.users.details(), uuid] as const,
   },
 
-  // Institutions queries
-  institutions: {
-    all: ['institutions'] as const,
-    lists: () => [...queryKeys.institutions.all, 'list'] as const,
-    list: (params?: PaginationParams & SearchParams & SortParams) => [...queryKeys.institutions.lists(), params] as const,
-    details: () => [...queryKeys.institutions.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.institutions.details(), uuid] as const,
-    dashboard: () => [...queryKeys.institutions.all, 'dashboard'] as const,
-  },
-
-  // Forms queries
-  forms: {
-    all: ['forms'] as const,
-    lists: () => [...queryKeys.forms.all, 'list'] as const,
-    list: (params?: GetFormsParams) => [...queryKeys.forms.lists(), params] as const,
-    details: () => [...queryKeys.forms.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.forms.details(), uuid] as const,
-  },
-
-  // Form Fields queries
-  formFields: {
-    all: ['formFields'] as const,
-    lists: () => [...queryKeys.formFields.all, 'list'] as const,
-    list: (params?: GetFormFieldsParams) => [...queryKeys.formFields.lists(), params] as const,
-    details: () => [...queryKeys.formFields.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.formFields.details(), uuid] as const,
-  },
-
-  // Submissions queries
-  submissions: {
-    all: ['submissions'] as const,
-    lists: () => [...queryKeys.submissions.all, 'list'] as const,
-    list: (params?: GetSubmissionsParams) => [...queryKeys.submissions.lists(), params] as const,
-    details: () => [...queryKeys.submissions.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.submissions.details(), uuid] as const,
-  },
-
-  // Templates queries
-  templates: {
-    all: ['templates'] as const,
-    lists: () => [...queryKeys.templates.all, 'list'] as const,
-    list: (params?: GetTemplatesParams) => [...queryKeys.templates.lists(), params] as const,
-    details: () => [...queryKeys.templates.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.templates.details(), uuid] as const,
-  },
-
-  // Phases queries
-  phases: {
-    all: ['phases'] as const,
-    lists: () => [...queryKeys.phases.all, 'list'] as const,
-    list: (params?: GetPhasesParams) => [...queryKeys.phases.lists(), params] as const,
-    details: () => [...queryKeys.phases.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.phases.details(), uuid] as const,
-  },
-
-  // Products queries
-  products: {
-    all: ['products'] as const,
-    lists: () => [...queryKeys.products.all, 'list'] as const,
-    list: (params?: GetProductsParams) => [...queryKeys.products.lists(), params] as const,
-    details: () => [...queryKeys.products.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.products.details(), uuid] as const,
-    landing: () => [...queryKeys.products.all, 'landing'] as const,
-  },
-
-  // Main Categories queries
-  mainCategories: {
-    all: ['mainCategories'] as const,
-    lists: () => [...queryKeys.mainCategories.all, 'list'] as const,
-    list: (params?: GetMainCategoriesParams) => [...queryKeys.mainCategories.lists(), params] as const,
-    details: () => [...queryKeys.mainCategories.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.mainCategories.details(), uuid] as const,
-  },
-
-  // Sub Categories queries
-  subCategories: {
-    all: ['subCategories'] as const,
-    lists: () => [...queryKeys.subCategories.all, 'list'] as const,
-    list: (params?: GetSubCategoriesParams) => [...queryKeys.subCategories.lists(), params] as const,
-    details: () => [...queryKeys.subCategories.all, 'detail'] as const,
-    detail: (uuid: string) => [...queryKeys.subCategories.details(), uuid] as const,
-  },
-
-  // ============================================================================
-  // TEXTILEHUB SPECIFIC QUERY KEYS
-  // ============================================================================
-
   // Outlets queries
   outlets: {
     all: ['outlets'] as const,
@@ -171,14 +59,14 @@ export const queryKeys = {
   productCatalog: {
     all: ['productCatalog'] as const,
     lists: () => [...queryKeys.productCatalog.all, 'list'] as const,
-    list: (params?: GetProductCatalogParams) => [...queryKeys.productCatalog.lists(), params] as const,
+    list: (params?: GetProductsParams) => [...queryKeys.productCatalog.lists(), params] as const,
     details: () => [...queryKeys.productCatalog.all, 'detail'] as const,
     detail: (uuid: string) => [...queryKeys.productCatalog.details(), uuid] as const,
     bySlug: (slug: string) => [...queryKeys.productCatalog.all, 'slug', slug] as const,
     featured: () => [...queryKeys.productCatalog.all, 'featured'] as const,
   },
 
-  // Categories (for product catalog)
+  // Categories
   categories: {
     all: ['categories'] as const,
     lists: () => [...queryKeys.categories.all, 'list'] as const,
@@ -263,5 +151,27 @@ export const queryKeys = {
     all: ['dashboard'] as const,
     admin: () => [...queryKeys.dashboard.all, 'admin'] as const,
     outlet: (outletId?: number) => [...queryKeys.dashboard.all, 'outlet', outletId] as const,
+  },
+
+  // Wishlist
+  wishlist: {
+    all: ['wishlist'] as const,
+    list: () => [...queryKeys.wishlist.all, 'list'] as const,
+  },
+
+  // Banners
+  banners: {
+    all: ['banners'] as const,
+    active: () => [...queryKeys.banners.all, 'active'] as const,
+  },
+
+  // Shop (public browsing)
+  shop: {
+    all: ['shop'] as const,
+    products: (params?: any) => [...queryKeys.shop.all, 'products', params] as const,
+    product: (slug: string) => [...queryKeys.shop.all, 'product', slug] as const,
+    featured: () => [...queryKeys.shop.all, 'featured'] as const,
+    categories: () => [...queryKeys.shop.all, 'categories'] as const,
+    offers: () => [...queryKeys.shop.all, 'offers'] as const,
   },
 } as const;

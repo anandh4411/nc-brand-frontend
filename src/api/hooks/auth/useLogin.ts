@@ -24,7 +24,7 @@ export const useLogin = () => {
       if (response.success && response.data) {
         login(response.data);
         showSuccess("Welcome back!", "Login successful");
-        router.navigate({ to: "/dashboard" });
+        router.navigate({ to: "/admin" });
       } else {
         console.error("[useLogin] Invalid response structure:", response);
       }

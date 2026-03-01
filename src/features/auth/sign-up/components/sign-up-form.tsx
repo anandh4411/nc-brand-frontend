@@ -1,8 +1,8 @@
-import { HTMLAttributes, useState } from "react";
+import { HTMLAttributes } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Github, Facebook } from "lucide-react";
+import { useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,23 +15,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
+import { useCustomerRegister } from "@/api/hooks/shop";
 
 type SignUpFormProps = HTMLAttributes<HTMLFormElement>;
 
 const formSchema = z
   .object({
+    name: z
+      .string()
+      .min(1, { message: "Please enter your name" })
+      .min(2, { message: "Name must be at least 2 characters" }),
     email: z
       .string()
       .min(1, { message: "Please enter your email" })
       .email({ message: "Invalid email address" }),
+    phone: z
+      .string()
+      .min(1, { message: "Please enter your phone number" })
+      .regex(/^[6-9]\d{9}$/, { message: "Please enter a valid 10-digit phone number" }),
     password: z
       .string()
-      .min(1, {
-        message: "Please enter your password",
-      })
-      .min(7, {
-        message: "Password must be at least 7 characters long",
-      }),
+      .min(1, { message: "Please enter your password" })
+      .min(6, { message: "Password must be at least 6 characters long" }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -40,25 +45,35 @@ const formSchema = z
   });
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  // Check if this is a customer registration
+  const search = useSearch({ strict: false }) as { type?: string };
+  const isCustomerSignUp = search?.type === "customer";
+
+  const { mutate: registerCustomer, isPending } = useCustomerRegister();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
+      phone: "",
       password: "",
       confirmPassword: "",
     },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    // eslint-disable-next-line no-console
-    console.log(data);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    if (isCustomerSignUp) {
+      registerCustomer({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+      });
+    } else {
+      // Admin sign-up not supported via this form
+      console.log("Admin registration not supported");
+    }
   }
 
   return (
@@ -70,12 +85,38 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       >
         <FormField
           control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="name@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="9876543210" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,39 +148,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             </FormItem>
           )}
         />
-        <Button className="mt-2" disabled={isLoading}>
-          Create Account
+        <Button className="mt-2" disabled={isPending}>
+          {isPending ? "Creating Account..." : "Create Account"}
         </Button>
-
-        <div className="relative my-2">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">
-              Or continue with
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            className="w-full"
-            type="button"
-            disabled={isLoading}
-          >
-            <Github className="h-4 w-4" /> GitHub
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            type="button"
-            disabled={isLoading}
-          >
-            <Facebook className="h-4 w-4" /> Facebook
-          </Button>
-        </div>
       </form>
     </Form>
   );

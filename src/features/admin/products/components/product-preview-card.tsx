@@ -17,6 +17,7 @@ interface ProductPreviewCardProps {
   pattern?: string;
   isFeatured?: boolean;
   colorVariants: ColorVariant[];
+  imagePreview?: string;
 }
 
 export function ProductPreviewCard({
@@ -27,6 +28,7 @@ export function ProductPreviewCard({
   pattern,
   isFeatured,
   colorVariants,
+  imagePreview,
 }: ProductPreviewCardProps) {
   const hasName = name.trim().length > 0;
   const hasDescription = description.trim().length > 0;
@@ -43,12 +45,16 @@ export function ProductPreviewCard({
       </div>
 
       <Card className="w-full max-w-[280px] mx-auto border-2 border-dashed border-primary/20 bg-card/50 overflow-hidden">
-        {/* Image Placeholder */}
-        <div className="relative h-48 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground/40">
-            <Package className="h-16 w-16" />
-            <span className="text-xs">Product Image</span>
-          </div>
+        {/* Image / Placeholder */}
+        <div className="relative h-48 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center overflow-hidden">
+          {imagePreview ? (
+            <img src={imagePreview} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-muted-foreground/40">
+              <Package className="h-16 w-16" />
+              <span className="text-xs">Product Image</span>
+            </div>
+          )}
 
           {/* Featured badge */}
           {isFeatured && (

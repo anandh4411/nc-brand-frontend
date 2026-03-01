@@ -1,15 +1,26 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useAuthGuard } from "@/guards/useAuthGuard";
-import { useRoleGuard } from "@/guards/useRoleGuard";
+import { createFileRoute, Outlet, useLocation, useRouter } from "@tanstack/react-router";
+import { useAuth } from "@/context/auth-context";
 import { AdminLayout } from "@/layouts/admin";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 function AdminLayoutRoute() {
-  const { isAuthenticated, isLoading: authLoading } = useAuthGuard();
-  const { isLoading: roleLoading } = useRoleGuard(["admin"]);
+  const location = useLocation();
+  const router = useRouter();
+  const { isAuthenticated, isLoading, userRole } = useAuth();
 
-  // Show loading spinner while checking auth and role
-  if (authLoading || roleLoading) {
+  const isSignInPage = location.pathname.startsWith("/admin/sign-in");
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isSignInPage && !isAuthenticated) {
+      router.navigate({ to: "/admin/sign-in" as any });
+    }
+  }, [isLoading, isAuthenticated, isSignInPage, router]);
+
+  if (isSignInPage) return <Outlet />;
+
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -17,11 +28,7 @@ function AdminLayoutRoute() {
     );
   }
 
-  // If not authenticated, guard will redirect to /sign-in
-  // If not admin role, useRoleGuard will redirect to appropriate dashboard
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
     <AdminLayout>

@@ -55,8 +55,10 @@ import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
 import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/index'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
+import { Route as AdminOffersIndexRouteImport } from './routes/admin/offers/index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
+import { Route as AdminCouponsIndexRouteImport } from './routes/admin/coupons/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics/index'
 import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$slug'
@@ -305,6 +307,11 @@ const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
   path: '/orders/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOffersIndexRoute = AdminOffersIndexRouteImport.update({
+  id: '/offers/',
+  path: '/offers/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
   id: '/inventory/',
   path: '/inventory/',
@@ -313,6 +320,11 @@ const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
 const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCouponsIndexRoute = AdminCouponsIndexRouteImport.update({
+  id: '/coupons/',
+  path: '/coupons/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
@@ -418,8 +430,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/coupons': typeof AdminCouponsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/offers': typeof AdminOffersIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
@@ -470,8 +484,10 @@ export interface FileRoutesByTo {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/coupons': typeof AdminCouponsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/offers': typeof AdminOffersIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
@@ -529,8 +545,10 @@ export interface FileRoutesById {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics/': typeof AdminAnalyticsIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/coupons/': typeof AdminCouponsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
+  '/admin/offers/': typeof AdminOffersIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
   '/admin/outlets/': typeof AdminOutletsIndexRoute
   '/admin/products/': typeof AdminProductsIndexRoute
@@ -589,8 +607,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/inventory'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
@@ -641,8 +661,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/inventory'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
@@ -699,8 +721,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics/'
     | '/admin/categories/'
+    | '/admin/coupons/'
     | '/admin/customers/'
     | '/admin/inventory/'
+    | '/admin/offers/'
     | '/admin/orders/'
     | '/admin/outlets/'
     | '/admin/products/'
@@ -1055,6 +1079,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/offers/': {
+      id: '/admin/offers/'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventory/': {
       id: '/admin/inventory/'
       path: '/inventory'
@@ -1067,6 +1098,13 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/admin/customers'
       preLoaderRoute: typeof AdminCustomersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/coupons/': {
+      id: '/admin/coupons/'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories/': {
@@ -1172,8 +1210,10 @@ interface AdminRouteChildren {
   AdminOutletsOutletIdRoute: typeof AdminOutletsOutletIdRoute
   AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
+  AdminCouponsIndexRoute: typeof AdminCouponsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
+  AdminOffersIndexRoute: typeof AdminOffersIndexRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
   AdminOutletsIndexRoute: typeof AdminOutletsIndexRoute
   AdminProductsIndexRoute: typeof AdminProductsIndexRoute
@@ -1187,8 +1227,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOutletsOutletIdRoute: AdminOutletsOutletIdRoute,
   AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
+  AdminCouponsIndexRoute: AdminCouponsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
+  AdminOffersIndexRoute: AdminOffersIndexRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
   AdminOutletsIndexRoute: AdminOutletsIndexRoute,
   AdminProductsIndexRoute: AdminProductsIndexRoute,

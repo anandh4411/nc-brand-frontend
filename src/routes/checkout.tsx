@@ -63,7 +63,7 @@ function CheckoutPage() {
   const addresses = addressesData?.data || [] as any[];
 
   const [step, setStep] = useState<CheckoutStep>("address");
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("cod");
   const [selectedAddressUuid, setSelectedAddressUuid] = useState<string>("");
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
@@ -85,16 +85,14 @@ function CheckoutPage() {
     }
   }, [addresses, selectedAddressUuid]);
 
-  // Load Razorpay script
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  // Razorpay script loading — disabled while online payments are not available
+  // useEffect(() => {
+  //   const script = document.createElement("script");
+  //   script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  //   script.async = true;
+  //   document.body.appendChild(script);
+  //   return () => { document.body.removeChild(script); };
+  // }, []);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -492,36 +490,32 @@ function CheckoutPage() {
                     </div>
                   )}
 
-                  <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "cod" | "razorpay")}>
-                    <div className="space-y-3">
-                      <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
-                        paymentMethod === "razorpay" ? "border-primary bg-primary/5" : ""
-                      }`}>
-                        <RadioGroupItem value="razorpay" id="razorpay" />
-                        <Label htmlFor="razorpay" className="flex items-center gap-2 cursor-pointer flex-1">
-                          <Wallet className="h-5 w-5" />
-                          <div>
-                            <p className="font-medium">Pay Online</p>
-                            <p className="text-xs text-muted-foreground">UPI, Card, Net Banking, Wallets</p>
-                          </div>
-                        </Label>
-                        <Badge>Recommended</Badge>
-                      </div>
-
-                      <div className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer ${
-                        paymentMethod === "cod" ? "border-primary bg-primary/5" : ""
-                      }`}>
-                        <RadioGroupItem value="cod" id="cod" />
-                        <Label htmlFor="cod" className="flex items-center gap-2 cursor-pointer flex-1">
-                          <Banknote className="h-5 w-5" />
-                          <div>
-                            <p className="font-medium">Cash on Delivery</p>
-                            <p className="text-xs text-muted-foreground">Pay when you receive</p>
-                          </div>
-                        </Label>
+                  <div className="space-y-3">
+                    {/* COD — enabled & selected */}
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg border-primary bg-primary/5">
+                      <div className="h-4 w-4 rounded-full border-4 border-primary shrink-0" />
+                      <div className="flex items-center gap-2 flex-1">
+                        <Banknote className="h-5 w-5" />
+                        <div>
+                          <p className="font-medium">Cash on Delivery</p>
+                          <p className="text-xs text-muted-foreground">Pay when you receive</p>
+                        </div>
                       </div>
                     </div>
-                  </RadioGroup>
+
+                    {/* Online Payment — disabled / coming soon */}
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg opacity-60 cursor-not-allowed">
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground shrink-0" />
+                      <div className="flex items-center gap-2 flex-1">
+                        <Wallet className="h-5 w-5" />
+                        <div>
+                          <p className="font-medium text-muted-foreground">Pay Online</p>
+                          <p className="text-xs text-muted-foreground">UPI, Card, Net Banking, Wallets</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">Coming Soon</Badge>
+                    </div>
+                  </div>
 
                   <Button
                     className="w-full"
@@ -552,8 +546,8 @@ function CheckoutPage() {
               <CardContent className="space-y-4">
                 {/* Items */}
                 <div className="space-y-3 max-h-48 overflow-y-auto">
-                  {items.map((item: any) => (
-                    <div key={item.variantUuid} className="flex gap-3">
+                  {items.map((item: any, index: number) => (
+                    <div key={item.variantUuid || item.sku || index} className="flex gap-3">
                       <div className="w-12 h-16 bg-muted rounded overflow-hidden shrink-0">
                         <img
                           src={item.imageUrl || `https://picsum.photos/seed/${item.sku}/100/130`}

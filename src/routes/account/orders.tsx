@@ -21,7 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Package, Eye, Truck, CheckCircle, Clock, XCircle, Loader2 } from "lucide-react";
+import { Package, Eye, Truck, CheckCircle, Clock, XCircle, Loader2, Copy, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { useCustomerOrders, useCancelOrder } from "@/api/hooks/shop";
 import { useAuth } from "@/context/auth-context";
 
@@ -276,6 +277,45 @@ function OrdersPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Tracking Info */}
+                {selectedOrder.trackingId && (
+                  <div className="p-4 border rounded-lg space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-blue-600" />
+                      <h3 className="font-semibold text-sm">Shipping & Tracking</h3>
+                    </div>
+                    {selectedOrder.deliveryProvider && (
+                      <p className="text-sm text-muted-foreground">
+                        Delivery by <span className="font-medium text-foreground">{selectedOrder.deliveryProvider}</span>
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Tracking ID:</span>
+                      <span className="font-mono font-medium text-sm">{selectedOrder.trackingId}</span>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedOrder.trackingId);
+                          toast.success("Tracking ID copied!");
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {selectedOrder.trackingUrl && (
+                      <a
+                        href={selectedOrder.trackingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        Track your shipment <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 {/* Items */}
                 <div>

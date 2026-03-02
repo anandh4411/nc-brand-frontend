@@ -56,7 +56,7 @@ export type Cart = z.infer<typeof CartSchema>;
 // ============================================================================
 
 export const AddToCartRequestSchema = z.object({
-  productVariantId: z.number(),
+  variantUuid: z.string().uuid(),
   quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 

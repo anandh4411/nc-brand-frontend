@@ -28,7 +28,7 @@ function WishlistPage() {
 
   const handleAddToCart = (item: any) => {
     addToCart.mutate(
-      { productVariantId: item.variantId, quantity: 1 } as any,
+      { variantUuid: item.variantUuid, quantity: 1 } as any,
       {
         onSuccess: () => {
           toast.success("Added to cart");

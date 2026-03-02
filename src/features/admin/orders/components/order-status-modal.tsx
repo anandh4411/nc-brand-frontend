@@ -1,10 +1,11 @@
 // src/features/admin/orders/components/order-status-modal.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RefreshCw, Save } from "lucide-react";
+import { RefreshCw, Save, Truck } from "lucide-react";
 import { useEffect } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogClose,
@@ -25,28 +26,46 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { orderStatusOptions } from "../data/mock-data";
-import type { Order, OrderStatus } from "@/types/dto/order.dto";
+import type { OrderStatus } from "@/types/dto/order.dto";
+import { useUpdateOrderStatus } from "@/api/hooks/admin";
 import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  order: Order;
+  order: { uuid: string; orderNumber: string; status: string };
 }
 
-const formSchema = z.object({
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-    "returned",
-  ]),
-  notes: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    status: z.enum([
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned",
+    ]),
+    notes: z.string().optional(),
+    deliveryProvider: z.string().optional(),
+    trackingId: z.string().optional(),
+    trackingUrl: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.status === "shipped") {
+        return !!data.deliveryProvider?.trim() && !!data.trackingId?.trim();
+      }
+      return true;
+    },
+    {
+      message: "Delivery provider and tracking ID are required when shipping",
+      path: ["deliveryProvider"],
+    }
+  );
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -64,31 +83,55 @@ const getNextStatuses = (current: OrderStatus): OrderStatus[] => {
 };
 
 export function OrderStatusModal({ open, onOpenChange, order }: Props) {
+  const updateStatus = useUpdateOrderStatus();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       status: order.status as FormData["status"],
       notes: "",
+      deliveryProvider: "",
+      trackingId: "",
+      trackingUrl: "",
     },
   });
+
+  const watchedStatus = form.watch("status");
 
   useEffect(() => {
     if (open) {
       form.reset({
         status: order.status as FormData["status"],
         notes: "",
+        deliveryProvider: "",
+        trackingId: "",
+        trackingUrl: "",
       });
     }
   }, [order, open, form]);
 
   const onSubmit = async (values: FormData) => {
-    console.log("Update order status:", {
-      orderId: order.uuid,
-      ...values,
-    });
-    toast.success("Order status updated successfully");
-    form.reset();
-    onOpenChange(false);
+    updateStatus.mutate(
+      {
+        uuid: order.uuid,
+        status: values.status,
+        notes: values.notes || undefined,
+        deliveryProvider: values.status === "shipped" ? values.deliveryProvider : undefined,
+        trackingId: values.status === "shipped" ? values.trackingId : undefined,
+        trackingUrl: values.status === "shipped" && values.trackingUrl ? values.trackingUrl : undefined,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Order status updated successfully");
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: (err: any) => {
+          const message = err?.response?.data?.error?.message || err?.message || "Failed to update status";
+          toast.error(message);
+        },
+      }
+    );
   };
 
   const handleClose = () => {
@@ -96,7 +139,7 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = updateStatus.isPending;
   const nextStatuses = getNextStatuses(order.status as OrderStatus);
   const availableStatuses = orderStatusOptions.filter(
     (opt) =>
@@ -153,6 +196,69 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
                   </FormItem>
                 )}
               />
+
+              {/* Shipping details — shown when "shipped" is selected */}
+              {watchedStatus === "shipped" && (
+                <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Truck className="h-4 w-4" />
+                    Shipping Details
+                  </div>
+                  <Separator />
+
+                  <FormField
+                    control={form.control}
+                    name="deliveryProvider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery Provider *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Delhivery, DTDC, BlueDart, India Post"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="trackingId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking ID *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. DL1234567890"
+                            className="font-mono"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="trackingUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://www.delhivery.com/track/..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               <FormField
                 control={form.control}

@@ -78,7 +78,7 @@ export default function ShippingPolicyPage() {
             <h2 className="text-xl font-semibold mb-4">7. Contact</h2>
             <p>
               For shipping-related queries, reach out via our{" "}
-              <Link to="/contact" className="text-primary hover:underline">
+              <Link to="/shop/contact" className="text-primary hover:underline">
                 Contact Us
               </Link>{" "}
               page.

@@ -81,7 +81,7 @@ export default function ContactPage() {
                   <Mail className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium text-sm">Email</p>
-                    <p className="text-sm text-muted-foreground">support@ncbrand.com</p>
+                    <p className="text-sm text-muted-foreground">info@ncbrandfashion.com</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">

@@ -32,7 +32,7 @@ export default function RefundPolicyPage() {
             <ul className="list-disc pl-6 space-y-2">
               <li>We accept returns within 7 days of delivery for products in unused, original condition with tags intact.</li>
               <li>Items that are worn, washed, altered, or damaged by the customer are not eligible for return.</li>
-              <li>To initiate a return, contact us via our <Link to="/contact" className="text-primary hover:underline">Contact Us</Link> page with your order number and reason for return.</li>
+              <li>To initiate a return, contact us via our <Link to="/shop/contact" className="text-primary hover:underline">Contact Us</Link> page with your order number and reason for return.</li>
             </ul>
           </section>
 
@@ -67,7 +67,7 @@ export default function RefundPolicyPage() {
             <h2 className="text-xl font-semibold mb-4">6. Contact</h2>
             <p>
               For refund or return queries, reach out via our{" "}
-              <Link to="/contact" className="text-primary hover:underline">
+              <Link to="/shop/contact" className="text-primary hover:underline">
                 Contact Us
               </Link>{" "}
               page.

@@ -94,11 +94,9 @@ export function OrderViewModal({ open, onOpenChange, order: orderRef }: Props) {
                   <Badge variant={getOrderStatusVariant(order.status) as any} className="capitalize">
                     {order.status}
                   </Badge>
-                  {order.paymentStatus !== order.status && (
-                    <Badge variant={getPaymentStatusVariant(order.paymentStatus) as any} className="capitalize">
-                      Payment: {order.paymentStatus}
-                    </Badge>
-                  )}
+                  <Badge variant={getPaymentStatusVariant(order.paymentStatus) as any} className="capitalize">
+                    Payment: {order.paymentStatus}
+                  </Badge>
                 </div>
               </div>
 

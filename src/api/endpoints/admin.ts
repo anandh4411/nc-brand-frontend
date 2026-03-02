@@ -711,7 +711,7 @@ export const adminApi = {
 
   updateOrderStatus: (
     uuid: string,
-    data: { status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string }
+    data: { status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string; paymentStatus?: string }
   ) => apiClient.put<AdminOrder>(`${BASE}/admin/orders/${uuid}/status`, data),
 
   // Banners

@@ -494,7 +494,7 @@ export function useAdminOrder(uuid: string) {
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ uuid, ...data }: { uuid: string; status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string }) =>
+    mutationFn: ({ uuid, ...data }: { uuid: string; status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string; paymentStatus?: string }) =>
       adminApi.updateOrderStatus(uuid, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });

@@ -515,26 +515,35 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               <h4 className="font-semibold mb-4">Help</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <span className="hover:text-foreground cursor-pointer">
+                  <Link to="/contact" className="hover:text-foreground">
                     Contact Us
-                  </span>
+                  </Link>
                 </li>
                 <li>
-                  <span className="hover:text-foreground cursor-pointer">
-                    Shipping Info
-                  </span>
+                  <Link to="/shipping-policy" className="hover:text-foreground">
+                    Shipping & Delivery
+                  </Link>
                 </li>
                 <li>
-                  <span className="hover:text-foreground cursor-pointer">
-                    Returns & Exchanges
-                  </span>
+                  <Link to="/refund-policy" className="hover:text-foreground">
+                    Returns & Refunds
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className="hover:text-foreground">
+                    About Us
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} NC Brand. All rights reserved.
+          <div className="border-t mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <p>© {new Date().getFullYear()} NC Brand. All rights reserved.</p>
+            <div className="flex gap-4">
+              <Link to="/terms" className="hover:text-foreground">Terms & Conditions</Link>
+              <Link to="/refund-policy" className="hover:text-foreground">Refund Policy</Link>
+            </div>
           </div>
         </div>
         </footer>

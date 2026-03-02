@@ -34,7 +34,7 @@ export const adminNavItems: SidebarItem[] = [
     children: [
       { label: "All Outlets", path: "/admin/outlets", icon: Store },
       { label: "Inventory", path: "/admin/inventory", icon: Boxes },
-      { label: "Shipments", path: "/admin/shipments", icon: Truck },
+      // { label: "Shipments", path: "/admin/shipments", icon: Truck },
     ],
   },
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
@@ -55,6 +55,12 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: categoriesData } = useShopCategories();
   const mainCategories = (categoriesData?.data || []).filter((c: any) => !c.parentId);
+
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [currentPath]);
 
   const isLoggedIn = isAuthenticated && isCustomer;
 
@@ -448,7 +454,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
 
         {/* Footer */}

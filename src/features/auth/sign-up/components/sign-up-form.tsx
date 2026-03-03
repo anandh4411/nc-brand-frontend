@@ -2,7 +2,6 @@ import { HTMLAttributes } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
-import { useCustomerRegister } from "@/api/hooks/shop";
 
 type SignUpFormProps = HTMLAttributes<HTMLFormElement>;
 
@@ -45,12 +43,6 @@ const formSchema = z
   });
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
-  // Check if this is a customer registration
-  const search = useSearch({ strict: false }) as { type?: string };
-  const isCustomerSignUp = search?.type === "customer";
-
-  const { mutate: registerCustomer, isPending } = useCustomerRegister();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,18 +54,10 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    if (isCustomerSignUp) {
-      registerCustomer({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        password: data.password,
-      });
-    } else {
-      // Admin sign-up not supported via this form
-      console.log("Admin registration not supported");
-    }
+  function onSubmit(_data: z.infer<typeof formSchema>) {
+    // Admin sign-up not supported via this form
+    // Customer sign-up uses /customer/sign-up route
+    console.log("Admin registration not supported");
   }
 
   return (
@@ -148,8 +132,8 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             </FormItem>
           )}
         />
-        <Button className="mt-2" disabled={isPending}>
-          {isPending ? "Creating Account..." : "Create Account"}
+        <Button className="mt-2">
+          Create Account
         </Button>
       </form>
     </Form>

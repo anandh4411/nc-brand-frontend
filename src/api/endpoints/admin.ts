@@ -395,6 +395,41 @@ export interface CreateCouponRequest {
 }
 
 // ============================================================================
+// OFFERS
+// ============================================================================
+
+export interface OfferProductGroup {
+  uuid: string;
+  name: string;
+}
+
+export interface Offer {
+  uuid: string;
+  id?: number;
+  name: string;
+  description?: string;
+  type: string;
+  buyQuantity: number;
+  getQuantity: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  productGroups?: OfferProductGroup[];
+}
+
+export interface CreateOfferRequest {
+  name: string;
+  description?: string;
+  type?: string;
+  buyQuantity: number;
+  getQuantity: number;
+  startDate: string;
+  endDate: string;
+  isActive?: boolean;
+  productGroupUuids?: string[];
+}
+
+// ============================================================================
 // CUSTOMERS
 // ============================================================================
 
@@ -674,8 +709,10 @@ export const adminApi = {
   getOrder: (uuid: string) =>
     apiClient.get<AdminOrder>(`${BASE}/admin/orders/${uuid}`),
 
-  updateOrderStatus: (uuid: string, status: string, notes?: string) =>
-    apiClient.put<AdminOrder>(`${BASE}/admin/orders/${uuid}/status`, { status, notes }),
+  updateOrderStatus: (
+    uuid: string,
+    data: { status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string; paymentStatus?: string }
+  ) => apiClient.put<AdminOrder>(`${BASE}/admin/orders/${uuid}/status`, data),
 
   // Banners
   getBanners: () =>
@@ -721,6 +758,28 @@ export const adminApi = {
 
   deleteCoupon: (uuid: string) =>
     apiClient.delete(`${BASE}/coupons/${uuid}`),
+
+  // Offers
+  getOffers: (params?: { page?: number; pageSize?: number; search?: string }) =>
+    apiClient.get<{ offers: Offer[]; pagination: any }>(`${BASE}/offers`, { params }),
+
+  getOffer: (uuid: string) =>
+    apiClient.get<Offer>(`${BASE}/offers/${uuid}`),
+
+  createOffer: (data: CreateOfferRequest) =>
+    apiClient.post<Offer>(`${BASE}/offers`, data),
+
+  updateOffer: (uuid: string, data: Partial<CreateOfferRequest> & { isActive?: boolean }) =>
+    apiClient.put<Offer>(`${BASE}/offers/${uuid}`, data),
+
+  deleteOffer: (uuid: string) =>
+    apiClient.delete(`${BASE}/offers/${uuid}`),
+
+  assignProductsToOffer: (uuid: string, productGroupUuids: string[]) =>
+    apiClient.post<Offer>(`${BASE}/offers/${uuid}/products`, { productGroupUuids }),
+
+  removeProductFromOffer: (offerUuid: string, productGroupUuid: string) =>
+    apiClient.delete(`${BASE}/offers/${offerUuid}/products/${productGroupUuid}`),
 
   // Customers
   getCustomers: (params?: { page?: number; pageSize?: number; search?: string }) =>

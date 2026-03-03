@@ -224,14 +224,26 @@ export type GetProductsParams = z.infer<typeof GetProductsParamsSchema>;
  * Simplified product for listing pages
  */
 export const ProductListItemSchema = z.object({
+  id: z.number().optional(),
   uuid: z.string().uuid(),
   slug: z.string(),
   name: z.string(),
   basePrice: z.number(),
-  categoryName: z.string(),
-  primaryImage: z.string().optional(),
+  categoryName: z.string().nullable().optional(),
+  primaryImage: z.string().nullable().optional(),
+  colorName: z.string().optional(),
+  colorCode: z.string().nullable().optional(),
   colorCount: z.number(),
   isFeatured: z.boolean(),
+  hasOffer: z.boolean().optional(),
+  offerText: z.string().nullable().optional(),
+  fabricType: z.string().nullable().optional(),
+  pattern: z.string().nullable().optional(),
+  colors: z.array(z.object({
+    colorName: z.string(),
+    colorCode: z.string().nullable(),
+  })).optional(),
+  sizes: z.array(z.string()).optional(),
   averageRating: z.number().optional(),
   reviewCount: z.number().optional(),
 });

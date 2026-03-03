@@ -29,31 +29,32 @@ function OutletLoginPage() {
     },
   });
 
-  const onSubmit = async (data: OutletLoginForm) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await outletApi.login(data.loginCode);
-      const { outlet, accessToken, refreshToken } = response.data;
-
-      login(
-        { accessToken, refreshToken },
-        {
-          id: outlet.id,
-          uuid: outlet.uuid,
-          name: outlet.name,
-          email: "",
-          role: "outlet",
-          outletId: outlet.id,
-          outletName: outlet.name,
-          outletCode: outlet.code,
-        }
-      );
-    } catch {
-      setError("Invalid login code. Please try again.");
-      setIsLoading(false);
-    }
+  const onSubmit = async (_data: OutletLoginForm) => {
+    // TODO: Enable outlet login API when ready
+    // setIsLoading(true);
+    // setError(null);
+    //
+    // try {
+    //   const response = await outletApi.login(data.loginCode);
+    //   const { outlet, accessToken, refreshToken } = response.data;
+    //
+    //   login(
+    //     { accessToken, refreshToken },
+    //     {
+    //       id: outlet.id,
+    //       uuid: outlet.uuid,
+    //       name: outlet.name,
+    //       email: "",
+    //       role: "outlet",
+    //       outletId: outlet.id,
+    //       outletName: outlet.name,
+    //       outletCode: outlet.code,
+    //     }
+    //   );
+    // } catch {
+    //   setError("Invalid login code. Please try again.");
+    //   setIsLoading(false);
+    // }
   };
 
   return (

@@ -19,6 +19,7 @@ import type {
   CreateShipmentRequest,
   CreateBannerRequest,
   CreateCouponRequest,
+  CreateOfferRequest,
 } from '../../endpoints/admin';
 
 // Query keys
@@ -58,6 +59,10 @@ export const adminKeys = {
 
   // Coupons
   coupons: (params?: any) => ['admin', 'coupons', params] as const,
+
+  // Offers
+  offers: (params?: any) => ['admin', 'offers', params] as const,
+  offer: (uuid: string) => ['admin', 'offers', uuid] as const,
 
   // Customers
   customers: (params?: any) => ['admin', 'customers', params] as const,
@@ -489,8 +494,8 @@ export function useAdminOrder(uuid: string) {
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ uuid, status, notes }: { uuid: string; status: string; notes?: string }) =>
-      adminApi.updateOrderStatus(uuid, status, notes),
+    mutationFn: ({ uuid, ...data }: { uuid: string; status: string; notes?: string; deliveryProvider?: string; trackingId?: string; trackingUrl?: string; paymentStatus?: string }) =>
+      adminApi.updateOrderStatus(uuid, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'recent-orders'] });
@@ -625,6 +630,56 @@ export function useDeleteReview() {
     mutationFn: (uuid: string) => adminApi.deleteReview(uuid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
+    },
+  });
+}
+
+// ============================================================================
+// OFFER HOOKS
+// ============================================================================
+
+export function useAdminOffers(params?: { page?: number; pageSize?: number; search?: string }) {
+  return useQuery({
+    queryKey: adminKeys.offers(params),
+    queryFn: () => adminApi.getOffers(params),
+  });
+}
+
+export function useAdminOffer(uuid: string) {
+  return useQuery({
+    queryKey: adminKeys.offer(uuid),
+    queryFn: () => adminApi.getOffer(uuid),
+    enabled: !!uuid,
+  });
+}
+
+export function useCreateOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateOfferRequest) => adminApi.createOffer(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'offers'] });
+    },
+  });
+}
+
+export function useUpdateOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uuid, data }: { uuid: string; data: Partial<CreateOfferRequest> & { isActive?: boolean } }) =>
+      adminApi.updateOffer(uuid, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'offers'] });
+    },
+  });
+}
+
+export function useDeleteOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (uuid: string) => adminApi.deleteOffer(uuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'offers'] });
     },
   });
 }

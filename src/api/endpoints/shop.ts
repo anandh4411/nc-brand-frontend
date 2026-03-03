@@ -22,6 +22,9 @@ import type {
   CustomerLoginRequest,
   CustomerRegisterRequest,
   CustomerAuthResponse,
+  CustomerRegisterResult,
+  VerifyEmailRequest,
+  ResendOtpRequest,
 } from '@/types/dto/shop-auth.dto';
 import type {
   CheckoutRequest,
@@ -59,11 +62,25 @@ export const shopApi = {
     apiClient.post<CustomerAuthResponse>(`${BASE}/auth/login`, data),
 
   /**
-   * Customer Register
+   * Customer Register (returns email + uuid, no tokens — OTP verification required)
    * POST /v1/shop/auth/register
    */
   register: (data: CustomerRegisterRequest) =>
-    apiClient.post<CustomerAuthResponse>(`${BASE}/auth/register`, data),
+    apiClient.post<CustomerRegisterResult>(`${BASE}/auth/register`, data),
+
+  /**
+   * Verify Email with OTP
+   * POST /v1/shop/auth/verify-email
+   */
+  verifyEmail: (data: VerifyEmailRequest) =>
+    apiClient.post<CustomerAuthResponse>(`${BASE}/auth/verify-email`, data),
+
+  /**
+   * Resend OTP
+   * POST /v1/shop/auth/resend-otp
+   */
+  resendOtp: (data: ResendOtpRequest) =>
+    apiClient.post(`${BASE}/auth/resend-otp`, data),
 
   /**
    * Customer Logout
@@ -100,6 +117,13 @@ export const shopApi = {
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     apiClient.post(`${BASE}/auth/change-password`, data),
 
+  /**
+   * Delete Account (soft delete)
+   * DELETE /v1/shop/auth/me
+   */
+  deleteAccount: () =>
+    apiClient.delete(`${BASE}/auth/me`),
+
   // ============================================================================
   // BROWSING (Public)
   // ============================================================================
@@ -116,7 +140,7 @@ export const shopApi = {
    * GET /v1/shop/products/:slug
    */
   getProductBySlug: (slug: string) =>
-    apiClient.get<ProductGroup>(`${BASE}/products/${slug}`),
+    apiClient.get<any>(`${BASE}/products/${slug}`),
 
   /**
    * Get Categories

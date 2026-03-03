@@ -34,7 +34,7 @@ export const adminNavItems: SidebarItem[] = [
     children: [
       { label: "All Outlets", path: "/admin/outlets", icon: Store },
       { label: "Inventory", path: "/admin/inventory", icon: Boxes },
-      { label: "Shipments", path: "/admin/shipments", icon: Truck },
+      // { label: "Shipments", path: "/admin/shipments", icon: Truck },
     ],
   },
 
@@ -48,6 +48,8 @@ export const adminNavItems: SidebarItem[] = [
       { label: "Products", path: "/admin/products", icon: Package },
       { label: "Orders", path: "/admin/orders", icon: ShoppingCart },
       { label: "Customers", path: "/admin/customers", icon: Users },
+      { label: "Coupons", path: "/admin/coupons", icon: Percent },
+      { label: "Offers", path: "/admin/offers", icon: Tag },
     ],
   },
 

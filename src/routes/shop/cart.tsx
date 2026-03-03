@@ -61,7 +61,13 @@ function CartPage() {
     setCouponError("");
     applyCouponMutation.mutate(couponCode.toUpperCase().trim(), {
       onSuccess: () => setCouponCode(""),
-      onError: () => setCouponError("Invalid or expired coupon code"),
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.error?.message ||
+          err?.message ||
+          "Invalid or expired coupon code";
+        setCouponError(message);
+      },
     });
   };
 
@@ -332,20 +338,6 @@ function CartPage() {
                 <span>{formatPrice(total)}</span>
               </div>
 
-              {/* Free Shipping Progress */}
-              {shipping > 0 && (
-                <div className="bg-muted/50 p-3 rounded-md">
-                  <p className="text-xs text-muted-foreground">
-                    Add {formatPrice(999 - subtotal)} more for free shipping!
-                  </p>
-                  <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${Math.min((subtotal / 999) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              )}
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button asChild className="w-full" size="lg">

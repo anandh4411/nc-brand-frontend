@@ -27,6 +27,7 @@ import {
   Camera,
   MessageSquare,
   Loader2,
+  Tag,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
@@ -183,7 +184,7 @@ function ProductDetailPage() {
     }
 
     addToCart.mutate(
-      { productVariantId: selectedVariant.id, quantity } as any,
+      { variantUuid: selectedVariant.uuid, quantity } as any,
       {
         onSuccess: () => {
           toast.success("Added to cart");
@@ -380,10 +381,29 @@ function ProductDetailPage() {
           {/* Category & Title */}
           <div>
             <p className="text-sm text-muted-foreground mb-2">
-              {product.categoryName}
+              {product.category?.name || product.categoryName}
             </p>
             <h1 className="text-2xl lg:text-3xl font-bold">{product.name}</h1>
+            {/* Fabric & Pattern badges */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {product.fabricType && (
+                <Badge variant="outline">{product.fabricType}</Badge>
+              )}
+              {product.pattern && (
+                <Badge variant="outline">{product.pattern}</Badge>
+              )}
+            </div>
           </div>
+
+          {/* Offer Banner */}
+          {product.offer && (
+            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
+              <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.getQuantity} Free`}
+              </p>
+            </div>
+          )}
 
           {/* Rating */}
           {(product.averageRating || reviewStats?.averageRating) && (
@@ -456,13 +476,13 @@ function ProductDetailPage() {
                       selectedVariantIndex === index
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-gray-300 hover:border-primary",
-                      variant.stock === 0 && "opacity-50 !cursor-not-allowed line-through"
+                      (variant.stockQuantity ?? variant.stock ?? 0) === 0 && "opacity-50 !cursor-not-allowed line-through"
                     )}
-                    disabled={variant.stock === 0}
+                    disabled={(variant.stockQuantity ?? variant.stock ?? 0) === 0}
                     onClick={() => setSelectedVariantIndex(index)}
                   >
                     {variant.size}
-                    {variant.stock === 0 && " (Out of Stock)"}
+                    {(variant.stockQuantity ?? variant.stock ?? 0) === 0 && " (Out of Stock)"}
                   </button>
                 ))}
               </div>
@@ -486,13 +506,13 @@ function ProductDetailPage() {
                 variant="outline"
                 size="icon"
                 onClick={() => setQuantity((q) => q + 1)}
-                disabled={quantity >= (selectedVariant?.stock || 10)}
+                disabled={quantity >= (selectedVariant?.stockQuantity || selectedVariant?.stock || 10)}
               >
                 <Plus className="h-4 w-4" />
               </Button>
               {selectedVariant && (
                 <span className="text-sm text-muted-foreground ml-2">
-                  {selectedVariant.stock} in stock
+                  {selectedVariant.stockQuantity ?? selectedVariant.stock ?? 0} in stock
                 </span>
               )}
             </div>
@@ -504,14 +524,14 @@ function ProductDetailPage() {
               size="lg"
               className="flex-1"
               onClick={handleAddToCart}
-              disabled={!selectedVariant || selectedVariant.stock === 0 || addToCart.isPending}
+              disabled={!selectedVariant || (selectedVariant.stockQuantity ?? selectedVariant.stock ?? 0) === 0 || addToCart.isPending}
             >
               {addToCart.isPending ? (
                 <Loader2 className="h-5 w-5 mr-2 animate-spin" />
               ) : (
                 <ShoppingCart className="h-5 w-5 mr-2" />
               )}
-              Add to Cart
+              {selectedVariant && (selectedVariant.stockQuantity ?? selectedVariant.stock ?? 0) === 0 ? "Out of Stock" : "Add to Cart"}
             </Button>
             <Button
               size="lg"

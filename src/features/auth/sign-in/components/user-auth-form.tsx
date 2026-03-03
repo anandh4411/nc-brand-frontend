@@ -2,7 +2,6 @@ import { HTMLAttributes } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { useLogin } from "@/api";
-import { useCustomerLogin } from "@/api/hooks/shop";
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>;
 
@@ -36,16 +34,7 @@ const formSchema = z.object({
 });
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  // Check if this is a customer login
-  const search = useSearch({ strict: false }) as { type?: string };
-  const isCustomerLogin = search?.type === "customer";
-
-  // Use appropriate login hook
-  const { loginUser: adminLoginFn, isLoading: adminLoading } = useLogin();
-  const { mutate: customerLoginFn, isPending: customerLoading } = useCustomerLogin();
-
-  const loginUser = isCustomerLogin ? customerLoginFn : adminLoginFn;
-  const isLoading = isCustomerLogin ? customerLoading : adminLoading;
+  const { loginUser, isLoading } = useLogin();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

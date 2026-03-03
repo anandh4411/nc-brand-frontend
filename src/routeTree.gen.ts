@@ -25,7 +25,15 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as ShopWishlistRouteImport } from './routes/shop/wishlist'
+import { Route as ShopTermsRouteImport } from './routes/shop/terms'
+import { Route as ShopShippingPolicyRouteImport } from './routes/shop/shipping-policy'
+import { Route as ShopRefundPolicyRouteImport } from './routes/shop/refund-policy'
+import { Route as ShopContactRouteImport } from './routes/shop/contact'
 import { Route as ShopCartRouteImport } from './routes/shop/cart'
+import { Route as ShopAboutRouteImport } from './routes/shop/about'
+import { Route as CustomerVerifyEmailRouteImport } from './routes/customer/verify-email'
+import { Route as CustomerSignUpRouteImport } from './routes/customer/sign-up'
+import { Route as CustomerSignInRouteImport } from './routes/customer/sign-in'
 import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
 import { Route as AccountWishlistRouteImport } from './routes/account/wishlist'
 import { Route as AccountSettingsRouteImport } from './routes/account/settings'
@@ -52,8 +60,10 @@ import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
 import { Route as AdminOutletsIndexRouteImport } from './routes/admin/outlets/index'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
+import { Route as AdminOffersIndexRouteImport } from './routes/admin/offers/index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
+import { Route as AdminCouponsIndexRouteImport } from './routes/admin/coupons/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as AdminAnalyticsIndexRouteImport } from './routes/admin/analytics/index'
 import { Route as ShopProductsSlugRouteImport } from './routes/shop/products/$slug'
@@ -145,10 +155,50 @@ const ShopWishlistRoute = ShopWishlistRouteImport.update({
   path: '/wishlist',
   getParentRoute: () => ShopRoute,
 } as any)
+const ShopTermsRoute = ShopTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => ShopRoute,
+} as any)
+const ShopShippingPolicyRoute = ShopShippingPolicyRouteImport.update({
+  id: '/shipping-policy',
+  path: '/shipping-policy',
+  getParentRoute: () => ShopRoute,
+} as any)
+const ShopRefundPolicyRoute = ShopRefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => ShopRoute,
+} as any)
+const ShopContactRoute = ShopContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => ShopRoute,
+} as any)
 const ShopCartRoute = ShopCartRouteImport.update({
   id: '/cart',
   path: '/cart',
   getParentRoute: () => ShopRoute,
+} as any)
+const ShopAboutRoute = ShopAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => ShopRoute,
+} as any)
+const CustomerVerifyEmailRoute = CustomerVerifyEmailRouteImport.update({
+  id: '/customer/verify-email',
+  path: '/customer/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSignUpRoute = CustomerSignUpRouteImport.update({
+  id: '/customer/sign-up',
+  path: '/customer/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerSignInRoute = CustomerSignInRouteImport.update({
+  id: '/customer/sign-in',
+  path: '/customer/sign-in',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSignInRoute = AdminSignInRouteImport.update({
   id: '/sign-in',
@@ -287,6 +337,11 @@ const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
   path: '/orders/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOffersIndexRoute = AdminOffersIndexRouteImport.update({
+  id: '/offers/',
+  path: '/offers/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
   id: '/inventory/',
   path: '/inventory/',
@@ -295,6 +350,11 @@ const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
 const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCouponsIndexRoute = AdminCouponsIndexRouteImport.update({
+  id: '/coupons/',
+  path: '/coupons/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
@@ -381,7 +441,15 @@ export interface FileRoutesByFullPath {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
+  '/shop/about': typeof ShopAboutRoute
   '/shop/cart': typeof ShopCartRoute
+  '/shop/contact': typeof ShopContactRoute
+  '/shop/refund-policy': typeof ShopRefundPolicyRoute
+  '/shop/shipping-policy': typeof ShopShippingPolicyRoute
+  '/shop/terms': typeof ShopTermsRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -397,8 +465,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/coupons': typeof AdminCouponsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/offers': typeof AdminOffersIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
@@ -430,7 +500,15 @@ export interface FileRoutesByTo {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
+  '/shop/about': typeof ShopAboutRoute
   '/shop/cart': typeof ShopCartRoute
+  '/shop/contact': typeof ShopContactRoute
+  '/shop/refund-policy': typeof ShopRefundPolicyRoute
+  '/shop/shipping-policy': typeof ShopShippingPolicyRoute
+  '/shop/terms': typeof ShopTermsRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -446,8 +524,10 @@ export interface FileRoutesByTo {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics': typeof AdminAnalyticsIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
+  '/admin/coupons': typeof AdminCouponsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/offers': typeof AdminOffersIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
   '/admin/outlets': typeof AdminOutletsIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
@@ -486,7 +566,15 @@ export interface FileRoutesById {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/sign-in': typeof CustomerSignInRoute
+  '/customer/sign-up': typeof CustomerSignUpRoute
+  '/customer/verify-email': typeof CustomerVerifyEmailRoute
+  '/shop/about': typeof ShopAboutRoute
   '/shop/cart': typeof ShopCartRoute
+  '/shop/contact': typeof ShopContactRoute
+  '/shop/refund-policy': typeof ShopRefundPolicyRoute
+  '/shop/shipping-policy': typeof ShopShippingPolicyRoute
+  '/shop/terms': typeof ShopTermsRoute
   '/shop/wishlist': typeof ShopWishlistRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -502,8 +590,10 @@ export interface FileRoutesById {
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsLazyRoute
   '/admin/analytics/': typeof AdminAnalyticsIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/coupons/': typeof AdminCouponsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
+  '/admin/offers/': typeof AdminOffersIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
   '/admin/outlets/': typeof AdminOutletsIndexRoute
   '/admin/products/': typeof AdminProductsIndexRoute
@@ -543,7 +633,15 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
+    | '/shop/about'
     | '/shop/cart'
+    | '/shop/contact'
+    | '/shop/refund-policy'
+    | '/shop/shipping-policy'
+    | '/shop/terms'
     | '/shop/wishlist'
     | '/account/'
     | '/admin/'
@@ -559,8 +657,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/inventory'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
@@ -592,7 +692,15 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
+    | '/shop/about'
     | '/shop/cart'
+    | '/shop/contact'
+    | '/shop/refund-policy'
+    | '/shop/shipping-policy'
+    | '/shop/terms'
     | '/shop/wishlist'
     | '/account'
     | '/admin'
@@ -608,8 +716,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics'
     | '/admin/categories'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/inventory'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/outlets'
     | '/admin/products'
@@ -647,7 +757,15 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/sign-in'
+    | '/customer/sign-up'
+    | '/customer/verify-email'
+    | '/shop/about'
     | '/shop/cart'
+    | '/shop/contact'
+    | '/shop/refund-policy'
+    | '/shop/shipping-policy'
+    | '/shop/terms'
     | '/shop/wishlist'
     | '/account/'
     | '/admin/'
@@ -663,8 +781,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings/notifications'
     | '/admin/analytics/'
     | '/admin/categories/'
+    | '/admin/coupons/'
     | '/admin/customers/'
     | '/admin/inventory/'
+    | '/admin/offers/'
     | '/admin/orders/'
     | '/admin/outlets/'
     | '/admin/products/'
@@ -697,6 +817,9 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  CustomerSignInRoute: typeof CustomerSignInRoute
+  CustomerSignUpRoute: typeof CustomerSignUpRoute
+  CustomerVerifyEmailRoute: typeof CustomerVerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -799,12 +922,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopWishlistRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/shop/terms': {
+      id: '/shop/terms'
+      path: '/terms'
+      fullPath: '/shop/terms'
+      preLoaderRoute: typeof ShopTermsRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/shop/shipping-policy': {
+      id: '/shop/shipping-policy'
+      path: '/shipping-policy'
+      fullPath: '/shop/shipping-policy'
+      preLoaderRoute: typeof ShopShippingPolicyRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/shop/refund-policy': {
+      id: '/shop/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/shop/refund-policy'
+      preLoaderRoute: typeof ShopRefundPolicyRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/shop/contact': {
+      id: '/shop/contact'
+      path: '/contact'
+      fullPath: '/shop/contact'
+      preLoaderRoute: typeof ShopContactRouteImport
+      parentRoute: typeof ShopRoute
+    }
     '/shop/cart': {
       id: '/shop/cart'
       path: '/cart'
       fullPath: '/shop/cart'
       preLoaderRoute: typeof ShopCartRouteImport
       parentRoute: typeof ShopRoute
+    }
+    '/shop/about': {
+      id: '/shop/about'
+      path: '/about'
+      fullPath: '/shop/about'
+      preLoaderRoute: typeof ShopAboutRouteImport
+      parentRoute: typeof ShopRoute
+    }
+    '/customer/verify-email': {
+      id: '/customer/verify-email'
+      path: '/customer/verify-email'
+      fullPath: '/customer/verify-email'
+      preLoaderRoute: typeof CustomerVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/sign-up': {
+      id: '/customer/sign-up'
+      path: '/customer/sign-up'
+      fullPath: '/customer/sign-up'
+      preLoaderRoute: typeof CustomerSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/sign-in': {
+      id: '/customer/sign-in'
+      path: '/customer/sign-in'
+      fullPath: '/customer/sign-in'
+      preLoaderRoute: typeof CustomerSignInRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/sign-in': {
       id: '/admin/sign-in'
@@ -995,6 +1174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/offers/': {
+      id: '/admin/offers/'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventory/': {
       id: '/admin/inventory/'
       path: '/inventory'
@@ -1007,6 +1193,13 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/admin/customers'
       preLoaderRoute: typeof AdminCustomersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/coupons/': {
+      id: '/admin/coupons/'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories/': {
@@ -1112,8 +1305,10 @@ interface AdminRouteChildren {
   AdminOutletsOutletIdRoute: typeof AdminOutletsOutletIdRoute
   AdminAnalyticsIndexRoute: typeof AdminAnalyticsIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
+  AdminCouponsIndexRoute: typeof AdminCouponsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
+  AdminOffersIndexRoute: typeof AdminOffersIndexRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
   AdminOutletsIndexRoute: typeof AdminOutletsIndexRoute
   AdminProductsIndexRoute: typeof AdminProductsIndexRoute
@@ -1127,8 +1322,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOutletsOutletIdRoute: AdminOutletsOutletIdRoute,
   AdminAnalyticsIndexRoute: AdminAnalyticsIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
+  AdminCouponsIndexRoute: AdminCouponsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
+  AdminOffersIndexRoute: AdminOffersIndexRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
   AdminOutletsIndexRoute: AdminOutletsIndexRoute,
   AdminProductsIndexRoute: AdminProductsIndexRoute,
@@ -1197,7 +1394,12 @@ const OutletRouteWithChildren =
   OutletRoute._addFileChildren(OutletRouteChildren)
 
 interface ShopRouteChildren {
+  ShopAboutRoute: typeof ShopAboutRoute
   ShopCartRoute: typeof ShopCartRoute
+  ShopContactRoute: typeof ShopContactRoute
+  ShopRefundPolicyRoute: typeof ShopRefundPolicyRoute
+  ShopShippingPolicyRoute: typeof ShopShippingPolicyRoute
+  ShopTermsRoute: typeof ShopTermsRoute
   ShopWishlistRoute: typeof ShopWishlistRoute
   ShopIndexRoute: typeof ShopIndexRoute
   ShopProductsSlugRoute: typeof ShopProductsSlugRoute
@@ -1205,7 +1407,12 @@ interface ShopRouteChildren {
 }
 
 const ShopRouteChildren: ShopRouteChildren = {
+  ShopAboutRoute: ShopAboutRoute,
   ShopCartRoute: ShopCartRoute,
+  ShopContactRoute: ShopContactRoute,
+  ShopRefundPolicyRoute: ShopRefundPolicyRoute,
+  ShopShippingPolicyRoute: ShopShippingPolicyRoute,
+  ShopTermsRoute: ShopTermsRoute,
   ShopWishlistRoute: ShopWishlistRoute,
   ShopIndexRoute: ShopIndexRoute,
   ShopProductsSlugRoute: ShopProductsSlugRoute,
@@ -1232,6 +1439,9 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  CustomerSignInRoute: CustomerSignInRoute,
+  CustomerSignUpRoute: CustomerSignUpRoute,
+  CustomerVerifyEmailRoute: CustomerVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

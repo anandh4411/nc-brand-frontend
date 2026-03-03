@@ -1,11 +1,15 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Heart, Trash2, ShoppingCart } from "lucide-react";
-import { useWishlist } from "@/context/wishlist-context";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useWishlist as useWishlistApi, useRemoveFromWishlist } from "@/api/hooks/shop";
+import type { WishlistItem } from "@/types/dto/wishlist.dto";
 
 function AccountWishlistPage() {
-  const { items, removeItem, clearWishlist } = useWishlist();
-  const router = useRouter();
+  const { data: wishlistData, isLoading } = useWishlistApi();
+  const { mutate: removeItem } = useRemoveFromWishlist();
+
+  const items: WishlistItem[] = (wishlistData?.data || []) as WishlistItem[];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -14,6 +18,28 @@ function AccountWishlistPage() {
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">My Wishlist</h1>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-lg border overflow-hidden">
+              <Skeleton className="aspect-square w-full" />
+              <div className="p-2.5 space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -41,57 +67,55 @@ function AccountWishlistPage() {
             {items.length} item{items.length > 1 ? "s" : ""} saved
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={clearWishlist} className="text-destructive">
-          <Trash2 className="h-4 w-4 mr-1" />
-          Clear All
-        </Button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {items.map((item) => (
           <div
-            key={item.productGroupId}
+            key={item.uuid}
             className="group bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow"
           >
-            <Link to={`/shop/products/${item.slug}` as any}>
-              <div className="relative aspect-square overflow-hidden bg-muted">
-                <img
-                  src={item.imageUrl || "/placeholder-product.jpg"}
-                  alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white shadow-sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    removeItem(item.productGroupId);
-                  }}
-                >
-                  <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500" />
-                </Button>
-              </div>
-
-              <div className="p-2.5">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                  {item.categoryName}
-                </span>
-                <h3 className="font-medium text-sm leading-tight line-clamp-2 mt-0.5 mb-1.5 min-h-[2.25rem]">
-                  {item.name}
-                </h3>
-                <span className="font-semibold text-sm">{formatPrice(item.basePrice)}</span>
-              </div>
-            </Link>
-
+            <div className="relative aspect-square overflow-hidden bg-muted">
+              <img
+                src={item.imageUrl || "/placeholder-product.jpg"}
+                alt={item.productName}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white shadow-sm"
+                onClick={() => removeItem(item.uuid)}
+              >
+                <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500" />
+              </Button>
+              {!item.inStock && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs text-center py-1">
+                  Out of Stock
+                </div>
+              )}
+            </div>
+            <div className="p-2.5">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                {item.colorName} / {item.size}
+              </span>
+              <h3 className="font-medium text-sm leading-tight line-clamp-2 mt-0.5 mb-1.5 min-h-[2.25rem]">
+                {item.productName}
+              </h3>
+              <span className="font-semibold text-sm">
+                {formatPrice(item.price)}
+              </span>
+            </div>
             <div className="px-2.5 pb-2.5">
               <Button
                 className="w-full h-8 text-xs"
                 size="sm"
-                onClick={() => router.navigate({ to: `/shop/products/${item.slug}` as any })}
+                asChild
               >
-                <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                View Product
+                <Link to="/shop/products">
+                  <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                  View Product
+                </Link>
               </Button>
             </div>
           </div>

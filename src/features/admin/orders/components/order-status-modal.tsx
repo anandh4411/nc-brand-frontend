@@ -1,10 +1,11 @@
 // src/features/admin/orders/components/order-status-modal.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RefreshCw, Save } from "lucide-react";
+import { CreditCard, RefreshCw, Save, Truck } from "lucide-react";
 import { useEffect } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogClose,
@@ -25,35 +26,54 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { orderStatusOptions } from "../data/mock-data";
-import type { Order, OrderStatus } from "@/types/dto/order.dto";
+import type { OrderStatus } from "@/types/dto/order.dto";
+import { useUpdateOrderStatus } from "@/api/hooks/admin";
 import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  order: Order;
+  order: { uuid: string; orderNumber: string; status: string; paymentStatus?: string; paymentMethod?: string | null };
 }
 
-const formSchema = z.object({
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-    "returned",
-  ]),
-  notes: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    status: z.enum([
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned",
+    ]),
+    notes: z.string().optional(),
+    paymentStatus: z.enum(["pending", "paid", "failed", "refunded"]),
+    deliveryProvider: z.string().optional(),
+    trackingId: z.string().optional(),
+    trackingUrl: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.status === "shipped") {
+        return !!data.deliveryProvider?.trim() && !!data.trackingId?.trim();
+      }
+      return true;
+    },
+    {
+      message: "Delivery provider and tracking ID are required when shipping",
+      path: ["deliveryProvider"],
+    }
+  );
 
 type FormData = z.infer<typeof formSchema>;
 
 const getNextStatuses = (current: OrderStatus): OrderStatus[] => {
   const flow: Record<OrderStatus, OrderStatus[]> = {
-    pending: ["confirmed", "cancelled"],
-    confirmed: ["processing", "cancelled"],
+    pending: ["confirmed", "processing", "shipped", "cancelled"],
+    confirmed: ["processing", "shipped", "cancelled"],
     processing: ["shipped", "cancelled"],
     shipped: ["delivered"],
     delivered: ["returned"],
@@ -64,31 +84,58 @@ const getNextStatuses = (current: OrderStatus): OrderStatus[] => {
 };
 
 export function OrderStatusModal({ open, onOpenChange, order }: Props) {
+  const updateStatus = useUpdateOrderStatus();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       status: order.status as FormData["status"],
+      paymentStatus: (order.paymentStatus || "pending") as FormData["paymentStatus"],
       notes: "",
+      deliveryProvider: "",
+      trackingId: "",
+      trackingUrl: "",
     },
   });
+
+  const watchedStatus = form.watch("status");
 
   useEffect(() => {
     if (open) {
       form.reset({
         status: order.status as FormData["status"],
+        paymentStatus: (order.paymentStatus || "pending") as FormData["paymentStatus"],
         notes: "",
+        deliveryProvider: "",
+        trackingId: "",
+        trackingUrl: "",
       });
     }
   }, [order, open, form]);
 
   const onSubmit = async (values: FormData) => {
-    console.log("Update order status:", {
-      orderId: order.uuid,
-      ...values,
-    });
-    toast.success("Order status updated successfully");
-    form.reset();
-    onOpenChange(false);
+    updateStatus.mutate(
+      {
+        uuid: order.uuid,
+        status: values.status,
+        notes: values.notes || undefined,
+        paymentStatus: values.paymentStatus !== order.paymentStatus ? values.paymentStatus : undefined,
+        deliveryProvider: values.status === "shipped" ? values.deliveryProvider : undefined,
+        trackingId: values.status === "shipped" ? values.trackingId : undefined,
+        trackingUrl: values.status === "shipped" && values.trackingUrl ? values.trackingUrl : undefined,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Order status updated successfully");
+          form.reset();
+          onOpenChange(false);
+        },
+        onError: (err: any) => {
+          const message = err?.response?.data?.error?.message || err?.message || "Failed to update status";
+          toast.error(message);
+        },
+      }
+    );
   };
 
   const handleClose = () => {
@@ -96,7 +143,7 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
     onOpenChange(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = updateStatus.isPending;
   const nextStatuses = getNextStatuses(order.status as OrderStatus);
   const availableStatuses = orderStatusOptions.filter(
     (opt) =>
@@ -117,42 +164,141 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
         </DialogHeader>
 
         {/* Current Status */}
-        <div className="p-3 bg-muted rounded-lg">
+        <div className="p-3 bg-muted rounded-lg space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Current Status</span>
+            <span className="text-sm font-medium">Order Status</span>
             <Badge variant="outline" className="capitalize">
               {order.status}
             </Badge>
           </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Payment</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground capitalize">
+                {order.paymentMethod === "cod" ? "COD" : order.paymentMethod || "—"}
+              </span>
+              <Badge variant="outline" className="capitalize">
+                {order.paymentStatus || "pending"}
+              </Badge>
+            </div>
+          </div>
         </div>
 
-        {nextStatuses.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground">
-            This order cannot be updated further.
-          </div>
-        ) : (
-          <Form {...form}>
-            <form
-              id="order-status-form"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
-            >
+        <Form {...form}>
+          <form
+            id="order-status-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
+            {nextStatuses.length > 0 && (
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel>New Status</FormLabel>
+                    <FormLabel>Order Status</FormLabel>
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
                       placeholder="Select status"
                       items={availableStatuses}
+                      isControlled
                     />
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+            )}
+
+              <FormField
+                control={form.control}
+                name="paymentStatus"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="flex items-center gap-1.5">
+                      <CreditCard className="h-3.5 w-3.5" />
+                      Payment Status
+                    </FormLabel>
+                    <SelectDropdown
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Select payment status"
+                      items={[
+                        { label: "Pending", value: "pending" },
+                        { label: "Paid", value: "paid" },
+                        { label: "Failed", value: "failed" },
+                        { label: "Refunded", value: "refunded" },
+                      ]}
+                      isControlled
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Shipping details — shown when "shipped" is selected */}
+              {watchedStatus === "shipped" && (
+                <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Truck className="h-4 w-4" />
+                    Shipping Details
+                  </div>
+                  <Separator />
+
+                  <FormField
+                    control={form.control}
+                    name="deliveryProvider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery Provider *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Delhivery, DTDC, BlueDart, India Post"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="trackingId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking ID *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. DL1234567890"
+                            className="font-mono"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="trackingUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tracking URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://www.delhivery.com/track/..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               <FormField
                 control={form.control}
@@ -173,7 +319,6 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
               />
             </form>
           </Form>
-        )}
 
         <DialogFooter className="gap-y-2">
           <DialogClose asChild>
@@ -181,16 +326,14 @@ export function OrderStatusModal({ open, onOpenChange, order }: Props) {
               Cancel
             </Button>
           </DialogClose>
-          {nextStatuses.length > 0 && (
-            <Button
-              type="submit"
-              form="order-status-form"
-              disabled={isSubmitting || form.watch("status") === order.status}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {isSubmitting ? "Updating..." : "Update Status"}
-            </Button>
-          )}
+          <Button
+            type="submit"
+            form="order-status-form"
+            disabled={isSubmitting || (form.watch("status") === order.status && form.watch("paymentStatus") === (order.paymentStatus || "pending"))}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            {isSubmitting ? "Updating..." : "Update"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -34,7 +34,7 @@ export default function Categories() {
   const parentCategories = categoryList
     .filter((c: Category) => !c.parentId)
     .map((c: Category) => ({
-      value: c.uuid,
+      value: String(c.id),
       label: c.name,
     }));
 

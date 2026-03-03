@@ -41,7 +41,20 @@ export const CustomerRegisterRequestSchema = z.object({
 export type CustomerRegisterRequest = z.infer<typeof CustomerRegisterRequestSchema>;
 
 // ============================================================================
-// AUTH RESPONSE
+// OTP REQUESTS
+// ============================================================================
+
+export interface VerifyEmailRequest {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpRequest {
+  email: string;
+}
+
+// ============================================================================
+// AUTH RESPONSES
 // ============================================================================
 
 export const CustomerAuthResponseSchema = z.object({
@@ -51,3 +64,8 @@ export const CustomerAuthResponseSchema = z.object({
 });
 
 export type CustomerAuthResponse = z.infer<typeof CustomerAuthResponseSchema>;
+
+export interface CustomerRegisterResult {
+  email: string;
+  uuid: string;
+}

@@ -12,7 +12,7 @@ export interface ProductCardData {
   slug: string;
   name: string;
   basePrice: number;
-  categoryName?: string;
+  categoryName?: string | null;
   primaryImage?: string | null;
   colorName?: string;
   colorCode?: string | null;

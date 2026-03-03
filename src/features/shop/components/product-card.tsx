@@ -45,7 +45,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     }).format(price);
   };
 
-  const imageUrl = product.primaryImage || `https://picsum.photos/seed/${product.slug}/400/400`;
+  const imageUrl = product.primaryImage || "/placeholder.svg";
   const rating = product.averageRating || 0;
   const colors = product.colors || [];
   const sizes = product.sizes || [];

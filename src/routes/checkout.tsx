@@ -550,7 +550,7 @@ function CheckoutPage() {
                     <div key={item.variantUuid || item.sku || index} className="flex gap-3">
                       <div className="w-12 h-16 bg-muted rounded overflow-hidden shrink-0">
                         <img
-                          src={item.imageUrl || `https://picsum.photos/seed/${item.sku}/100/130`}
+                          src={item.imageUrl || "/placeholder.svg"}
                           alt={item.productName}
                           className="w-full h-full object-cover"
                         />

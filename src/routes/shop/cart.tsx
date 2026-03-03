@@ -167,7 +167,7 @@ function CartPage() {
                   {/* Image */}
                   <div className="w-24 h-32 bg-muted rounded-md overflow-hidden shrink-0">
                     <img
-                      src={item.imageUrl || `https://picsum.photos/seed/${item.sku}/200/300`}
+                      src={item.imageUrl || "/placeholder.svg"}
                       alt={item.productName}
                       className="w-full h-full object-cover"
                     />

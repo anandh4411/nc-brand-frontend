@@ -58,7 +58,7 @@ export function ImageUploadArea({
       if (valid.length === 0) return;
 
       const newPending: PendingFile[] = valid.map((file) => ({
-        id: crypto.randomUUID(),
+        id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
         file,
         preview: URL.createObjectURL(file),
       }));

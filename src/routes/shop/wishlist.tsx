@@ -117,7 +117,7 @@ function WishlistPage() {
               {/* Image */}
               <div className="relative aspect-square overflow-hidden bg-muted">
                 <img
-                  src={item.imageUrl || `https://picsum.photos/seed/${item.productSlug}/400/400`}
+                  src={item.imageUrl || "/placeholder.svg"}
                   alt={item.productName}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

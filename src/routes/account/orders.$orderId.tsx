@@ -172,7 +172,7 @@ function OrderDetailPage() {
                 return (
                   <div key={item.uuid || index} className="flex gap-4">
                     <img
-                      src={snapshot.imageUrl || `https://picsum.photos/seed/item${index}/100/100`}
+                      src={snapshot.imageUrl || "/placeholder.svg"}
                       alt={snapshot.name || "Product"}
                       className="w-20 h-20 object-cover rounded-lg"
                     />

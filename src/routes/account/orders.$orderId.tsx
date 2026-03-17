@@ -115,7 +115,7 @@ function OrderDetailPage() {
     const addHours = (date: Date, hours: number) =>
       new Date(date.getTime() + hours * 60 * 60 * 1000).toISOString();
 
-    const events = [
+    const events: ShipmentTracking["events"] = [
       {
         id: "1",
         status: "order_placed" as const,

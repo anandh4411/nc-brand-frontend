@@ -71,6 +71,20 @@ export function useOutletSales(params?: {
   });
 }
 
+export function useReceiveShipment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uuid, items }: { uuid: string; items: { itemUuid: string; receivedQuantity: number }[] }) =>
+      outletApi.receiveShipment(uuid, items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: outletKeys.shipments() });
+      queryClient.invalidateQueries({ queryKey: outletKeys.inventory() });
+      queryClient.invalidateQueries({ queryKey: outletKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: outletKeys.posInventory() });
+    },
+  });
+}
+
 export function useCreateSale() {
   const queryClient = useQueryClient();
   return useMutation({

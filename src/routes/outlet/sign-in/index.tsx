@@ -12,7 +12,7 @@ import { useAuth } from "@/context/auth-context";
 import { outletApi } from "@/api/endpoints/outlet";
 
 const outletLoginSchema = z.object({
-  loginCode: z.string().length(6, "Login code must be exactly 6 characters").regex(/^[A-Za-z0-9]{6}$/, "Login code must be 6 alphanumeric characters"),
+  loginCode: z.string().min(4, "Login code must be at least 4 characters").max(10, "Login code is too long").regex(/^[A-Za-z0-9]+$/, "Login code must be alphanumeric"),
 });
 
 type OutletLoginForm = z.infer<typeof outletLoginSchema>;
@@ -29,32 +29,31 @@ function OutletLoginPage() {
     },
   });
 
-  const onSubmit = async (_data: OutletLoginForm) => {
-    // TODO: Enable outlet login API when ready
-    // setIsLoading(true);
-    // setError(null);
-    //
-    // try {
-    //   const response = await outletApi.login(data.loginCode);
-    //   const { outlet, accessToken, refreshToken } = response.data;
-    //
-    //   login(
-    //     { accessToken, refreshToken },
-    //     {
-    //       id: outlet.id,
-    //       uuid: outlet.uuid,
-    //       name: outlet.name,
-    //       email: "",
-    //       role: "outlet",
-    //       outletId: outlet.id,
-    //       outletName: outlet.name,
-    //       outletCode: outlet.code,
-    //     }
-    //   );
-    // } catch {
-    //   setError("Invalid login code. Please try again.");
-    //   setIsLoading(false);
-    // }
+  const onSubmit = async (data: OutletLoginForm) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await outletApi.login(data.loginCode);
+      const { outlet, accessToken, refreshToken } = response.data;
+
+      login(
+        { accessToken, refreshToken },
+        {
+          id: outlet.id,
+          uuid: outlet.uuid,
+          name: outlet.name,
+          email: "",
+          role: "outlet",
+          outletId: outlet.id,
+          outletName: outlet.name,
+          outletCode: outlet.code,
+        }
+      );
+    } catch {
+      setError("Invalid login code. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,7 +84,7 @@ function OutletLoginPage() {
                 <Input
                   id="loginCode"
                   type="password"
-                  maxLength={6}
+                  maxLength={10}
                   placeholder="Enter 6-digit code"
                   {...form.register("loginCode")}
                 />

@@ -159,6 +159,9 @@ export const outletApi = {
   getShipments: (params?: { status?: string }) =>
     apiClient.get<OutletShipment[]>(`${BASE}/outlet/shipments`, { params }),
 
+  receiveShipment: (uuid: string, items: { itemUuid: string; receivedQuantity: number }[]) =>
+    apiClient.put(`${BASE}/shipments/${uuid}/receive`, { items }),
+
   // POS / Sales
   getPosInventory: () =>
     apiClient.get<POSInventoryProduct[]>(`${BASE}/outlet/pos/inventory`),

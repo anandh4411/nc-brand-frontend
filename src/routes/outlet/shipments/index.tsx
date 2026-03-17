@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColumnDef } from "@tanstack/react-table";
 import {
@@ -16,10 +18,20 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Truck, Package, Clock, CheckCircle2, Eye } from "lucide-react";
-import { useOutletShipments } from "@/api/hooks/outlet";
+import {
+  Truck,
+  Package,
+  Clock,
+  CheckCircle2,
+  Eye,
+  PackageCheck,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useOutletShipments, useReceiveShipment } from "@/api/hooks/outlet";
 import type { OutletShipment } from "@/api/endpoints/outlet";
 import { format } from "date-fns";
 
@@ -56,13 +68,20 @@ const formatDate = (dateStr?: string | null) => {
 function OutletShipments() {
   const tableState = useTableState<OutletShipment>({ debounceMs: 300 });
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
   const [selectedShipment, setSelectedShipment] =
     useState<OutletShipment | null>(null);
 
+  // Receive quantities state: { itemUuid: receivedQuantity }
+  const [receiveQuantities, setReceiveQuantities] = useState<
+    Record<string, number>
+  >({});
+
   const { data: shipmentsResponse, isLoading } = useOutletShipments();
+  const receiveShipment = useReceiveShipment();
 
   const shipments = (
-    Array.isArray((shipmentsResponse?.data as any))
+    Array.isArray(shipmentsResponse?.data as any)
       ? (shipmentsResponse?.data as any)
       : (shipmentsResponse?.data as any)?.shipments || []
   ) as OutletShipment[];
@@ -72,6 +91,51 @@ function OutletShipments() {
     setViewDialogOpen(true);
   };
 
+  const handleReceiveOpen = (shipment: OutletShipment) => {
+    setSelectedShipment(shipment);
+    // Pre-fill with remaining quantities (expected - already received)
+    const quantities: Record<string, number> = {};
+    shipment.items.forEach((item) => {
+      const remaining = item.quantity - (item.receivedQuantity || 0);
+      quantities[item.uuid] = remaining > 0 ? remaining : 0;
+    });
+    setReceiveQuantities(quantities);
+    setReceiveDialogOpen(true);
+  };
+
+  const handleReceiveSubmit = () => {
+    if (!selectedShipment) return;
+
+    const items = selectedShipment.items
+      .filter((item) => (receiveQuantities[item.uuid] || 0) > 0)
+      .map((item) => ({
+        itemUuid: item.uuid,
+        receivedQuantity: receiveQuantities[item.uuid] || 0,
+      }));
+
+    if (items.length === 0) {
+      toast.error("Please enter received quantities");
+      return;
+    }
+
+    receiveShipment.mutate(
+      { uuid: selectedShipment.uuid, items },
+      {
+        onSuccess: () => {
+          toast.success("Shipment received successfully. Stock updated.");
+          setReceiveDialogOpen(false);
+          setSelectedShipment(null);
+        },
+        onError: () => {
+          toast.error("Failed to receive shipment");
+        },
+      }
+    );
+  };
+
+  const canReceive = (status: string) =>
+    status === "SHIPPED" || status === "PARTIALLY_RECEIVED";
+
   const columns = useMemo(
     (): ColumnDef<OutletShipment>[] => [
       {
@@ -79,7 +143,9 @@ function OutletShipments() {
         accessorFn: (row) => `SHP-${String(row.id).padStart(4, "0")}`,
         header: "Shipment #",
         cell: ({ getValue }) => (
-          <span className="font-mono font-medium">{getValue() as string}</span>
+          <span className="font-mono font-medium">
+            {getValue() as string}
+          </span>
         ),
       },
 
@@ -125,6 +191,12 @@ function OutletShipments() {
 
       actionsColumn<OutletShipment>([
         { label: "View Details", icon: Eye, onClick: handleView },
+        {
+          label: "Receive Shipment",
+          icon: PackageCheck,
+          onClick: handleReceiveOpen,
+          condition: (row) => canReceive(row.status),
+        },
       ]),
     ],
     []
@@ -269,7 +341,7 @@ function OutletShipments() {
 
       {/* View Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="sm:max-w-2xl">
           {selectedShipment && (
             <>
               <DialogHeader>
@@ -330,7 +402,7 @@ function OutletShipments() {
                             &times;{item.quantity}
                           </Badge>
                           {item.receivedQuantity > 0 && (
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-green-600 mt-1">
                               Received: {item.receivedQuantity}
                             </p>
                           )}
@@ -339,7 +411,124 @@ function OutletShipments() {
                     ))}
                   </div>
                 </div>
+
+                {/* Receive button in view dialog */}
+                {canReceive(selectedShipment.status) && (
+                  <>
+                    <Separator />
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setViewDialogOpen(false);
+                        handleReceiveOpen(selectedShipment);
+                      }}
+                    >
+                      <PackageCheck className="h-4 w-4 mr-2" />
+                      Receive Shipment
+                    </Button>
+                  </>
+                )}
               </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Shipment Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          {selectedShipment && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <PackageCheck className="h-5 w-5" />
+                  Receive Shipment — SHP-
+                  {String(selectedShipment.id).padStart(4, "0")}
+                </DialogTitle>
+                <DialogDescription>
+                  Enter the quantity received for each item. Stock will be
+                  updated automatically.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto">
+                {selectedShipment.items.map((item) => {
+                  const remaining =
+                    item.quantity - (item.receivedQuantity || 0);
+                  const alreadyFullyReceived = remaining <= 0;
+
+                  return (
+                    <div
+                      key={item.uuid}
+                      className={`flex items-center gap-4 p-3 border rounded-lg ${alreadyFullyReceived ? "opacity-50" : ""}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          {item.productName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.sku} &bull; {item.colorName} / {item.size}
+                        </p>
+                        <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                          <span>Expected: {item.quantity}</span>
+                          {item.receivedQuantity > 0 && (
+                            <span className="text-green-600">
+                              Already received: {item.receivedQuantity}
+                            </span>
+                          )}
+                          <span>Remaining: {Math.max(0, remaining)}</span>
+                        </div>
+                      </div>
+                      <div className="w-24 shrink-0">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={remaining}
+                          disabled={alreadyFullyReceived}
+                          value={receiveQuantities[item.uuid] ?? 0}
+                          onChange={(e) => {
+                            const val = Math.min(
+                              Math.max(0, parseInt(e.target.value) || 0),
+                              remaining
+                            );
+                            setReceiveQuantities((prev) => ({
+                              ...prev,
+                              [item.uuid]: val,
+                            }));
+                          }}
+                          className="text-center"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setReceiveDialogOpen(false)}
+                  disabled={receiveShipment.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleReceiveSubmit}
+                  disabled={receiveShipment.isPending}
+                >
+                  {receiveShipment.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <PackageCheck className="h-4 w-4 mr-2" />
+                      Confirm Receipt
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
             </>
           )}
         </DialogContent>

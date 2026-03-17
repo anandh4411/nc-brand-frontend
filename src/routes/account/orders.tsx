@@ -128,7 +128,7 @@ function buildMockTracking(order: any): ShipmentTracking | null {
   const state = addr.state || "";
   const loc = state ? `${city}, ${state}` : city;
 
-  const events = [
+  const events: ShipmentTracking["events"] = [
     {
       id: "1",
       status: "order_placed" as const,

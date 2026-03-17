@@ -154,39 +154,47 @@ export function actionsColumn<TData>(
     className?: string;
     icon?: LucideIcon;
     disabled?: (row: TData) => boolean;
+    condition?: (row: TData) => boolean;
   }>
 ): ColumnDef<TData> {
   return {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {actions.map((action, index) => {
-            const Icon = action.icon;
-            const isDisabled = action.disabled?.(row.original) ?? false;
-            return (
-              <DropdownMenuItem
-                key={index}
-                onClick={() => action.onClick(row.original)}
-                className={action.className}
-                disabled={isDisabled}
-              >
-                {Icon && <Icon className="mr-2 h-4 w-4" />}
-                {action.label}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const visibleActions = actions.filter(
+        (action) => !action.condition || action.condition(row.original)
+      );
+      if (visibleActions.length === 0) return null;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {visibleActions.map((action, index) => {
+              const Icon = action.icon;
+              const isDisabled = action.disabled?.(row.original) ?? false;
+              return (
+                <DropdownMenuItem
+                  key={index}
+                  onClick={() => action.onClick(row.original)}
+                  className={action.className}
+                  disabled={isDisabled}
+                >
+                  {Icon && <Icon className="mr-2 h-4 w-4" />}
+                  {action.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   };
 }

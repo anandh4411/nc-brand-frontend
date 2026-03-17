@@ -23,6 +23,7 @@ import { StorefrontLayout } from "@/layouts/storefront";
 import {
   useCart,
   useAddresses,
+  useCreateAddress,
   useCheckout,
   useCreateRazorpayOrder,
   useVerifyPayment,
@@ -54,19 +55,23 @@ function CheckoutPage() {
   // API hooks
   const { data: cartData, isLoading: cartLoading } = useCart();
   const { data: addressesData, isLoading: addressesLoading } = useAddresses();
+  const createAddress = useCreateAddress();
   const checkout = useCheckout();
   const createRazorpayOrder = useCreateRazorpayOrder();
   const verifyPayment = useVerifyPayment();
 
   const cart = cartData?.data as any;
   const items = cart?.items || [];
-  const addresses = addressesData?.data || [] as any[];
+  const addresses = (addressesData?.data || []) as any[];
 
   const [step, setStep] = useState<CheckoutStep>("address");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("cod");
   const [selectedAddressUuid, setSelectedAddressUuid] = useState<string>("");
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+
+  // True when the user is filling in a new address (either explicitly or because no saved addresses exist)
+  const isUsingNewAddress = useNewAddress || addresses.length === 0;
   const [addressForm, setAddressForm] = useState<AddressForm>({
     name: "",
     phone: "",
@@ -112,64 +117,45 @@ function CheckoutPage() {
   };
 
   const getSelectedAddress = () => {
-    if (useNewAddress) {
+    if (isUsingNewAddress) {
       return addressForm;
     }
     return addresses.find((a: any) => a.uuid === selectedAddressUuid);
   };
 
   const handleContinueToPayment = () => {
-    if (useNewAddress && !validateNewAddress()) {
+    if (isUsingNewAddress && !validateNewAddress()) {
       toast.error("Please fill in all required address fields");
       return;
     }
-    if (!useNewAddress && !selectedAddressUuid) {
+    if (!isUsingNewAddress && !selectedAddressUuid) {
       toast.error("Please select an address");
       return;
     }
     setStep("payment");
   };
 
-  const handlePlaceOrder = async () => {
+  const placeOrderWithUuid = (addressUuid: string) => {
     const address = getSelectedAddress();
-    if (!address) {
-      toast.error("Please select an address");
-      return;
-    }
-
-    const shippingAddress = useNewAddress
-      ? addressForm
-      : {
-          name: address.name,
-          phone: address.phone,
-          addressLine1: address.addressLine1,
-          addressLine2: address.addressLine2 || "",
-          city: address.city,
-          state: address.state,
-          pincode: address.pincode,
-        };
 
     if (paymentMethod === "cod") {
-      // Place COD order
       checkout.mutate(
         {
-          shippingAddressUuid: useNewAddress ? undefined : selectedAddressUuid,
-          shippingAddress: useNewAddress ? shippingAddress : undefined,
+          shippingAddressUuid: addressUuid,
           paymentMethod: "cod",
         } as any,
         {
-          onSuccess: (data) => {
+          onSuccess: (data: any) => {
             setOrderNumber(data.data.orderNumber);
             setStep("confirmation");
           },
         }
       );
     } else {
-      // Create Razorpay order - pass cart total as orderUuid temporarily (will be fixed when order is created first)
       createRazorpayOrder.mutate(
         String(cart?.total || 0),
         {
-          onSuccess: (data) => {
+          onSuccess: (data: any) => {
             const razorpayOrderId = data.data.razorpayOrderId;
             const options = {
               key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -179,7 +165,6 @@ function CheckoutPage() {
               description: "Order Payment",
               order_id: razorpayOrderId,
               handler: async (response: any) => {
-                // Verify payment
                 verifyPayment.mutate(
                   {
                     razorpayOrderId: response.razorpay_order_id,
@@ -187,7 +172,7 @@ function CheckoutPage() {
                     razorpaySignature: response.razorpay_signature,
                   } as any,
                   {
-                    onSuccess: (verifyData) => {
+                    onSuccess: (verifyData: any) => {
                       setOrderNumber(verifyData.data.orderNumber);
                       setStep("confirmation");
                     },
@@ -195,20 +180,39 @@ function CheckoutPage() {
                 );
               },
               prefill: {
-                name: user?.name || shippingAddress.name,
+                name: user?.name || address?.name,
                 email: user?.email || "",
-                contact: shippingAddress.phone,
+                contact: address?.phone,
               },
-              theme: {
-                color: "#0f172a",
-              },
+              theme: { color: "#0f172a" },
             };
-
             const razorpay = new window.Razorpay(options);
             razorpay.open();
           },
         }
       );
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (isUsingNewAddress) {
+      if (!validateNewAddress()) {
+        toast.error("Please fill in all required address fields");
+        return;
+      }
+      // Save the new address first, then checkout with the returned UUID
+      createAddress.mutate(addressForm, {
+        onSuccess: (data: any) => {
+          const newUuid = data.data.uuid;
+          placeOrderWithUuid(newUuid);
+        },
+      });
+    } else {
+      if (!selectedAddressUuid) {
+        toast.error("Please select an address");
+        return;
+      }
+      placeOrderWithUuid(selectedAddressUuid);
     }
   };
 
@@ -521,9 +525,9 @@ function CheckoutPage() {
                     className="w-full"
                     size="lg"
                     onClick={handlePlaceOrder}
-                    disabled={checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending}
+                    disabled={createAddress.isPending || checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending}
                   >
-                    {(checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending) ? (
+                    {(createAddress.isPending || checkout.isPending || createRazorpayOrder.isPending || verifyPayment.isPending) ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Processing...

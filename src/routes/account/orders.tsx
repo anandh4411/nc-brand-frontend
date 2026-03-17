@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { useCustomerOrders, useCustomerOrder, useCancelOrder } from "@/api/hooks/shop";
 import { useAuth } from "@/context/auth-context";
+import { OrderTracking, type ShipmentTracking } from "@/components/elements/order-tracking";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -113,6 +114,107 @@ const formatDateLong = (dateStr: string) => {
   });
 };
 
+// ---------- Mock Tracking Data (will be replaced with real API) ----------
+function buildMockTracking(order: any): ShipmentTracking | null {
+  const status = order.status?.toLowerCase();
+  if (status === "pending" || status === "cancelled") return null;
+
+  const baseDate = new Date(order.createdAt);
+  const addHours = (hours: number) =>
+    new Date(baseDate.getTime() + hours * 60 * 60 * 1000).toISOString();
+
+  const addr = order.shippingAddress || {};
+  const city = addr.city || "Destination";
+  const state = addr.state || "";
+  const loc = state ? `${city}, ${state}` : city;
+
+  const events = [
+    {
+      id: "1",
+      status: "order_placed" as const,
+      title: "Order Placed",
+      description: `Order ${order.orderNumber} placed successfully`,
+      location: "Online",
+      timestamp: baseDate.toISOString(),
+    },
+    {
+      id: "2",
+      status: "confirmed" as const,
+      title: "Order Confirmed",
+      description: "Seller has confirmed your order",
+      location: "Tirupur, Tamil Nadu",
+      timestamp: addHours(2),
+    },
+  ];
+
+  if (["processing", "shipped", "delivered"].includes(status)) {
+    events.push({
+      id: "3",
+      status: "picked_up" as const,
+      title: "Picked Up by Courier",
+      description: "Shipment picked up from seller warehouse",
+      location: "Tirupur Hub, Tamil Nadu",
+      timestamp: addHours(24),
+    });
+  }
+
+  if (["shipped", "delivered"].includes(status)) {
+    events.push(
+      {
+        id: "4",
+        status: "in_transit" as const,
+        title: "In Transit",
+        description: "Package departed from sorting facility",
+        location: "Tirupur Sort Center, Tamil Nadu",
+        timestamp: addHours(30),
+      },
+      {
+        id: "5",
+        status: "in_transit" as const,
+        title: "Arrived at Hub",
+        description: `Package arrived at ${city} hub`,
+        location: loc,
+        timestamp: addHours(54),
+      },
+      {
+        id: "6",
+        status: "out_for_delivery" as const,
+        title: "Out for Delivery",
+        description: "Package is out for delivery",
+        location: loc,
+        timestamp: addHours(72),
+      }
+    );
+  }
+
+  if (status === "delivered") {
+    events.push({
+      id: "7",
+      status: "delivered" as const,
+      title: "Delivered",
+      description: `Delivered to ${addr.name || "recipient"}`,
+      location: loc,
+      timestamp: order.deliveredAt || addHours(78),
+    });
+  }
+
+  const statusMap: Record<string, ShipmentTracking["currentStatus"]> = {
+    confirmed: "confirmed",
+    processing: "picked_up",
+    shipped: "out_for_delivery",
+    delivered: "delivered",
+  };
+
+  return {
+    awbNumber: order.trackingId || "2934 8721 0045",
+    courier: "delhivery",
+    courierName: order.deliveryProvider || "Delhivery",
+    estimatedDelivery: status !== "delivered" ? addHours(96) : undefined,
+    currentStatus: statusMap[status] || "confirmed",
+    events: [...events].reverse(),
+  };
+}
+
 // ---------- Order Detail Modal (fetches full order) ----------
 function OrderDetailModal({
   open,
@@ -130,7 +232,7 @@ function OrderDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         {isLoading || !order ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -155,67 +257,26 @@ function OrderDetailModal({
             </DialogHeader>
 
             <div className="space-y-5 mt-4">
-              {/* Status Banner */}
-              <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                {getStatusIcon(order.status)}
-                <div>
-                  <p className="font-medium capitalize">
-                    Order {order.status}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {getStatusMessage(order.status)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Tracking Info */}
-              {order.trackingId && (
-                <div className="p-4 border rounded-lg space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4 text-blue-600" />
-                    <h3 className="font-semibold text-sm">
-                      Shipping & Tracking
-                    </h3>
+              {/* Tracking UI or Status Banner */}
+              {(() => {
+                const tracking = buildMockTracking(order);
+                if (tracking) {
+                  return <OrderTracking tracking={tracking} />;
+                }
+                return (
+                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                    {getStatusIcon(order.status)}
+                    <div>
+                      <p className="font-medium capitalize">
+                        Order {order.status}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {getStatusMessage(order.status)}
+                      </p>
+                    </div>
                   </div>
-                  {order.deliveryProvider && (
-                    <p className="text-sm text-muted-foreground">
-                      Delivery by{" "}
-                      <span className="font-medium text-foreground">
-                        {order.deliveryProvider}
-                      </span>
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      Tracking ID:
-                    </span>
-                    <span className="font-mono font-medium text-sm">
-                      {order.trackingId}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
-                      onClick={() => {
-                        navigator.clipboard.writeText(order.trackingId);
-                        toast.success("Tracking ID copied!");
-                      }}
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  {order.trackingUrl && (
-                    <a
-                      href={order.trackingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      Track your shipment{" "}
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                </div>
-              )}
+                );
+              })()}
 
               {/* Items */}
               <div>

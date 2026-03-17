@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Download, Package, Truck, CheckCircle, Clock } from "lucide-react";
 import { useCustomerOrder } from "@/api/hooks/shop";
+import { OrderTracking, type ShipmentTracking } from "@/components/elements/order-tracking";
 
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
@@ -105,6 +106,108 @@ function OrderDetailPage() {
   const items = order.items || [];
   const shippingAddress = order.shippingAddress || {};
 
+  // Mock tracking data — will be replaced with real API data later
+  const mockTracking: ShipmentTracking | null = (() => {
+    const status = order.status?.toLowerCase();
+    if (status === "pending" || status === "cancelled") return null;
+
+    const baseDate = new Date(order.createdAt);
+    const addHours = (date: Date, hours: number) =>
+      new Date(date.getTime() + hours * 60 * 60 * 1000).toISOString();
+
+    const events = [
+      {
+        id: "1",
+        status: "order_placed" as const,
+        title: "Order Placed",
+        description: `Order ${order.orderNumber} has been placed successfully`,
+        location: shippingAddress.city || "Online",
+        timestamp: baseDate.toISOString(),
+      },
+      {
+        id: "2",
+        status: "confirmed" as const,
+        title: "Order Confirmed",
+        description: "Seller has confirmed your order",
+        location: "Tirupur, Tamil Nadu",
+        timestamp: addHours(baseDate, 2),
+      },
+    ];
+
+    if (["processing", "shipped", "delivered"].includes(status)) {
+      events.push({
+        id: "3",
+        status: "picked_up" as const,
+        title: "Picked Up by Courier",
+        description: "Shipment picked up from seller warehouse",
+        location: "Tirupur Hub, Tamil Nadu",
+        timestamp: addHours(baseDate, 24),
+      });
+    }
+
+    if (["shipped", "delivered"].includes(status)) {
+      events.push(
+        {
+          id: "4",
+          status: "in_transit" as const,
+          title: "In Transit",
+          description: "Package departed from Tirupur sorting facility",
+          location: "Tirupur Sort Center, Tamil Nadu",
+          timestamp: addHours(baseDate, 30),
+        },
+        {
+          id: "5",
+          status: "in_transit" as const,
+          title: "Arrived at Hub",
+          description: `Package arrived at ${shippingAddress.city || "destination"} hub`,
+          location: shippingAddress.city
+            ? `${shippingAddress.city}, ${shippingAddress.state}`
+            : "Destination Hub",
+          timestamp: addHours(baseDate, 54),
+        },
+        {
+          id: "6",
+          status: "out_for_delivery" as const,
+          title: "Out for Delivery",
+          description: "Package is out for delivery with courier executive",
+          location: shippingAddress.city
+            ? `${shippingAddress.city}, ${shippingAddress.state}`
+            : "Local Hub",
+          timestamp: addHours(baseDate, 72),
+        }
+      );
+    }
+
+    if (status === "delivered") {
+      events.push({
+        id: "7",
+        status: "delivered" as const,
+        title: "Delivered",
+        description: `Package delivered to ${shippingAddress.name || "recipient"}`,
+        location: shippingAddress.city
+          ? `${shippingAddress.city}, ${shippingAddress.state}`
+          : "Delivery Address",
+        timestamp: order.deliveredAt || addHours(baseDate, 78),
+      });
+    }
+
+    const statusMap: Record<string, ShipmentTracking["currentStatus"]> = {
+      confirmed: "confirmed",
+      processing: "picked_up",
+      shipped: "out_for_delivery",
+      delivered: "delivered",
+    };
+
+    return {
+      awbNumber: order.trackingNumber || "2934 8721 0045",
+      courier: "delhivery" as const,
+      courierName: "Delhivery",
+      estimatedDelivery: status !== "delivered" ? addHours(baseDate, 96) : undefined,
+      currentStatus: statusMap[status] || "confirmed",
+      events: [...events].reverse(),
+    };
+  })();
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -136,31 +239,31 @@ function OrderDetailPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Order Items */}
         <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {getStatusIcon(order.status)}
-                Order Status: <span className="capitalize">{order.status}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {order.status?.toLowerCase() === "delivered" && order.deliveredAt && (
-                <p className="text-sm text-muted-foreground">
-                  Delivered on {formatDate(order.deliveredAt)}
-                </p>
-              )}
-              {order.status?.toLowerCase() === "shipped" && order.trackingNumber && (
-                <p className="text-sm text-muted-foreground">
-                  Tracking Number: <span className="font-mono">{order.trackingNumber}</span>
-                </p>
-              )}
-              {(order.status?.toLowerCase() === "processing" || order.status?.toLowerCase() === "pending") && (
-                <p className="text-sm text-muted-foreground">
-                  Your order is being prepared for shipment
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Tracking UI — shown when order has been confirmed/shipped */}
+          {mockTracking ? (
+            <OrderTracking tracking={mockTracking} />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {getStatusIcon(order.status)}
+                  Order Status: <span className="capitalize">{order.status}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {order.status?.toLowerCase() === "pending" && (
+                  <p className="text-sm text-muted-foreground">
+                    Your order is being prepared for shipment
+                  </p>
+                )}
+                {order.status?.toLowerCase() === "cancelled" && (
+                  <p className="text-sm text-muted-foreground">
+                    This order has been cancelled
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

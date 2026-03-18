@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/context/auth-context";
-import { useCart } from "@/context/cart-context";
-import { useWishlist } from "@/context/wishlist-context";
 import { useTheme } from "@/context/theme-context";
+import { useCart as useCartApi, useWishlist as useWishlistApi } from "@/api/hooks/shop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,9 +44,14 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
   children,
 }) => {
   const { isAuthenticated, user, isCustomer, logout } = useAuth();
-  const { itemCount: cartItemCount } = useCart();
-  const { itemCount: wishlistCount } = useWishlist();
   const { theme, setTheme } = useTheme();
+
+  // Use API hooks for cart/wishlist counts (same source of truth as pages)
+  const { data: cartData } = useCartApi();
+  const { data: wishlistData } = useWishlistApi();
+  const cart = cartData?.data as any;
+  const cartItemCount = (cart?.items || []).reduce((acc: number, item: any) => acc + (item.quantity || 1), 0);
+  const wishlistCount = ((wishlistData?.data || []) as any[]).length;
   const router = useRouter();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;

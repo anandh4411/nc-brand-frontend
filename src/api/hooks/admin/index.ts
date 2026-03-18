@@ -4,7 +4,7 @@
  * React Query hooks for all admin operations
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { adminApi } from '../../endpoints/admin';
 import { queryKeys } from '../../query-keys';
 import type {
@@ -169,6 +169,7 @@ export function useAdminProductGroups(params?: { page?: number; pageSize?: numbe
   return useQuery({
     queryKey: adminKeys.productGroups(params),
     queryFn: () => adminApi.getProductGroups(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -318,6 +319,7 @@ export function useAdminInventory(params?: { page?: number; pageSize?: number; l
   return useQuery({
     queryKey: adminKeys.inventory(params),
     queryFn: () => adminApi.getInventory(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -353,6 +355,7 @@ export function useAdminOutlets(params?: { page?: number; pageSize?: number; sea
   return useQuery({
     queryKey: adminKeys.outlets(params),
     queryFn: () => adminApi.getOutlets(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -437,6 +440,7 @@ export function useAdminShipments(params?: { page?: number; pageSize?: number; o
   return useQuery({
     queryKey: adminKeys.shipments(params),
     queryFn: () => adminApi.getShipments(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -480,6 +484,7 @@ export function useAdminOrders(params?: { page?: number; pageSize?: number; stat
   return useQuery({
     queryKey: adminKeys.orders(params),
     queryFn: () => adminApi.getOrders(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -554,10 +559,11 @@ export function useDeleteBanner() {
 // COUPON HOOKS
 // ============================================================================
 
-export function useAdminCoupons(params?: { page?: number; pageSize?: number }) {
+export function useAdminCoupons(params?: { page?: number; pageSize?: number; search?: string }) {
   return useQuery({
     queryKey: adminKeys.coupons(params),
     queryFn: () => adminApi.getCoupons(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -600,6 +606,7 @@ export function useAdminCustomers(params?: { page?: number; pageSize?: number; s
   return useQuery({
     queryKey: adminKeys.customers(params),
     queryFn: () => adminApi.getCustomers(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -611,6 +618,7 @@ export function useAdminReviews(params?: { page?: number; pageSize?: number; app
   return useQuery({
     queryKey: adminKeys.reviews(params),
     queryFn: () => adminApi.getReviews(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -642,6 +650,7 @@ export function useAdminOffers(params?: { page?: number; pageSize?: number; sear
   return useQuery({
     queryKey: adminKeys.offers(params),
     queryFn: () => adminApi.getOffers(params),
+    placeholderData: keepPreviousData,
   });
 }
 

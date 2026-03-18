@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import {
   RowData,
   VisibilityState,
@@ -42,6 +42,18 @@ export function DataTable<TData>({
   // Local UI state only - server state managed by parent
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [searchValue, setSearchValue] = useState("");
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedSearch = useCallback(
+    (value: string, onSearch?: (v: string) => void) => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        onSearch?.(value);
+      }, 400);
+    },
+    []
+  );
 
   // Memoize stable callbacks to prevent infinite loops
   const stableCallbacks = useMemo(
@@ -148,7 +160,15 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-4">
-      <TableToolbar table={table} config={config} onSearch={stableCallbacks.onSearch} />
+      <TableToolbar
+        table={table}
+        config={config}
+        searchValue={searchValue}
+        onSearchChange={(value) => {
+          setSearchValue(value);
+          debouncedSearch(value, stableCallbacks.onSearch);
+        }}
+      />
 
       <div className="rounded-md border">
         <Table>

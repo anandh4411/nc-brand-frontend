@@ -143,6 +143,11 @@ export default function Categories() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No categories found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
           filters: [
             {
               columnKey: "isActive",

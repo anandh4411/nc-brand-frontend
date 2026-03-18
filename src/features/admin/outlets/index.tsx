@@ -26,12 +26,20 @@ export default function Outlets() {
   // Table state
   const tableState = useTableState<Outlet>({ debounceMs: 300 });
 
+  // Build query params from table state
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    search: tableState.state.search || undefined,
+  }), [tableState.state.pagination, tableState.state.search]);
+
   // API Hooks
-  const { data: outletsResponse, isLoading } = useAdminOutlets();
+  const { data: outletsResponse, isLoading } = useAdminOutlets(queryParams);
   const deleteOutlet = useDeleteOutlet();
 
   // Get data from API
   const outletList = ((outletsResponse?.data as any)?.outlets || outletsResponse?.data || []) as Outlet[];
+  const pagination = (outletsResponse?.data as any)?.meta || (outletsResponse?.data as any)?.pagination;
 
   // Action handlers
   const handleView = (outlet: Outlet) => {
@@ -131,6 +139,12 @@ export default function Outlets() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No outlets found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "isActive",

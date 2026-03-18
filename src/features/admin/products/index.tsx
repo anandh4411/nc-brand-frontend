@@ -27,8 +27,15 @@ export default function Products() {
   // Table state
   const tableState = useTableState<ProductGroup>({ debounceMs: 300 });
 
+  // Build query params from table state
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    search: tableState.state.search || undefined,
+  }), [tableState.state.pagination, tableState.state.search]);
+
   // API Hooks
-  const { data: productsResponse, isLoading: productsLoading } = useAdminProductGroups();
+  const { data: productsResponse, isLoading: productsLoading } = useAdminProductGroups(queryParams);
   const { data: categoriesResponse, isLoading: categoriesLoading } = useAdminCategories();
   const deleteProduct = useDeleteProductGroup();
 
@@ -47,6 +54,7 @@ export default function Products() {
       images: p.images || [],
     })),
   }));
+  const pagination = (productsResponse?.data as any)?.meta;
   const categories = ((categoriesResponse?.data as any)?.categories || categoriesResponse?.data || []) as Category[];
 
   const isLoading = productsLoading || categoriesLoading;
@@ -152,6 +160,12 @@ export default function Products() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No products found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "isActive",

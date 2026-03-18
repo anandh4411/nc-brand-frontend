@@ -18,16 +18,25 @@ export default function Offers() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
 
-  const { data: offersResponse, isLoading } = useAdminOffers();
   const deleteOffer = useDeleteOffer();
 
   const tableState = useTableState<Offer>({ debounceMs: 300 });
+
+  // Build query params from table state
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    search: tableState.state.search || undefined,
+  }), [tableState.state.pagination, tableState.state.search]);
+
+  const { data: offersResponse, isLoading } = useAdminOffers(queryParams);
 
   const offerList = (
     (offersResponse?.data as any)?.offers ||
     offersResponse?.data ||
     []
   ) as Offer[];
+  const pagination = (offersResponse?.data as any)?.pagination;
 
   const handleView = (offer: Offer) => {
     setSelectedOffer(offer);
@@ -116,6 +125,12 @@ export default function Offers() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No offers found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "isActive",

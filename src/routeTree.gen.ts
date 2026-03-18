@@ -34,6 +34,7 @@ import { Route as ShopAboutRouteImport } from './routes/shop/about'
 import { Route as CustomerVerifyEmailRouteImport } from './routes/customer/verify-email'
 import { Route as CustomerSignUpRouteImport } from './routes/customer/sign-up'
 import { Route as CustomerSignInRouteImport } from './routes/customer/sign-in'
+import { Route as CustomerForgotPasswordRouteImport } from './routes/customer/forgot-password'
 import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
 import { Route as AccountWishlistRouteImport } from './routes/account/wishlist'
 import { Route as AccountSettingsRouteImport } from './routes/account/settings'
@@ -198,6 +199,11 @@ const CustomerSignUpRoute = CustomerSignUpRouteImport.update({
 const CustomerSignInRoute = CustomerSignInRouteImport.update({
   id: '/customer/sign-in',
   path: '/customer/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerForgotPasswordRoute = CustomerForgotPasswordRouteImport.update({
+  id: '/customer/forgot-password',
+  path: '/customer/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSignInRoute = AdminSignInRouteImport.update({
@@ -441,6 +447,7 @@ export interface FileRoutesByFullPath {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/forgot-password': typeof CustomerForgotPasswordRoute
   '/customer/sign-in': typeof CustomerSignInRoute
   '/customer/sign-up': typeof CustomerSignUpRoute
   '/customer/verify-email': typeof CustomerVerifyEmailRoute
@@ -500,6 +507,7 @@ export interface FileRoutesByTo {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/forgot-password': typeof CustomerForgotPasswordRoute
   '/customer/sign-in': typeof CustomerSignInRoute
   '/customer/sign-up': typeof CustomerSignUpRoute
   '/customer/verify-email': typeof CustomerVerifyEmailRoute
@@ -566,6 +574,7 @@ export interface FileRoutesById {
   '/account/settings': typeof AccountSettingsRoute
   '/account/wishlist': typeof AccountWishlistRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/customer/forgot-password': typeof CustomerForgotPasswordRoute
   '/customer/sign-in': typeof CustomerSignInRoute
   '/customer/sign-up': typeof CustomerSignUpRoute
   '/customer/verify-email': typeof CustomerVerifyEmailRoute
@@ -633,6 +642,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/forgot-password'
     | '/customer/sign-in'
     | '/customer/sign-up'
     | '/customer/verify-email'
@@ -692,6 +702,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/forgot-password'
     | '/customer/sign-in'
     | '/customer/sign-up'
     | '/customer/verify-email'
@@ -757,6 +768,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/account/wishlist'
     | '/admin/sign-in'
+    | '/customer/forgot-password'
     | '/customer/sign-in'
     | '/customer/sign-up'
     | '/customer/verify-email'
@@ -817,6 +829,7 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  CustomerForgotPasswordRoute: typeof CustomerForgotPasswordRoute
   CustomerSignInRoute: typeof CustomerSignInRoute
   CustomerSignUpRoute: typeof CustomerSignUpRoute
   CustomerVerifyEmailRoute: typeof CustomerVerifyEmailRoute
@@ -983,6 +996,13 @@ declare module '@tanstack/react-router' {
       path: '/customer/sign-in'
       fullPath: '/customer/sign-in'
       preLoaderRoute: typeof CustomerSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/forgot-password': {
+      id: '/customer/forgot-password'
+      path: '/customer/forgot-password'
+      fullPath: '/customer/forgot-password'
+      preLoaderRoute: typeof CustomerForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/sign-in': {
@@ -1439,6 +1459,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  CustomerForgotPasswordRoute: CustomerForgotPasswordRoute,
   CustomerSignInRoute: CustomerSignInRoute,
   CustomerSignUpRoute: CustomerSignUpRoute,
   CustomerVerifyEmailRoute: CustomerVerifyEmailRoute,

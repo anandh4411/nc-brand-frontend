@@ -90,6 +90,14 @@ export default function CustomerSignIn() {
                   </FormItem>
                 )}
               />
+              <div className="text-right">
+                <Link
+                  to="/customer/forgot-password"
+                  className="text-muted-foreground hover:text-primary text-sm underline underline-offset-4"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <Button type="submit" className="mt-2" disabled={isPending}>
                 {isPending ? "Logging in..." : "Login"}
               </Button>

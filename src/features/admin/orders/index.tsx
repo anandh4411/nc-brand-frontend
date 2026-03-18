@@ -42,11 +42,22 @@ export default function Orders() {
   // Table state
   const tableState = useTableState<Order>({ debounceMs: 300 });
 
+  // Build query params from table state
+  const statusFilter = tableState.state.filters.find(f => f.id === "status")?.value as string[] | undefined;
+
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    search: tableState.state.search || undefined,
+    status: statusFilter?.[0],
+  }), [tableState.state.pagination, tableState.state.search, statusFilter]);
+
   // API Hook
-  const { data: ordersResponse, isLoading } = useAdminOrders();
+  const { data: ordersResponse, isLoading } = useAdminOrders(queryParams);
 
   // Get orders from API
   const orderList = ((ordersResponse?.data as any)?.orders || ordersResponse?.data || []) as Order[];
+  const pagination = (ordersResponse?.data as any)?.meta || (ordersResponse?.data as any)?.pagination;
 
   // Stats
   const totalRevenue = orderList
@@ -154,6 +165,12 @@ export default function Orders() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No orders found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "status",

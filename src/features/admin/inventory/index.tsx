@@ -23,12 +23,20 @@ export default function Inventory() {
   // Table state
   const tableState = useTableState<InventoryItem>({ debounceMs: 300 });
 
+  // Build query params from table state
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    lowStock: showLowStockOnly || undefined,
+  }), [tableState.state.pagination, showLowStockOnly]);
+
   // API Hooks
-  const { data: inventoryResponse, isLoading } = useAdminInventory({ lowStock: showLowStockOnly || undefined });
+  const { data: inventoryResponse, isLoading } = useAdminInventory(queryParams);
   const { data: lowStockResponse } = useLowStockItems(100);
 
   // Get data from API
   const inventoryList = ((inventoryResponse?.data as any)?.inventories || inventoryResponse?.data || []) as InventoryItem[];
+  const pagination = (inventoryResponse?.data as any)?.meta || (inventoryResponse?.data as any)?.pagination;
   const lowStockAlerts = (lowStockResponse?.data || []) as any[];
 
   // Action handlers
@@ -125,6 +133,12 @@ export default function Inventory() {
           emptyStateMessage: showLowStockOnly
             ? "No low stock items found."
             : "No inventory items found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
         }}
         callbacks={{
           onSearch: tableState.updateSearch,

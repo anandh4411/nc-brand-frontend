@@ -45,6 +45,7 @@ interface Props {
 
 // Size variant schema
 const sizeVariantSchema = z.object({
+  uuid: z.string().optional(),
   size: z.string().min(1, "Size is required"),
   sku: z.string().optional(),
   priceAdjustment: z.number().default(0),
@@ -52,6 +53,7 @@ const sizeVariantSchema = z.object({
 
 // Color variant schema
 const colorVariantSchema = z.object({
+  uuid: z.string().optional(),
   colorCode: z.string().min(1, "Color code is required"),
   colorName: z.string().min(1, "Color name is required"),
   sizes: z.array(sizeVariantSchema).min(1, "At least one size is required"),
@@ -148,7 +150,9 @@ export function ProductFormModal({
 
       files.forEach((pf, fileIndex) => {
         // First image of each variant is primary (if variant has no existing images)
-        const existingCount = product?.colorVariants?.[colorIndex]?.images?.length ?? 0;
+        const colorUuid = form.getValues(`colorVariants.${colorIndex}.uuid`);
+        const existingColor = product?.colorVariants?.find((cv) => cv.uuid === colorUuid);
+        const existingCount = existingColor?.images?.length ?? 0;
         const isPrimary = existingCount === 0 && fileIndex === 0;
 
         uploads.push(
@@ -202,9 +206,11 @@ export function ProductFormModal({
           isFeatured: product.isFeatured,
           isActive: product.isActive,
           colorVariants: (product.colorVariants || []).map((cv) => ({
+            uuid: cv.uuid,
             colorCode: cv.colorCode,
             colorName: cv.colorName,
             sizes: (cv.sizeVariants || []).map((sv) => ({
+              uuid: sv.uuid,
               size: sv.size,
               sku: sv.sku || "",
               priceAdjustment: sv.priceAdjustment,
@@ -240,9 +246,11 @@ export function ProductFormModal({
       isFeatured: values.isFeatured,
       isActive: values.isActive,
       colorVariants: values.colorVariants.map((cv) => ({
+        uuid: cv.uuid || undefined,
         colorCode: cv.colorCode,
         colorName: cv.colorName,
         sizeVariants: cv.sizes.map((s) => ({
+          uuid: s.uuid || undefined,
           size: s.size,
           sku: s.sku || undefined,
           priceAdjustment: s.priceAdjustment,
@@ -278,19 +286,22 @@ export function ProductFormModal({
       }
     } else if (product) {
       try {
-        await updateProductGroup.mutateAsync({ uuid: product.uuid, data: apiData as any });
-        // Upload any new pending images for existing variants
-        if (hasPendingImages && product.colorVariants) {
+        const result = await updateProductGroup.mutateAsync({ uuid: product.uuid, data: apiData as any });
+        // Upload pending images using RESPONSE data (has UUIDs for newly created colors)
+        const updatedProducts = (result.data as any)?.products || (result.data as any)?.colorVariants;
+        if (hasPendingImages && updatedProducts?.length) {
           setIsUploadingImages(true);
           try {
-            await uploadPendingImages(product.colorVariants);
+            await uploadPendingImages(updatedProducts);
+            toast.success("Product updated with images");
           } catch {
-            toast.error("Some images failed to upload");
+            toast.success("Product updated, but some images failed to upload");
           } finally {
             setIsUploadingImages(false);
           }
+        } else {
+          toast.success("Product updated successfully");
         }
-        toast.success("Product updated successfully");
         cleanupPendingPreviews();
         form.reset();
         onOpenChange(false);
@@ -591,10 +602,14 @@ export function ProductFormModal({
                           )}
                         </div>
 
-                        {/* Image Upload */}
+                        {/* Image Upload - match by UUID instead of index */}
                         <ImageUploadArea
                           existingImages={
-                            mode === "edit" ? product?.colorVariants?.[colorIndex]?.images : undefined
+                            mode === "edit"
+                              ? product?.colorVariants?.find(
+                                  (cv) => cv.uuid === form.getValues(`colorVariants.${colorIndex}.uuid`)
+                                )?.images
+                              : undefined
                           }
                           pendingFiles={pendingImageFiles.get(colorIndex) || []}
                           onFilesAdd={(files) => handleFilesAdd(colorIndex, files)}

@@ -9,13 +9,15 @@ import { DataTableConfig } from "../types";
 interface TableToolbarProps<TData> {
   table: Table<TData>;
   config: DataTableConfig;
-  onSearch?: (value: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }
 
 export function TableToolbar<TData>({
   table,
   config,
-  onSearch,
+  searchValue,
+  onSearchChange,
 }: TableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -32,14 +34,10 @@ export function TableToolbar<TData>({
           {hasSearch && (
             <SearchInput
               placeholder={searchConfig.placeholder}
-              value={
-                (table
-                  .getColumn(searchConfig.columnKey)
-                  ?.getFilterValue() as string) ?? ""
-              }
+              value={searchValue}
               onChange={(value) => {
+                onSearchChange(value);
                 table.getColumn(searchConfig.columnKey)?.setFilterValue(value);
-                onSearch?.(value);
               }}
             />
           )}
@@ -77,7 +75,10 @@ export function TableToolbar<TData>({
           {isFiltered && (
             <ActionButton
               variant="ghost"
-              onClick={() => table.resetColumnFilters()}
+              onClick={() => {
+                table.resetColumnFilters();
+                onSearchChange("");
+              }}
               className="h-8 px-2 lg:px-3"
             >
               Reset

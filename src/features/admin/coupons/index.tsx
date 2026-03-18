@@ -18,16 +18,25 @@ export default function Coupons() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
-  const { data: couponsResponse, isLoading } = useAdminCoupons();
   const deleteCoupon = useDeleteCoupon();
 
   const tableState = useTableState<Coupon>({ debounceMs: 300 });
+
+  // Build query params from table state
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    search: tableState.state.search || undefined,
+  }), [tableState.state.pagination, tableState.state.search]);
+
+  const { data: couponsResponse, isLoading } = useAdminCoupons(queryParams);
 
   const couponList = (
     (couponsResponse?.data as any)?.coupons ||
     couponsResponse?.data ||
     []
   ) as Coupon[];
+  const pagination = (couponsResponse?.data as any)?.meta;
 
   const handleView = (coupon: Coupon) => {
     setSelectedCoupon(coupon);
@@ -116,6 +125,12 @@ export default function Coupons() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No coupons found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "isActive",

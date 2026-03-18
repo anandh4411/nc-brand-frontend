@@ -30,12 +30,22 @@ export default function Shipments() {
   // Table state
   const tableState = useTableState<Shipment>({ debounceMs: 300 });
 
+  // Build query params from table state
+  const statusFilter = tableState.state.filters.find(f => f.id === "status")?.value as string[] | undefined;
+
+  const queryParams = useMemo(() => ({
+    page: tableState.state.pagination.pageIndex + 1,
+    pageSize: tableState.state.pagination.pageSize,
+    status: statusFilter?.[0],
+  }), [tableState.state.pagination, statusFilter]);
+
   // API Hooks
-  const { data: shipmentsResponse, isLoading } = useAdminShipments();
+  const { data: shipmentsResponse, isLoading } = useAdminShipments(queryParams);
   const updateStatus = useUpdateShipmentStatus();
 
   // Get data from API
   const shipmentList = ((shipmentsResponse?.data as any)?.shipments || shipmentsResponse?.data || []) as Shipment[];
+  const pagination = (shipmentsResponse?.data as any)?.meta || (shipmentsResponse?.data as any)?.pagination;
 
   // Action handlers
   const handleView = (shipment: Shipment) => {
@@ -188,6 +198,12 @@ export default function Shipments() {
           },
           viewOptions: { enabled: true },
           emptyStateMessage: "No shipments found.",
+          state: {
+            sorting: tableState.state.sorting,
+            columnFilters: tableState.state.filters,
+            pagination: tableState.state.pagination,
+          },
+          pageCount: pagination?.totalPages ?? -1,
           filters: [
             {
               columnKey: "status",

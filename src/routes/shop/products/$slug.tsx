@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,7 @@ import { useAuth } from "@/context/auth-context";
 
 function ProductDetailPage() {
   const { slug } = useParams({ from: "/shop/products/$slug" });
+  const navigate = useNavigate();
   const { isAuthenticated, isCustomer } = useAuth();
 
   // Fetch product
@@ -178,6 +179,10 @@ function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated || !isCustomer) {
+      navigate({ to: "/customer/sign-in" } as any);
+      return;
+    }
     if (!selectedVariant) {
       toast.error("Please select a size");
       return;

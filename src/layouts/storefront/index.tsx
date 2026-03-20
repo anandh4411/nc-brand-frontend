@@ -205,26 +205,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                         </span>
                       )}
                     </Link>
-                    <Link
-                      to="/shop/wishlist"
-                      className={cn(
-                        "flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                        isActivePath("/shop/wishlist")
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="flex items-center gap-3">
-                        <Heart className="h-4 w-4" />
-                        Wishlist
-                      </span>
-                      {wishlistCount > 0 && (
-                        <span className="h-5 min-w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center px-1.5">
-                          {wishlistCount}
-                        </span>
-                      )}
-                    </Link>
+                    {/* Wishlist disabled - has bugs */}
                   </div>
                 </div>
 
@@ -368,20 +349,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
               {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </Button>
 
-            {/* Wishlist */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => handleNavigate("/shop/wishlist")}
-            >
-              <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                  {wishlistCount}
-                </span>
-              )}
-            </Button>
+            {/* Wishlist disabled - has bugs */}
 
             {/* Cart */}
             <Button
@@ -412,10 +380,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                       <User className="h-4 w-4 mr-2" />
                       My Account
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleNavigate("/shop/wishlist")}>
-                      <Heart className="h-4 w-4 mr-2" />
-                      Wishlist
-                    </DropdownMenuItem>
+                    {/* Wishlist disabled - has bugs */}
                     <DropdownMenuItem onClick={() => handleNavigate("/account/orders")}>
                       <Package className="h-4 w-4 mr-2" />
                       Order History
@@ -547,11 +512,7 @@ export const StorefrontLayout: React.FC<StorefrontLayoutProps> = ({
                     Order History
                   </Link>
                 </li>
-                <li>
-                  <Link to="/shop/wishlist" className="hover:text-foreground">
-                    Wishlist
-                  </Link>
-                </li>
+                {/* Wishlist disabled - has bugs */}
               </ul>
             </div>
 

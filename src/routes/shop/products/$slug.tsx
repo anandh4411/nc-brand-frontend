@@ -533,23 +533,7 @@ function ProductDetailPage() {
               )}
               {selectedVariant && (selectedVariant.stockQuantity ?? selectedVariant.stock ?? 0) === 0 ? "Out of Stock" : "Add to Cart"}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleWishlistClick}
-              disabled={addToWishlist.isPending || removeFromWishlist.isPending}
-            >
-              {addToWishlist.isPending || removeFromWishlist.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Heart
-                  className={cn(
-                    "h-5 w-5",
-                    inWishlist && "fill-red-500 text-red-500"
-                  )}
-                />
-              )}
-            </Button>
+            {/* Wishlist disabled - has bugs */}
           </div>
 
           {/* Features */}

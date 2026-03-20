@@ -77,7 +77,7 @@ export const accountNavItems: SidebarItem[] = [
   { label: "Dashboard", path: "/account", icon: Home },
   { label: "Orders", path: "/account/orders", icon: ShoppingCart },
   { label: "Addresses", path: "/account/addresses", icon: MapPin },
-  { label: "Wishlist", path: "/account/wishlist", icon: Heart },
+  // { label: "Wishlist", path: "/account/wishlist", icon: Heart }, // Wishlist disabled - has bugs
 ];
 
 export const accountFooterItems: SidebarItem[] = [
@@ -97,7 +97,7 @@ export const shopNavItems: SidebarItem[] = [
 
 export const shopFooterItems: SidebarItem[] = [
   { label: "Cart", path: "/shop/cart", icon: ShoppingCart },
-  { label: "Wishlist", path: "/shop/wishlist", icon: Heart },
+  // { label: "Wishlist", path: "/shop/wishlist", icon: Heart }, // Wishlist disabled - has bugs
   { label: "My Account", path: "/account", icon: User },
 ];
 

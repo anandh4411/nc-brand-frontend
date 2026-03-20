@@ -153,7 +153,7 @@ function ProductDetailPage() {
   const variants = selectedColor?.variants || [];
   const selectedVariant = variants[selectedVariantIndex];
   const images = selectedColor?.images || [];
-  const currentImage = images[currentImageIndex] || product.primaryImage || "/placeholder-product.jpg";
+  const currentImage = images[currentImageIndex] || product.primaryImage || "/placeholder.svg";
 
   const finalPrice = product.basePrice + (selectedVariant?.priceAdjustment || 0);
 

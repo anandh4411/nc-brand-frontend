@@ -61,6 +61,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
           />
 
           {/* Badges - Top Left */}

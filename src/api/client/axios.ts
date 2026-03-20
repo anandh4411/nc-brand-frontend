@@ -58,6 +58,13 @@ class ApiClient {
           return Promise.reject(this.handleError(error));
         }
 
+        // Handle 403 errors (forbidden) - force logout
+        if (error.response?.status === 403) {
+          TokenManager.clearTokens();
+          this.handleAuthFailure();
+          return Promise.reject(this.handleError(error));
+        }
+
         // Handle 401 errors (token expired/invalid)
         if (error.response?.status === 401 && !originalRequest._retry) {
           // If already refreshing, queue this request

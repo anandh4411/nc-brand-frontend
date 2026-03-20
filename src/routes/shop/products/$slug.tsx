@@ -331,6 +331,7 @@ function ProductDetailPage() {
               src={typeof currentImage === 'string' ? currentImage : currentImage.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
             {/* Zoom Lens */}
             {isZooming && (

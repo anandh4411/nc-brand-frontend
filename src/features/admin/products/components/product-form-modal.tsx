@@ -91,6 +91,7 @@ export function ProductFormModal({
   const [pendingImageFiles, setPendingImageFiles] = useState<Map<number, PendingFile[]>>(new Map());
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [deletingImageIds, setDeletingImageIds] = useState<Set<string>>(new Set());
+  const [deletedImageIds, setDeletedImageIds] = useState<Set<string>>(new Set());
 
   const defaultColorVariant = {
     colorCode: "#000000",
@@ -122,6 +123,7 @@ export function ProductFormModal({
     setDeletingImageIds((prev) => new Set(prev).add(imageUuid));
     try {
       await deleteImage.mutateAsync(imageUuid);
+      setDeletedImageIds((prev) => new Set(prev).add(imageUuid));
       toast.success("Image deleted");
     } catch {
       toast.error("Failed to delete image");
@@ -194,6 +196,7 @@ export function ProductFormModal({
   useEffect(() => {
     if (open) {
       cleanupPendingPreviews();
+      setDeletedImageIds(new Set());
       if (product && mode === "edit") {
         form.reset({
           name: product.name,
@@ -608,7 +611,7 @@ export function ProductFormModal({
                             mode === "edit"
                               ? product?.colorVariants?.find(
                                   (cv) => cv.uuid === form.getValues(`colorVariants.${colorIndex}.uuid`)
-                                )?.images
+                                )?.images?.filter((img) => !deletedImageIds.has(img.uuid))
                               : undefined
                           }
                           pendingFiles={pendingImageFiles.get(colorIndex) || []}

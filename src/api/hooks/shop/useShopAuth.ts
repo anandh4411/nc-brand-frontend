@@ -111,6 +111,19 @@ export const useChangePassword = () => {
   });
 };
 
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: (email: string) => shopApi.forgotPassword(email),
+  });
+};
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: (data: { email: string; otp: string; newPassword: string }) =>
+      shopApi.resetPassword(data),
+  });
+};
+
 export const useDeleteAccount = () => {
   const { logout } = useAuth();
   const queryClient = useQueryClient();

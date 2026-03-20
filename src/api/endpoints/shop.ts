@@ -118,6 +118,20 @@ export const shopApi = {
     apiClient.post(`${BASE}/auth/change-password`, data),
 
   /**
+   * Forgot Password (send OTP to email)
+   * POST /v1/shop/auth/forgot-password
+   */
+  forgotPassword: (email: string) =>
+    apiClient.post(`${BASE}/auth/forgot-password`, { email }),
+
+  /**
+   * Reset Password (verify OTP and set new password)
+   * POST /v1/shop/auth/reset-password
+   */
+  resetPassword: (data: { email: string; otp: string; newPassword: string }) =>
+    apiClient.post(`${BASE}/auth/reset-password`, data),
+
+  /**
    * Delete Account (soft delete)
    * DELETE /v1/shop/auth/me
    */

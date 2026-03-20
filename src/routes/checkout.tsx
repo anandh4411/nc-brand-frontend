@@ -17,6 +17,8 @@ import {
   Wallet,
   Banknote,
   Loader2,
+  QrCode,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { StorefrontLayout } from "@/layouts/storefront";
@@ -518,6 +520,39 @@ function CheckoutPage() {
                         </div>
                       </div>
                       <Badge variant="secondary">Coming Soon</Badge>
+                    </div>
+                  </div>
+
+                  {/* QR Code Payment */}
+                  <div className="border rounded-lg p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="h-5 w-5" />
+                      <p className="font-medium">Pay via QR Code</p>
+                    </div>
+                    <div className="flex justify-center">
+                      <img
+                        src="/qrcode.JPG"
+                        alt="Payment QR Code"
+                        className="w-52 h-52 object-contain rounded-lg border"
+                      />
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground">How to pay:</p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        <li>Scan the QR code using any UPI app</li>
+                        <li>Complete the payment of <span className="font-semibold text-foreground">{formatPrice(total)}</span></li>
+                        <li>Take a screenshot of the payment confirmation</li>
+                        <li>Send the screenshot to our WhatsApp number below</li>
+                      </ol>
+                      <a
+                        href="https://wa.me/917034531113"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-2 text-green-600 hover:text-green-700 font-medium"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        +91 70345 31113
+                      </a>
                     </div>
                   </div>
 

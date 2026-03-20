@@ -3,7 +3,7 @@ import { Heart, Star, Palette, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useWishlist } from "@/context/wishlist-context";
+// import { useWishlist } from "@/context/wishlist-context"; // Wishlist disabled - has bugs
 
 // API-compatible product type
 export interface ProductCardData {
@@ -34,8 +34,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const { toggleWishlist, isInWishlist } = useWishlist();
-  const inWishlist = product.id ? isInWishlist(product.id) : false;
+  // Wishlist disabled - has bugs
+  // const { toggleWishlist, isInWishlist } = useWishlist();
+  // const inWishlist = product.id ? isInWishlist(product.id) : false;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -77,28 +78,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             )}
           </div>
 
-          {/* Wishlist - Top Right */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white shadow-sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (product.id) {
-                toggleWishlist({
-                  productGroupId: product.id,
-                  slug: product.slug,
-                  name: product.name,
-                  basePrice: product.basePrice,
-                  imageUrl: product.primaryImage || undefined,
-                  categoryName: product.categoryName || "Product",
-                });
-              }
-            }}
-          >
-            <Heart className={cn("h-3.5 w-3.5", inWishlist ? "fill-red-500 text-red-500" : "text-gray-600")} />
-          </Button>
+          {/* Wishlist disabled - has bugs */}
 
           {/* Color swatches - Bottom Left of image */}
           {colors.length > 0 && (

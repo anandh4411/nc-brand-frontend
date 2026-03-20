@@ -3,16 +3,15 @@ import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, MapPin, Star, Heart, User, Package } from "lucide-react";
-import { useCustomerOrders, useWishlist, useAddresses } from "@/api/hooks/shop";
+import { useCustomerOrders, useAddresses } from "@/api/hooks/shop";
 
 function AccountDashboard() {
   const { user } = useAuth();
   const { data: ordersData, isLoading: ordersLoading } = useCustomerOrders();
-  const { data: wishlistData, isLoading: wishlistLoading } = useWishlist();
+  // const { data: wishlistData, isLoading: wishlistLoading } = useWishlist(); // Wishlist disabled - has bugs
   const { data: addressesData, isLoading: addressesLoading } = useAddresses();
 
   const orders = (ordersData?.data || []) as any[];
-  const wishlistItems = (wishlistData?.data || []) as any[];
   const addresses = (addressesData?.data || []) as any[];
 
   const recentOrders = orders.slice(0, 3);
@@ -51,21 +50,7 @@ function AccountDashboard() {
             </div>
           </div>
         </div>
-        <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-full bg-primary/10 p-3">
-              <Heart className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              {wishlistLoading ? (
-                <Skeleton className="h-8 w-12" />
-              ) : (
-                <div className="text-2xl font-bold">{wishlistItems.length}</div>
-              )}
-              <div className="text-sm text-muted-foreground">Wishlist Items</div>
-            </div>
-          </div>
-        </div>
+        {/* Wishlist stat card disabled - has bugs */}
         <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center gap-4">
             <div className="rounded-full bg-primary/10 p-3">

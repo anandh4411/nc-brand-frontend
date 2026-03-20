@@ -153,7 +153,7 @@ function ProductDetailPage() {
   const variants = selectedColor?.variants || [];
   const selectedVariant = variants[selectedVariantIndex];
   const images = selectedColor?.images || [];
-  const currentImage = images[currentImageIndex] || product.primaryImage || "/placeholder-product.jpg";
+  const currentImage = images[currentImageIndex] || product.primaryImage || "/placeholder.svg";
 
   const finalPrice = product.basePrice + (selectedVariant?.priceAdjustment || 0);
 
@@ -405,33 +405,7 @@ function ProductDetailPage() {
             </div>
           )}
 
-          {/* Rating */}
-          {(product.averageRating || reviewStats?.averageRating) && (
-            <button
-              onClick={scrollToReviews}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={cn(
-                      "h-4 w-4",
-                      i < Math.floor(product.averageRating || reviewStats?.averageRating || 0)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    )}
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-medium">
-                {(product.averageRating || reviewStats?.averageRating || 0).toFixed(1)}
-              </span>
-              <span className="text-sm text-muted-foreground underline">
-                ({product.reviewCount || reviewStats?.totalReviews || 0} reviews)
-              </span>
-            </button>
-          )}
+          {/* Rating & Reviews disabled - has bugs */}
 
           {/* Price */}
           <div className="flex items-center gap-3">
@@ -533,23 +507,7 @@ function ProductDetailPage() {
               )}
               {selectedVariant && (selectedVariant.stockQuantity ?? selectedVariant.stock ?? 0) === 0 ? "Out of Stock" : "Add to Cart"}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleWishlistClick}
-              disabled={addToWishlist.isPending || removeFromWishlist.isPending}
-            >
-              {addToWishlist.isPending || removeFromWishlist.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Heart
-                  className={cn(
-                    "h-5 w-5",
-                    inWishlist && "fill-red-500 text-red-500"
-                  )}
-                />
-              )}
-            </Button>
+            {/* Wishlist disabled - has bugs */}
           </div>
 
           {/* Features */}
@@ -577,9 +535,7 @@ function ProductDetailPage() {
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="care">Care Instructions</TabsTrigger>
-            <TabsTrigger value="reviews">
-              Reviews ({product.reviewCount || reviewStats?.totalReviews || 0})
-            </TabsTrigger>
+            {/* Reviews tab disabled - has bugs */}
           </TabsList>
           <TabsContent value="description" className="mt-4">
             <p className="text-muted-foreground leading-relaxed">
@@ -609,111 +565,7 @@ function ProductDetailPage() {
           <TabsContent value="care" className="mt-4">
             <p className="text-muted-foreground">{product.careInstructions || "No care instructions available."}</p>
           </TabsContent>
-          <TabsContent value="reviews" className="mt-4">
-            <div className="space-y-8">
-              {/* Rating Summary */}
-              <div className="grid md:grid-cols-[300px_1fr] gap-8">
-                {/* Overall Rating */}
-                <div className="text-center p-6 bg-muted rounded-lg">
-                  <div className="text-5xl font-bold mb-2">
-                    {(product.averageRating || reviewStats?.averageRating || 0).toFixed(1)}
-                  </div>
-                  <div className="flex justify-center mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          "h-5 w-5",
-                          i < Math.floor(product.averageRating || reviewStats?.averageRating || 0)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Based on {product.reviewCount || reviewStats?.totalReviews || 0} reviews
-                  </p>
-                  {isAuthenticated && isCustomer && (
-                    <Button onClick={() => setReviewModalOpen(true)}>
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Write a Review
-                    </Button>
-                  )}
-                </div>
-
-                {/* Rating Breakdown */}
-                <div className="space-y-3">
-                  {[5, 4, 3, 2, 1].map((star) => (
-                    <div key={star} className="flex items-center gap-3">
-                      <span className="text-sm w-12">{star} star</span>
-                      <Progress
-                        value={ratingBreakdown[star as keyof typeof ratingBreakdown] || 0}
-                        className="flex-1 h-2"
-                      />
-                      <span className="text-sm text-muted-foreground w-12">
-                        {ratingBreakdown[star as keyof typeof ratingBreakdown] || 0}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reviews List */}
-              <div className="space-y-6">
-                <h3 className="font-semibold">Customer Reviews</h3>
-                {reviews.length === 0 ? (
-                  <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
-                ) : (
-                  reviews.map((review: any) => (
-                    <div key={review.uuid} className="border-b pb-6 last:border-b-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback>
-                              {review.customerName?.split(" ").map((n: string) => n[0]).join("") || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{review.customerName || "Customer"}</span>
-                              {review.isVerifiedPurchase && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Verified Purchase
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={cn(
-                                      "h-3 w-3",
-                                      i < review.rating
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-gray-300"
-                                    )}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {formatReviewDate(review.createdAt)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <h4 className="font-medium mb-1">{review.title}</h4>
-                      <p className="text-muted-foreground text-sm mb-3">
-                        {review.comment}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </TabsContent>
+          {/* Reviews TabsContent disabled - has bugs */}
         </Tabs>
       </div>
 
@@ -725,83 +577,7 @@ function ProductDetailPage() {
         </div>
       )}
 
-      {/* Write Review Modal */}
-      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Write a Review</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Rating Selection */}
-            <div>
-              <Label className="mb-2 block">Your Rating</Label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setNewReview((prev) => ({ ...prev, rating: star }))}
-                    className="p-1 cursor-pointer"
-                  >
-                    <Star
-                      className={cn(
-                        "h-8 w-8 transition-colors",
-                        star <= newReview.rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300 hover:text-yellow-300"
-                      )}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Review Title */}
-            <div>
-              <Label htmlFor="review-title">Review Title</Label>
-              <Input
-                id="review-title"
-                placeholder="Summarize your experience"
-                value={newReview.title}
-                onChange={(e) =>
-                  setNewReview((prev) => ({ ...prev, title: e.target.value }))
-                }
-                className="mt-1.5"
-              />
-            </div>
-
-            {/* Review Comment */}
-            <div>
-              <Label htmlFor="review-comment">Your Review</Label>
-              <Textarea
-                id="review-comment"
-                placeholder="Share your experience with this product..."
-                rows={4}
-                value={newReview.comment}
-                onChange={(e) =>
-                  setNewReview((prev) => ({ ...prev, comment: e.target.value }))
-                }
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitReview} disabled={createReview.isPending}>
-              {createReview.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Review"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Write Review Modal disabled - has bugs */}
     </div>
   );
 }

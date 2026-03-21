@@ -27,6 +27,7 @@ export const sizeOptions = [
   { label: "L", value: "L" },
   { label: "XL", value: "XL" },
   { label: "XXL", value: "XXL" },
+  { label: "XXXL", value: "XXXL" },
   { label: "Standard", value: "Standard" },
   { label: "Free Size", value: "Free Size" },
 ];

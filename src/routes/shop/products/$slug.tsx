@@ -498,6 +498,17 @@ function ProductDetailPage() {
             </div>
           </div>
 
+          {/* Delivery Note / Pre-booking */}
+          {product.deliveryNote && (
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
+              <Truck className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-400">Delivery Note</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">{product.deliveryNote}</p>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-4">
             <Button

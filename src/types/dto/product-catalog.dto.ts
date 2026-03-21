@@ -165,6 +165,7 @@ export const ProductGroupSchema = z.object({
   categoryId: z.number(),
   category: CategorySchema.optional(),
   attributes: ProductAttributesSchema,
+  deliveryNote: z.string().nullable().optional(),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
   colorVariants: z.array(ProductSchema),

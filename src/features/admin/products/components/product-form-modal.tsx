@@ -68,6 +68,7 @@ const productFormSchema = z.object({
   fabricType: z.string().optional(),
   pattern: z.string().optional(),
   careInstructions: z.string().optional(),
+  deliveryNote: z.string().optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   colorVariants: z.array(colorVariantSchema).min(1, "At least one color variant is required"),
@@ -182,6 +183,7 @@ export function ProductFormModal({
       fabricType: "",
       pattern: "",
       careInstructions: "",
+      deliveryNote: "",
       isFeatured: false,
       isActive: true,
       colorVariants: [defaultColorVariant],
@@ -206,6 +208,7 @@ export function ProductFormModal({
           fabricType: product.attributes?.fabricType || "",
           pattern: product.attributes?.pattern || "",
           careInstructions: product.attributes?.careInstructions || "",
+          deliveryNote: product.deliveryNote || "",
           isFeatured: product.isFeatured,
           isActive: product.isActive,
           colorVariants: (product.colorVariants || []).map((cv) => ({
@@ -246,6 +249,7 @@ export function ProductFormModal({
       fabricType: values.fabricType,
       pattern: values.pattern,
       careInstructions: values.careInstructions,
+      deliveryNote: values.deliveryNote || null,
       isFeatured: values.isFeatured,
       isActive: values.isActive,
       colorVariants: values.colorVariants.map((cv) => ({
@@ -465,6 +469,20 @@ export function ProductFormModal({
                       <FormLabel>Care Instructions</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g. Dry clean only" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="deliveryNote"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Expected Delivery Note (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Pre-booking: Expected delivery in 14 days" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -411,7 +411,13 @@ function ProductDetailPage() {
               {product.offer.freeProductGroup && (
                 <p className="text-green-600 dark:text-green-400 text-xs mt-1 ml-6">
                   Get {product.offer.freeQuantity} free{" "}
-                  <span className="font-medium">{product.offer.freeProductGroup.name}</span> with this purchase!
+                  <Link
+                    to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
+                    className="font-medium underline hover:text-green-800 dark:hover:text-green-200 transition-colors"
+                  >
+                    {product.offer.freeProductGroup.name}
+                  </Link>{" "}
+                  with this purchase!
                 </p>
               )}
             </div>

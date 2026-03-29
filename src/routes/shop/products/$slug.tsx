@@ -415,7 +415,21 @@ function ProductDetailPage() {
 
           {/* Price */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold">{formatPrice(finalPrice)}</span>
+            {product.offerPrice && product.offerPrice < product.basePrice ? (
+              <>
+                <span className="text-3xl font-bold">
+                  {formatPrice(product.offerPrice + (selectedVariant?.priceAdjustment || 0))}
+                </span>
+                <span className="text-xl text-muted-foreground line-through">
+                  {formatPrice(finalPrice)}
+                </span>
+                <span className="text-sm text-green-600 font-semibold">
+                  {Math.round(((product.basePrice - product.offerPrice) / product.basePrice) * 100)}% off
+                </span>
+              </>
+            ) : (
+              <span className="text-3xl font-bold">{formatPrice(finalPrice)}</span>
+            )}
           </div>
 
           {/* Color Selection */}

@@ -64,6 +64,7 @@ const productFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
   basePrice: z.number().min(0, "Price must be positive"),
+  offerPrice: z.number().min(0, "Offer price must be positive").optional().nullable(),
   categoryId: z.number({ required_error: "Category is required" }),
   fabricType: z.string().optional(),
   pattern: z.string().optional(),
@@ -179,6 +180,7 @@ export function ProductFormModal({
       name: "",
       description: "",
       basePrice: 0,
+      offerPrice: null,
       categoryId: undefined,
       fabricType: "",
       pattern: "",
@@ -204,6 +206,7 @@ export function ProductFormModal({
           name: product.name,
           description: product.description,
           basePrice: product.basePrice,
+          offerPrice: product.offerPrice ?? null,
           categoryId: product.categoryId,
           fabricType: product.attributes?.fabricType || "",
           pattern: product.attributes?.pattern || "",
@@ -228,6 +231,7 @@ export function ProductFormModal({
           name: "",
           description: "",
           basePrice: 0,
+          offerPrice: null,
           categoryId: undefined,
           fabricType: "",
           pattern: "",
@@ -245,6 +249,7 @@ export function ProductFormModal({
       name: values.name,
       description: values.description,
       basePrice: values.basePrice,
+      offerPrice: values.offerPrice || null,
       categoryId: values.categoryId,
       fabricType: values.fabricType,
       pattern: values.pattern,
@@ -406,7 +411,7 @@ export function ProductFormModal({
                   )}
                 />
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="basePrice"
@@ -426,6 +431,28 @@ export function ProductFormModal({
                     )}
                   />
 
+                  <FormField
+                    control={form.control}
+                    name="offerPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Offer Price (₹) <span className="text-muted-foreground text-xs">(Optional)</span></FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder="Leave empty for no offer"
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="fabricType"
@@ -680,6 +707,7 @@ export function ProductFormModal({
               <ProductPreviewCard
                 name={watchedValues.name || ""}
                 basePrice={watchedValues.basePrice || 0}
+                offerPrice={watchedValues.offerPrice}
                 fabricType={watchedValues.fabricType}
                 pattern={watchedValues.pattern}
                 isFeatured={watchedValues.isFeatured}

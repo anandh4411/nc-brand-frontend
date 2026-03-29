@@ -82,10 +82,24 @@ export function ProductViewModal({ open, onOpenChange, product }: Props) {
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium">Base Price</p>
-                <p className="text-sm font-mono font-semibold">
-                  {formatPrice(product.basePrice)}
-                </p>
+                <p className="text-sm font-medium">Price</p>
+                {product.offerPrice && product.offerPrice < product.basePrice ? (
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-sm font-mono font-semibold">
+                      {formatPrice(product.offerPrice)}
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground line-through">
+                      {formatPrice(product.basePrice)}
+                    </p>
+                    <span className="text-xs text-green-600 font-medium">
+                      {Math.round(((product.basePrice - product.offerPrice) / product.basePrice) * 100)}% off
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm font-mono font-semibold">
+                    {formatPrice(product.basePrice)}
+                  </p>
+                )}
               </div>
             </div>
 

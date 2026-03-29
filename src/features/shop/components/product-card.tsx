@@ -12,6 +12,7 @@ export interface ProductCardData {
   slug: string;
   name: string;
   basePrice: number;
+  offerPrice?: number | null;
   categoryName?: string | null;
   primaryImage?: string | null;
   colorName?: string;
@@ -155,9 +156,23 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
           {/* Price */}
           <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-base font-bold text-foreground">
-              {formatPrice(product.basePrice)}
-            </span>
+            {product.offerPrice && product.offerPrice < product.basePrice ? (
+              <>
+                <span className="text-base font-bold text-foreground">
+                  {formatPrice(product.offerPrice)}
+                </span>
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatPrice(product.basePrice)}
+                </span>
+                <span className="text-[10px] text-green-600 font-semibold">
+                  {Math.round(((product.basePrice - product.offerPrice) / product.basePrice) * 100)}% off
+                </span>
+              </>
+            ) : (
+              <span className="text-base font-bold text-foreground">
+                {formatPrice(product.basePrice)}
+              </span>
+            )}
           </div>
 
           {/* Summary footer */}

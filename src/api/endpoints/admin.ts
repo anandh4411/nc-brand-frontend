@@ -407,26 +407,27 @@ export interface Offer {
   uuid: string;
   id?: number;
   name: string;
-  description?: string;
+  description?: string | null;
   type: string;
+  targetProductGroup: OfferProductGroup;
   buyQuantity: number;
-  getQuantity: number;
+  freeProductGroup: OfferProductGroup;
+  freeQuantity: number;
   startDate: string;
   endDate: string;
   isActive: boolean;
-  productGroups?: OfferProductGroup[];
 }
 
 export interface CreateOfferRequest {
   name: string;
   description?: string;
-  type?: string;
+  targetProductGroupUuid: string;
   buyQuantity: number;
-  getQuantity: number;
+  freeProductGroupUuid: string;
+  freeQuantity: number;
   startDate: string;
   endDate: string;
   isActive?: boolean;
-  productGroupUuids?: string[];
 }
 
 // ============================================================================
@@ -774,12 +775,6 @@ export const adminApi = {
 
   deleteOffer: (uuid: string) =>
     apiClient.delete(`${BASE}/offers/${uuid}`),
-
-  assignProductsToOffer: (uuid: string, productGroupUuids: string[]) =>
-    apiClient.post<Offer>(`${BASE}/offers/${uuid}/products`, { productGroupUuids }),
-
-  removeProductFromOffer: (offerUuid: string, productGroupUuid: string) =>
-    apiClient.delete(`${BASE}/offers/${offerUuid}/products/${productGroupUuid}`),
 
   // Customers
   getCustomers: (params?: { page?: number; pageSize?: number; search?: string }) =>

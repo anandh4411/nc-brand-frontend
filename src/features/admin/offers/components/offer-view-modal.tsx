@@ -1,4 +1,4 @@
-import { Tag, Calendar, Package } from "lucide-react";
+import { Tag, Calendar, Package, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -39,7 +39,7 @@ export function OfferViewModal({ open, onOpenChange, offer }: Props) {
             <div>
               <h3 className="font-semibold text-lg">{offer.name}</h3>
               <p className="text-sm text-muted-foreground">
-                Buy {offer.buyQuantity} Get {offer.getQuantity} Free
+                Buy {offer.buyQuantity} Get {offer.freeQuantity} Free
               </p>
             </div>
             <Badge variant={offer.isActive ? "success" : "secondary"}>
@@ -58,6 +58,38 @@ export function OfferViewModal({ open, onOpenChange, offer }: Props) {
               </div>
             </>
           )}
+
+          <Separator />
+
+          {/* Target & Free Products */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium">Offer Configuration</p>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg border p-3">
+              <div className="flex-1 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Customer Buys</p>
+                <Badge variant="outline" className="text-xs">
+                  {offer.targetProductGroup?.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1">
+                  x{offer.buyQuantity}
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="flex-1 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Gets Free</p>
+                <Badge variant="secondary" className="text-xs">
+                  {offer.freeProductGroup?.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1">
+                  x{offer.freeQuantity}
+                </p>
+              </div>
+            </div>
+          </div>
 
           <Separator />
 
@@ -81,27 +113,6 @@ export function OfferViewModal({ open, onOpenChange, offer }: Props) {
               </div>
             </div>
           </div>
-
-          {offer.productGroups && offer.productGroups.length > 0 && (
-            <>
-              <Separator />
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm font-medium">
-                    Assigned Products ({offer.productGroups.length})
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {offer.productGroups.map((pg) => (
-                    <Badge key={pg.uuid} variant="secondary">
-                      {pg.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </DialogContent>
     </Dialog>

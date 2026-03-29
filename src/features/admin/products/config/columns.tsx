@@ -74,8 +74,17 @@ export const createProductColumns = (
       <Badge variant="outline">{value?.name || "N/A"}</Badge>
     )),
 
-    customColumn<ProductGroup>("basePrice", "Base Price", (value) => (
-      <div className="font-mono font-medium">{formatPrice(value)}</div>
+    customColumn<ProductGroup>("basePrice", "Price", (value, row) => (
+      <div className="font-mono font-medium">
+        {row.offerPrice ? (
+          <div className="flex flex-col">
+            <span>{formatPrice(row.offerPrice)}</span>
+            <span className="text-xs text-muted-foreground line-through">{formatPrice(value)}</span>
+          </div>
+        ) : (
+          formatPrice(value)
+        )}
+      </div>
     )),
 
     {

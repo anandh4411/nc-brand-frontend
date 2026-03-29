@@ -12,6 +12,7 @@ interface ColorVariant {
 interface ProductPreviewCardProps {
   name: string;
   basePrice: number;
+  offerPrice?: number | null;
   fabricType?: string;
   pattern?: string;
   isFeatured?: boolean;
@@ -23,6 +24,7 @@ interface ProductPreviewCardProps {
 export function ProductPreviewCard({
   name,
   basePrice,
+  offerPrice,
   fabricType,
   pattern,
   isFeatured,
@@ -136,11 +138,25 @@ export function ProductPreviewCard({
 
           {/* Price */}
           <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-lg font-bold text-foreground">
-              {hasPrice ? `₹${basePrice.toLocaleString()}` : (
-                <span className="text-muted-foreground/50 italic">₹0</span>
-              )}
-            </span>
+            {offerPrice && offerPrice < basePrice ? (
+              <>
+                <span className="text-lg font-bold text-foreground">
+                  ₹{offerPrice.toLocaleString()}
+                </span>
+                <span className="text-sm text-muted-foreground line-through">
+                  ₹{basePrice.toLocaleString()}
+                </span>
+                <span className="text-xs text-green-600 font-medium">
+                  {Math.round(((basePrice - offerPrice) / basePrice) * 100)}% off
+                </span>
+              </>
+            ) : (
+              <span className="text-lg font-bold text-foreground">
+                {hasPrice ? `₹${basePrice.toLocaleString()}` : (
+                  <span className="text-muted-foreground/50 italic">₹0</span>
+                )}
+              </span>
+            )}
           </div>
 
           {/* Summary */}

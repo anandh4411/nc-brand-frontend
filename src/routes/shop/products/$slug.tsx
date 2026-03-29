@@ -406,8 +406,20 @@ function ProductDetailPage() {
             <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
               <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
                 <Tag className="h-4 w-4" />
-                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.getQuantity} Free`}
+                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
               </p>
+              {product.offer.freeProductGroup && (
+                <p className="text-green-600 dark:text-green-400 text-xs mt-1 ml-6">
+                  Get {product.offer.freeQuantity} free{" "}
+                  <Link
+                    to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
+                    className="font-medium underline hover:text-green-800 dark:hover:text-green-200 transition-colors"
+                  >
+                    {product.offer.freeProductGroup.name}
+                  </Link>{" "}
+                  with this purchase!
+                </p>
+              )}
             </div>
           )}
 
@@ -415,7 +427,21 @@ function ProductDetailPage() {
 
           {/* Price */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold">{formatPrice(finalPrice)}</span>
+            {product.offerPrice && product.offerPrice < product.basePrice ? (
+              <>
+                <span className="text-3xl font-bold">
+                  {formatPrice(product.offerPrice + (selectedVariant?.priceAdjustment || 0))}
+                </span>
+                <span className="text-xl text-muted-foreground line-through">
+                  {formatPrice(finalPrice)}
+                </span>
+                <span className="text-sm text-green-600 font-semibold">
+                  {Math.round(((product.basePrice - product.offerPrice) / product.basePrice) * 100)}% off
+                </span>
+              </>
+            ) : (
+              <span className="text-3xl font-bold">{formatPrice(finalPrice)}</span>
+            )}
           </div>
 
           {/* Color Selection */}

@@ -406,8 +406,14 @@ function ProductDetailPage() {
             <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
               <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
                 <Tag className="h-4 w-4" />
-                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.getQuantity} Free`}
+                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
               </p>
+              {product.offer.freeProductGroup && (
+                <p className="text-green-600 dark:text-green-400 text-xs mt-1 ml-6">
+                  Get {product.offer.freeQuantity} free{" "}
+                  <span className="font-medium">{product.offer.freeProductGroup.name}</span> with this purchase!
+                </p>
+              )}
             </div>
           )}
 

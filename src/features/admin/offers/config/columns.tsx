@@ -37,12 +37,16 @@ export const createOfferColumns = (
 
     customColumn<Offer>("buyQuantity", "Deal", (value, row) => (
       <span className="text-sm">
-        Buy {value} Get {row.getQuantity} Free
+        Buy {value} Get {row.freeQuantity} Free
       </span>
     )),
 
-    customColumn<Offer>("productGroups", "Products", (value) => (
-      <Badge variant="secondary">{value?.length ?? 0} products</Badge>
+    customColumn<Offer>("targetProductGroup", "Target Product", (value) => (
+      <Badge variant="outline">{value?.name || "N/A"}</Badge>
+    )),
+
+    customColumn<Offer>("freeProductGroup", "Free Product", (value) => (
+      <Badge variant="secondary">{value?.name || "N/A"}</Badge>
     )),
 
     customColumn<Offer>("startDate", "Date Range", (value, row) => (

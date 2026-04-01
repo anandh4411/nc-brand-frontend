@@ -348,13 +348,7 @@ function CartPage() {
                     <Truck className="h-3 w-3" />
                     Shipping
                   </span>
-                  <span>
-                    {shipping === 0 ? (
-                      <span className="text-green-600">Free</span>
-                    ) : (
-                      formatPrice(shipping)
-                    )}
-                  </span>
+                  <span className="text-muted-foreground text-xs">Charges may apply</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax (5% GST)</span>

@@ -572,7 +572,7 @@ function ProductDetailPage() {
           <div className="grid grid-cols-3 gap-4 pt-4 border-t">
             <div className="text-center">
               <Truck className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Free Shipping</p>
+              <p className="text-xs text-muted-foreground">Shipping charges may apply</p>
             </div>
             <div className="text-center">
               <Shield className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />

@@ -192,44 +192,50 @@ function CartPage() {
                           SKU: {item.sku}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={() => handleRemoveItem(item.variantUuid)}
-                        disabled={removeFromCart.isPending}
-                      >
-                        {removeFromCart.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      {!item.isFreeItem && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="shrink-0"
+                          onClick={() => handleRemoveItem(item.variantUuid)}
+                          disabled={removeFromCart.isPending}
+                        >
+                          {removeFromCart.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between mt-4">
                       {/* Quantity */}
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity - 1)}
-                          disabled={item.quantity <= 1 || updateCartItem.isPending}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity + 1)}
-                          disabled={updateCartItem.isPending}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      {item.isFreeItem ? (
+                        <span className="text-sm text-muted-foreground">Qty: {item.quantity}</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity - 1)}
+                            disabled={item.quantity <= 1 || updateCartItem.isPending}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleUpdateQuantity(item.variantUuid, item.quantity + 1)}
+                            disabled={updateCartItem.isPending}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
 
                       {/* Price */}
                       <div className="text-right">

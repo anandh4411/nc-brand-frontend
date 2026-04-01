@@ -401,26 +401,12 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Offer Banner */}
+          {/* Offer Note */}
           {product.offer && (
-            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
-              <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
-              </p>
-              {product.offer.freeProductGroup && (
-                <p className="text-green-600 dark:text-green-400 text-xs mt-1 ml-6">
-                  Get {product.offer.freeQuantity} free{" "}
-                  <Link
-                    to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
-                    className="font-medium underline hover:text-green-800 dark:hover:text-green-200 transition-colors"
-                  >
-                    {product.offer.freeProductGroup.name}
-                  </Link>{" "}
-                  with this purchase!
-                </p>
-              )}
-            </div>
+            <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
+            </p>
           )}
 
           {/* Rating & Reviews disabled - has bugs */}
@@ -523,6 +509,35 @@ function ProductDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Free Product Offer */}
+          {product.offer?.freeProductGroup && (
+            <Link
+              to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
+              className="group block"
+            >
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 hover:border-green-400 dark:hover:border-green-600 transition-colors">
+                <div className="w-14 h-14 rounded-md overflow-hidden bg-muted shrink-0">
+                  <img
+                    src={product.offer.freeProductGroup.primaryImage || "/placeholder.svg"}
+                    alt={product.offer.freeProductGroup.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-[10px] px-1.5 py-0">
+                    FREE
+                  </Badge>
+                  <p className="text-sm font-medium truncate group-hover:underline mt-0.5">
+                    {product.offer.freeProductGroup.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Buy {product.offer.buyQuantity}, get {product.offer.freeQuantity} free
+                  </p>
+                </div>
+              </div>
+            </Link>
+          )}
 
           {/* Delivery Note / Pre-booking */}
           {product.deliveryNote && (

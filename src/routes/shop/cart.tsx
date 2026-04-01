@@ -177,7 +177,14 @@ function CartPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between gap-2">
                       <div>
-                        <h3 className="font-medium line-clamp-2">{item.productName}</h3>
+                        <h3 className="font-medium line-clamp-2">
+                          {item.productName}
+                          {item.freeQuantity > 0 && (
+                            <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                              FREE
+                            </Badge>
+                          )}
+                        </h3>
                         <p className="text-sm text-muted-foreground mt-1">
                           {item.colorName} | {item.size}
                         </p>
@@ -226,10 +233,28 @@ function CartPage() {
 
                       {/* Price */}
                       <div className="text-right">
-                        <p className="font-semibold">{formatPrice(item.lineTotal)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatPrice(item.unitPrice)} each
-                        </p>
+                        {item.freeQuantity > 0 && item.paidQuantity === 0 ? (
+                          <>
+                            <p className="font-semibold text-green-600">{formatPrice(0)}</p>
+                            <p className="text-xs text-muted-foreground line-through">
+                              {formatPrice(item.unitPrice * item.quantity)}
+                            </p>
+                          </>
+                        ) : item.freeQuantity > 0 ? (
+                          <>
+                            <p className="font-semibold">{formatPrice(item.lineTotal)}</p>
+                            <p className="text-xs text-green-600">
+                              {item.freeQuantity} free, {item.paidQuantity} paid
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-semibold">{formatPrice(item.lineTotal)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatPrice(item.unitPrice)} each
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

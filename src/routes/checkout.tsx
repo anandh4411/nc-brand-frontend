@@ -595,12 +595,21 @@ function CheckoutPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-1">{item.productName}</p>
+                        <p className="text-sm font-medium line-clamp-1">
+                          {item.productName}
+                          {item.freeQuantity > 0 && (
+                            <span className="ml-1 text-xs text-green-600 font-semibold">FREE</span>
+                          )}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {item.colorName} | {item.size} × {item.quantity}
                         </p>
                         <p className="text-sm font-medium">
-                          {formatPrice(item.lineTotal)}
+                          {item.freeQuantity > 0 && item.paidQuantity === 0 ? (
+                            <span className="text-green-600">{formatPrice(0)}</span>
+                          ) : (
+                            formatPrice(item.lineTotal)
+                          )}
                         </p>
                       </div>
                     </div>

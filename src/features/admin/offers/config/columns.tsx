@@ -13,6 +13,34 @@ const formatDate = (dateString?: string) => {
   return format(new Date(dateString), "MMM dd, yyyy");
 };
 
+function ProductBadge({ name, color, size, variant }: {
+  name?: string;
+  color?: { colorName: string; colorCode: string } | null;
+  size?: { size: string } | null;
+  variant?: "outline" | "secondary";
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <Badge variant={variant || "outline"}>{name || "N/A"}</Badge>
+      {(color || size) && (
+        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+          {color && (
+            <>
+              <span
+                className="inline-block h-2 w-2 rounded-full border"
+                style={{ backgroundColor: color.colorCode }}
+              />
+              {color.colorName}
+            </>
+          )}
+          {color && size && " / "}
+          {size && size.size}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export const createOfferColumns = (
   onView: (offer: Offer) => void,
   onEdit: (offer: Offer) => void,
@@ -41,12 +69,22 @@ export const createOfferColumns = (
       </span>
     )),
 
-    customColumn<Offer>("targetProductGroup", "Target Product", (value) => (
-      <Badge variant="outline">{value?.name || "N/A"}</Badge>
+    customColumn<Offer>("targetProductGroup", "Target Product", (value, row) => (
+      <ProductBadge
+        name={value?.name}
+        color={row.targetProduct}
+        size={row.targetVariant}
+        variant="outline"
+      />
     )),
 
-    customColumn<Offer>("freeProductGroup", "Free Product", (value) => (
-      <Badge variant="secondary">{value?.name || "N/A"}</Badge>
+    customColumn<Offer>("freeProductGroup", "Free Product", (value, row) => (
+      <ProductBadge
+        name={value?.name}
+        color={row.freeProduct}
+        size={row.freeVariant}
+        variant="secondary"
+      />
     )),
 
     customColumn<Offer>("startDate", "Date Range", (value, row) => (

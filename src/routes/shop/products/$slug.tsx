@@ -158,6 +158,17 @@ function ProductDetailPage() {
 
   const finalPrice = product.basePrice + (selectedVariant?.priceAdjustment || 0);
 
+  // Check if offer matches the currently selected color/size
+  const offerMatchesSelection = (() => {
+    if (!product.offer) return false;
+    const offer = product.offer;
+    // If offer specifies a target color, selected color must match
+    if (offer.targetProduct && selectedColor?.uuid !== offer.targetProduct.uuid) return false;
+    // If offer specifies a target size, selected variant must match
+    if (offer.targetVariant && selectedVariant?.uuid !== offer.targetVariant.uuid) return false;
+    return true;
+  })();
+
   // Check if in wishlist
   const wishlistItems = wishlistData?.data || [];
   const inWishlist = selectedVariant
@@ -401,12 +412,19 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Offer Note */}
-          {product.offer && (
-            <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
-            </p>
+          {/* Offer Note — only when selected color/size matches the offer */}
+          {offerMatchesSelection && (
+            <div className="text-green-700 dark:text-green-300 text-sm">
+              <p className="font-semibold flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
+              </p>
+              {(product.offer.targetProduct || product.offer.targetVariant) && (
+                <p className="text-xs mt-0.5 ml-6 text-green-600 dark:text-green-400">
+                  Applicable for: {product.offer.targetProduct?.colorName}{product.offer.targetVariant ? ` / ${product.offer.targetVariant.size}` : ""}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Rating & Reviews disabled - has bugs */}
@@ -510,8 +528,8 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Free Product Offer */}
-          {product.offer?.freeProductGroup && (
+          {/* Free Product Offer — only when selected color/size matches the offer */}
+          {offerMatchesSelection && product.offer?.freeProductGroup && (
             <Link
               to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
               className="group block"
@@ -531,6 +549,21 @@ function ProductDetailPage() {
                   <p className="text-sm font-medium truncate group-hover:underline mt-0.5">
                     {product.offer.freeProductGroup.name}
                   </p>
+                  {(product.offer.freeProduct || product.offer.freeVariant) && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      {product.offer.freeProduct && (
+                        <>
+                          <span
+                            className="inline-block h-2 w-2 rounded-full border"
+                            style={{ backgroundColor: product.offer.freeProduct.colorCode }}
+                          />
+                          {product.offer.freeProduct.colorName}
+                        </>
+                      )}
+                      {product.offer.freeProduct && product.offer.freeVariant && " / "}
+                      {product.offer.freeVariant && product.offer.freeVariant.size}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Buy {product.offer.buyQuantity}, get {product.offer.freeQuantity} free
                   </p>

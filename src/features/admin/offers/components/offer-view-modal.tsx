@@ -22,6 +22,40 @@ const formatDate = (dateString?: string) => {
   return format(new Date(dateString), "MMM dd, yyyy 'at' hh:mm a");
 };
 
+function ProductDetail({ label, productGroup, product, variant, quantity }: {
+  label: string;
+  productGroup?: { name: string };
+  product?: { colorName: string; colorCode: string } | null;
+  variant?: { size: string } | null;
+  quantity: number;
+}) {
+  return (
+    <div className="flex-1 text-center">
+      <p className="text-xs text-muted-foreground mb-1">{label}</p>
+      <Badge variant={label === "Customer Buys" ? "outline" : "secondary"} className="text-xs">
+        {productGroup?.name || "N/A"}
+      </Badge>
+      {product && (
+        <div className="flex items-center justify-center gap-1 mt-1">
+          <span
+            className="inline-block h-2.5 w-2.5 rounded-full border"
+            style={{ backgroundColor: product.colorCode }}
+          />
+          <span className="text-xs text-muted-foreground">{product.colorName}</span>
+        </div>
+      )}
+      {variant && (
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Size: {variant.size}
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground mt-1">
+        x{quantity}
+      </p>
+    </div>
+  );
+}
+
 export function OfferViewModal({ open, onOpenChange, offer }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -69,25 +103,21 @@ export function OfferViewModal({ open, onOpenChange, offer }: Props) {
             </div>
 
             <div className="flex items-center gap-3 rounded-lg border p-3">
-              <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Customer Buys</p>
-                <Badge variant="outline" className="text-xs">
-                  {offer.targetProductGroup?.name}
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">
-                  x{offer.buyQuantity}
-                </p>
-              </div>
+              <ProductDetail
+                label="Customer Buys"
+                productGroup={offer.targetProductGroup}
+                product={offer.targetProduct}
+                variant={offer.targetVariant}
+                quantity={offer.buyQuantity}
+              />
               <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Gets Free</p>
-                <Badge variant="secondary" className="text-xs">
-                  {offer.freeProductGroup?.name}
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">
-                  x{offer.freeQuantity}
-                </p>
-              </div>
+              <ProductDetail
+                label="Gets Free"
+                productGroup={offer.freeProductGroup}
+                product={offer.freeProduct}
+                variant={offer.freeVariant}
+                quantity={offer.freeQuantity}
+              />
             </div>
           </div>
 

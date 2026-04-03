@@ -240,12 +240,7 @@ function CartPage() {
                       {/* Price */}
                       <div className="text-right">
                         {item.freeQuantity > 0 && item.paidQuantity === 0 ? (
-                          <>
-                            <p className="font-semibold text-green-600">{formatPrice(0)}</p>
-                            <p className="text-xs text-muted-foreground line-through">
-                              {formatPrice(item.unitPrice * item.quantity)}
-                            </p>
-                          </>
+                          <p className="font-semibold text-green-600">FREE</p>
                         ) : item.freeQuantity > 0 ? (
                           <>
                             <p className="font-semibold">{formatPrice(item.lineTotal)}</p>

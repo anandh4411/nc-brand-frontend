@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tag, Plus, Save, ChevronsUpDown, Check } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,6 +49,7 @@ import type { Offer } from "@/api/endpoints/admin";
 import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface Props {
   open: boolean;
@@ -65,8 +66,6 @@ const formSchema = z.object({
   targetVariantUuid: z.string().optional(),
   buyQuantity: z.coerce.number().int().min(1, "Must be at least 1"),
   freeProductGroupUuid: z.string().min(1, "Free product is required"),
-  freeProductUuid: z.string().optional(),
-  freeVariantUuid: z.string().optional(),
   freeQuantity: z.coerce.number().int().min(1, "Must be at least 1"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
@@ -163,8 +162,6 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
       targetVariantUuid: "",
       buyQuantity: 1,
       freeProductGroupUuid: "",
-      freeProductUuid: "",
-      freeVariantUuid: "",
       freeQuantity: 1,
       startDate: "",
       endDate: "",
@@ -172,17 +169,12 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
     },
   });
 
-  // Watch product group selections to fetch their details
+  // Watch target product group to fetch colors/sizes
   const watchedTargetPgUuid = form.watch("targetProductGroupUuid");
-  const watchedFreePgUuid = form.watch("freeProductGroupUuid");
   const watchedTargetProductUuid = form.watch("targetProductUuid");
-  const watchedFreeProductUuid = form.watch("freeProductUuid");
 
-  // Fetch product group details for color/size data
   const { data: targetPgDetail } = useAdminProductGroup(watchedTargetPgUuid);
-  const { data: freePgDetail } = useAdminProductGroup(watchedFreePgUuid);
 
-  // Extract colors (products) from target product group
   const targetColors = useMemo(() => {
     const pg = (targetPgDetail?.data as any);
     if (!pg?.products) return [];
@@ -191,16 +183,6 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
       .map((p: any) => ({ uuid: p.uuid, colorName: p.colorName, colorCode: p.colorCode, variants: p.variants }));
   }, [targetPgDetail]);
 
-  // Extract colors (products) from free product group
-  const freeColors = useMemo(() => {
-    const pg = (freePgDetail?.data as any);
-    if (!pg?.products) return [];
-    return pg.products
-      .filter((p: any) => p.isActive)
-      .map((p: any) => ({ uuid: p.uuid, colorName: p.colorName, colorCode: p.colorCode, variants: p.variants }));
-  }, [freePgDetail]);
-
-  // Extract sizes (variants) from selected target color
   const targetSizes = useMemo(() => {
     const color = targetColors.find((c: any) => c.uuid === watchedTargetProductUuid);
     if (!color?.variants) return [];
@@ -209,18 +191,8 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
       .map((v: any) => ({ uuid: v.uuid, size: v.size }));
   }, [targetColors, watchedTargetProductUuid]);
 
-  // Extract sizes (variants) from selected free color
-  const freeSizes = useMemo(() => {
-    const color = freeColors.find((c: any) => c.uuid === watchedFreeProductUuid);
-    if (!color?.variants) return [];
-    return color.variants
-      .filter((v: any) => v.isActive)
-      .map((v: any) => ({ uuid: v.uuid, size: v.size }));
-  }, [freeColors, watchedFreeProductUuid]);
-
-  // Reset child selections when parent changes
+  // Reset target child selections when parent changes
   useEffect(() => {
-    // Only reset if the modal is open and form has been initialized (not during initial load)
     if (!open) return;
     const currentTargetProduct = form.getValues("targetProductUuid");
     const validColor = targetColors.find((c: any) => c.uuid === currentTargetProduct);
@@ -232,31 +204,12 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    const currentFreeProduct = form.getValues("freeProductUuid");
-    const validColor = freeColors.find((c: any) => c.uuid === currentFreeProduct);
-    if (currentFreeProduct && !validColor) {
-      form.setValue("freeProductUuid", "");
-      form.setValue("freeVariantUuid", "");
-    }
-  }, [watchedFreePgUuid, freeColors, open, form]);
-
-  useEffect(() => {
-    if (!open) return;
     const currentVariant = form.getValues("targetVariantUuid");
     const validVariant = targetSizes.find((s: any) => s.uuid === currentVariant);
     if (currentVariant && !validVariant) {
       form.setValue("targetVariantUuid", "");
     }
   }, [watchedTargetProductUuid, targetSizes, open, form]);
-
-  useEffect(() => {
-    if (!open) return;
-    const currentVariant = form.getValues("freeVariantUuid");
-    const validVariant = freeSizes.find((s: any) => s.uuid === currentVariant);
-    if (currentVariant && !validVariant) {
-      form.setValue("freeVariantUuid", "");
-    }
-  }, [watchedFreeProductUuid, freeSizes, open, form]);
 
   useEffect(() => {
     if (open) {
@@ -268,8 +221,6 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
         targetVariantUuid: offer?.targetVariant?.uuid || "",
         buyQuantity: offer?.buyQuantity || 1,
         freeProductGroupUuid: offer?.freeProductGroup?.uuid || "",
-        freeProductUuid: offer?.freeProduct?.uuid || "",
-        freeVariantUuid: offer?.freeVariant?.uuid || "",
         freeQuantity: offer?.freeQuantity || 1,
         startDate: toDateInputValue(offer?.startDate) || "",
         endDate: toDateInputValue(offer?.endDate) || "",
@@ -287,8 +238,6 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
       targetVariantUuid: values.targetVariantUuid || undefined,
       buyQuantity: values.buyQuantity,
       freeProductGroupUuid: values.freeProductGroupUuid,
-      freeProductUuid: values.freeProductUuid || undefined,
-      freeVariantUuid: values.freeVariantUuid || undefined,
       freeQuantity: values.freeQuantity,
       startDate: new Date(values.startDate).toISOString(),
       endDate: new Date(values.endDate).toISOString(),
@@ -326,15 +275,14 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
   const isSubmitting = createOffer.isPending || updateOffer.isPending;
 
   // Watch for live summary
+  const watchedFreePgUuid = form.watch("freeProductGroupUuid");
   const watchedBuyQty = form.watch("buyQuantity");
   const watchedFreeQty = form.watch("freeQuantity");
 
   const targetName = productGroups.find((p) => p.uuid === watchedTargetPgUuid)?.name;
   const freeName = productGroups.find((p) => p.uuid === watchedFreePgUuid)?.name;
   const targetColorName = targetColors.find((c: any) => c.uuid === watchedTargetProductUuid)?.colorName;
-  const freeColorName = freeColors.find((c: any) => c.uuid === watchedFreeProductUuid)?.colorName;
   const targetSizeName = targetSizes.find((s: any) => s.uuid === form.watch("targetVariantUuid"))?.size;
-  const freeSizeName = freeSizes.find((s: any) => s.uuid === form.watch("freeVariantUuid"))?.size;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -495,7 +443,7 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
               />
             </div>
 
-            {/* ===== FREE PRODUCT SECTION ===== */}
+            {/* ===== FREE PRODUCT SECTION (no color/size — customer chooses) ===== */}
             <div className="space-y-3 rounded-lg border p-3">
               <p className="text-sm font-medium">Free Product (Customer Gets)</p>
 
@@ -513,76 +461,13 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
                         placeholder="Select the product to give for free..."
                       />
                     </FormControl>
+                    <FormDescription>
+                      Customer will choose their preferred color and size at checkout.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-2 gap-3">
-                <FormField
-                  control={form.control}
-                  name="freeProductUuid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Color</FormLabel>
-                      <Select
-                        value={field.value || ""}
-                        onValueChange={field.onChange}
-                        disabled={freeColors.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={freeColors.length === 0 ? "Select product first" : "Select color"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {freeColors.map((color: any) => (
-                            <SelectItem key={color.uuid} value={color.uuid}>
-                              <span className="flex items-center gap-2">
-                                <span
-                                  className="inline-block h-3 w-3 rounded-full border"
-                                  style={{ backgroundColor: color.colorCode }}
-                                />
-                                {color.colorName}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="freeVariantUuid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Size</FormLabel>
-                      <Select
-                        value={field.value || ""}
-                        onValueChange={field.onChange}
-                        disabled={freeSizes.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={freeSizes.length === 0 ? "Select color first" : "Select size"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {freeSizes.map((size: any) => (
-                            <SelectItem key={size.uuid} value={size.uuid}>
-                              {size.size}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <FormField
                 control={form.control}
@@ -614,10 +499,7 @@ export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
                   )}
                   , get <span className="font-semibold text-foreground">{watchedFreeQty}</span>{" "}
                   <span className="font-semibold text-foreground">{freeName}</span>
-                  {freeColorName && (
-                    <span className="text-foreground"> ({freeColorName}{freeSizeName ? `, ${freeSizeName}` : ""})</span>
-                  )}
-                  {" "}free.
+                  {" "}free <span className="text-xs">(customer picks color/size)</span>.
                 </p>
               </div>
             )}

@@ -78,11 +78,11 @@ export const createOfferColumns = (
       />
     )),
 
-    customColumn<Offer>("freeProductGroup", "Free Product", (value, row) => (
+    customColumn<Offer>("freeProductGroup", "Free Product", (value) => (
       <ProductBadge
         name={value?.name}
-        color={row.freeProduct}
-        size={row.freeVariant}
+        color={null}
+        size={null}
         variant="secondary"
       />
     )),

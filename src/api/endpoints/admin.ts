@@ -425,8 +425,6 @@ export interface Offer {
   targetVariant: OfferProductSize | null;
   buyQuantity: number;
   freeProductGroup: OfferProductGroup;
-  freeProduct: OfferProductColor | null;
-  freeVariant: OfferProductSize | null;
   freeQuantity: number;
   startDate: string;
   endDate: string;
@@ -441,8 +439,6 @@ export interface CreateOfferRequest {
   targetVariantUuid?: string;
   buyQuantity: number;
   freeProductGroupUuid: string;
-  freeProductUuid?: string;
-  freeVariantUuid?: string;
   freeQuantity: number;
   startDate: string;
   endDate: string;

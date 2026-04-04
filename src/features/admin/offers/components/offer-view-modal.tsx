@@ -114,8 +114,8 @@ export function OfferViewModal({ open, onOpenChange, offer }: Props) {
               <ProductDetail
                 label="Gets Free"
                 productGroup={offer.freeProductGroup}
-                product={offer.freeProduct}
-                variant={offer.freeVariant}
+                product={null}
+                variant={null}
                 quantity={offer.freeQuantity}
               />
             </div>

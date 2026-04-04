@@ -96,9 +96,6 @@ function ProductDetailPage() {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  // Free product selection state
-  const [freeColorIndex, setFreeColorIndex] = useState(0);
-  const [freeVariantIndex, setFreeVariantIndex] = useState(0);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState("description");
@@ -161,16 +158,7 @@ function ProductDetailPage() {
 
   const finalPrice = product.basePrice + (selectedVariant?.priceAdjustment || 0);
 
-  // Check if offer matches the currently selected color/size
-  const offerMatchesSelection = (() => {
-    if (!product.offer) return false;
-    const offer = product.offer;
-    // If offer specifies a target color, selected color must match
-    if (offer.targetProduct && selectedColor?.uuid !== offer.targetProduct.uuid) return false;
-    // If offer specifies a target size, selected variant must match
-    if (offer.targetVariant && selectedVariant?.uuid !== offer.targetVariant.uuid) return false;
-    return true;
-  })();
+  const hasOffer = !!product.offer;
 
   // Check if in wishlist
   const wishlistItems = wishlistData?.data || [];
@@ -192,12 +180,6 @@ function ProductDetailPage() {
     setCurrentImageIndex(0);
   };
 
-  // Free product colors/variants from the offer
-  const freeColors = product?.offer?.freeProductGroup?.colors || [];
-  const selectedFreeColor = freeColors[freeColorIndex];
-  const freeVariants = selectedFreeColor?.variants || [];
-  const selectedFreeVariant = freeVariants[freeVariantIndex];
-
   const handleAddToCart = () => {
     if (!isAuthenticated || !isCustomer) {
       navigate({ to: "/customer/sign-in" } as any);
@@ -208,17 +190,14 @@ function ProductDetailPage() {
       return;
     }
 
-    // Build payload — include free variant if offer applies and customer selected one
-    const payload: any = { variantUuid: selectedVariant.uuid, quantity };
-    if (offerMatchesSelection && selectedFreeVariant?.inStock && selectedFreeVariant?.uuid) {
-      payload.freeVariantUuid = selectedFreeVariant.uuid;
-    }
-
-    addToCart.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Added to cart");
-      },
-    });
+    addToCart.mutate(
+      { variantUuid: selectedVariant.uuid, quantity } as any,
+      {
+        onSuccess: () => {
+          toast.success("Added to cart");
+        },
+      }
+    );
   };
 
   const handleWishlistClick = () => {
@@ -424,19 +403,12 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Offer Note — only when selected color/size matches the offer */}
-          {offerMatchesSelection && (
-            <div className="text-green-700 dark:text-green-300 text-sm">
-              <p className="font-semibold flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
-              </p>
-              {(product.offer.targetProduct || product.offer.targetVariant) && (
-                <p className="text-xs mt-0.5 ml-6 text-green-600 dark:text-green-400">
-                  Applicable for: {product.offer.targetProduct?.colorName}{product.offer.targetVariant ? ` / ${product.offer.targetVariant.size}` : ""}
-                </p>
-              )}
-            </div>
+          {/* Offer Note */}
+          {hasOffer && (
+            <p className="text-green-700 dark:text-green-300 font-semibold text-sm flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              {product.offer.name || `Buy ${product.offer.buyQuantity} Get ${product.offer.freeQuantity} Free`}
+            </p>
           )}
 
           {/* Rating & Reviews disabled - has bugs */}
@@ -540,88 +512,34 @@ function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Free Product Offer — customer picks color/size */}
-          {offerMatchesSelection && product.offer?.freeProductGroup && freeColors.length > 0 && (
-            <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 p-3 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-md overflow-hidden bg-muted shrink-0">
+          {/* Free Product — clickable link to the free product page */}
+          {hasOffer && product.offer?.freeProductGroup && (
+            <Link
+              to={`/shop/products/${product.offer.freeProductGroup.slug}` as any}
+              className="group block"
+            >
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 hover:border-green-400 dark:hover:border-green-600 transition-colors">
+                <div className="w-14 h-14 rounded-md overflow-hidden bg-muted shrink-0">
                   <img
                     src={product.offer.freeProductGroup.primaryImage || "/placeholder.svg"}
                     alt={product.offer.freeProductGroup.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-[10px] px-1.5 py-0">
                     FREE
                   </Badge>
-                  <p className="text-sm font-medium mt-0.5">
+                  <p className="text-sm font-medium truncate group-hover:underline mt-0.5">
                     {product.offer.freeProductGroup.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Buy {product.offer.buyQuantity}, get {product.offer.freeQuantity} free — choose your preference:
+                    Buy {product.offer.buyQuantity}, get {product.offer.freeQuantity} free — tap to choose your free item
                   </p>
                 </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </div>
-
-              {/* Free product color selector */}
-              <div>
-                <p className="text-xs font-medium mb-1.5">Color:</p>
-                <div className="flex gap-2 flex-wrap">
-                  {freeColors.map((color: any, index: number) => (
-                    <button
-                      key={color.uuid}
-                      type="button"
-                      className={cn(
-                        "h-7 w-7 rounded-full border-2 transition-all",
-                        freeColorIndex === index
-                          ? "border-green-600 ring-2 ring-green-600/30 scale-110"
-                          : "border-muted hover:scale-105"
-                      )}
-                      style={{ backgroundColor: color.colorCode }}
-                      title={color.colorName}
-                      onClick={() => {
-                        setFreeColorIndex(index);
-                        setFreeVariantIndex(0);
-                      }}
-                    />
-                  ))}
-                </div>
-                {selectedFreeColor && (
-                  <p className="text-xs text-muted-foreground mt-1">{selectedFreeColor.colorName}</p>
-                )}
-              </div>
-
-              {/* Free product size selector */}
-              {freeVariants.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium mb-1.5">Size:</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {freeVariants.map((v: any, index: number) => (
-                      <button
-                        key={v.uuid}
-                        type="button"
-                        disabled={!v.inStock}
-                        className={cn(
-                          "px-3 py-1 text-xs rounded-md border transition-all",
-                          !v.inStock
-                            ? "opacity-40 line-through cursor-not-allowed"
-                            : freeVariantIndex === index
-                              ? "border-green-600 bg-green-600 text-white"
-                              : "border-muted hover:border-green-400"
-                        )}
-                        onClick={() => setFreeVariantIndex(index)}
-                      >
-                        {v.size}
-                      </button>
-                    ))}
-                  </div>
-                  {selectedFreeVariant && !selectedFreeVariant.inStock && (
-                    <p className="text-xs text-destructive mt-1">This size is out of stock. Please choose another.</p>
-                  )}
-                </div>
-              )}
-            </div>
+            </Link>
           )}
 
           {/* Delivery Note / Pre-booking */}

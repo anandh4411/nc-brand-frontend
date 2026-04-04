@@ -403,17 +403,6 @@ export interface OfferProductGroup {
   name: string;
 }
 
-export interface OfferProductColor {
-  uuid: string;
-  colorName: string;
-  colorCode: string;
-}
-
-export interface OfferProductSize {
-  uuid: string;
-  size: string;
-}
-
 export interface Offer {
   uuid: string;
   id?: number;
@@ -421,8 +410,6 @@ export interface Offer {
   description?: string | null;
   type: string;
   targetProductGroup: OfferProductGroup;
-  targetProduct: OfferProductColor | null;
-  targetVariant: OfferProductSize | null;
   buyQuantity: number;
   freeProductGroup: OfferProductGroup;
   freeQuantity: number;
@@ -435,8 +422,6 @@ export interface CreateOfferRequest {
   name: string;
   description?: string;
   targetProductGroupUuid: string;
-  targetProductUuid?: string;
-  targetVariantUuid?: string;
   buyQuantity: number;
   freeProductGroupUuid: string;
   freeQuantity: number;

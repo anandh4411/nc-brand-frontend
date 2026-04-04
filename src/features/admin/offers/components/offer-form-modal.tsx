@@ -110,9 +110,13 @@ function ProductCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="start">
-        <Command>
+        <Command
+          filter={(value, search) =>
+            value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+          }
+        >
           <CommandInput placeholder="Search products..." />
-          <CommandList>
+          <CommandList className="max-h-[250px] overflow-y-auto">
             <CommandEmpty>No products found.</CommandEmpty>
             <CommandGroup>
               {products.map((pg) => (
@@ -144,7 +148,7 @@ function ProductCombobox({
 export function OfferFormModal({ open, onOpenChange, offer, mode }: Props) {
   const createOffer = useCreateOffer();
   const updateOffer = useUpdateOffer();
-  const { data: productGroupsResponse } = useAdminProductGroups();
+  const { data: productGroupsResponse } = useAdminProductGroups({ pageSize: 200 });
 
   const productGroups = (
     (productGroupsResponse?.data as any)?.productGroups ||
